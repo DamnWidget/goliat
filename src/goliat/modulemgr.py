@@ -26,20 +26,19 @@ Created on 03/04/2010 00:13:39
 @organization: Open Phoenix IT S.Coop.And
 @author: damnwidget
 @contact: oscar.campos@open-phoenix.com
-@summary:
+@summary: Modules Manager
 @version: 0.1
 '''
-class ModuleManager:
-    _modules = list()
-    _modulePath = None
+class ModuleManager(object):
+    _modules = list()    
     
-    def __init__(self, module_path):
-        self._modulePath = module_path
+    def __init__(self):
+        super(ModuleManager, self).__init__()        
             
     def Register(self, module):
         """Add a new module to self"""
         self._modules.append(module)
-        module.Load(self._modulePath)    
+        module.Load()    
     
     def lenght(self):
         """Returns the self lenght"""

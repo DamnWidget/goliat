@@ -1,0 +1,70 @@
+#!/bin/bash
+#
+#       /etc/rc.d/init.d/%{app_name}
+# %{app_name}   This shell script takes care of starting and stopping
+#               %{app_name} 
+#
+# Author: Goliat Web application Framework <goliat@open-phoenix.com>
+#
+# chkconfig: 2345 13 87
+# description: %{app_desc}
+
+# Source function library.
+. /etc/init.d/functions
+
+APP_NAME=%{app_name}
+GOLIAT_HOST=`hostname -a`
+GOLIAT_BIN=/usr/bin/twistd
+PIDFILE=/var/run/${APP_NAME}.pid
+
+if [ -f /etc/sysconfig/${APP_NAME}.cfg ]; then
+    . /etc/sysconfig/${APP_NAME}.cfg
+fi
+
+
+start() {
+    echo -n "Starting ${APP_NAME}: "    
+    if [ -f $PIDFILE ]; then
+            PID=`cat $PIDFILE`
+            echo ${APP_NAME} already running: $PID
+            exit 2;
+    else            
+            daemon  ./${GOLIAT_BIN} --pidfile=${PIDFILE} --file=%{app_file} --rundir=%{app_share} --logfile=/var/log/goliat/${APP_NAME}.log
+            RETVAL=$?
+            echo
+            [ $RETVAL -eq 0 ] && touch /var/lock/subsys/${APP_NAME}
+            return $RETVAL
+    fi
+
+}
+
+stop() {
+    echo -n "Shutting down ${APP_NAME}: "
+    echo
+    killproc ${GOLIAT_BIN}
+    echo
+    rm -f /var/lock/subsys/${APP_NAME}
+    return 0
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    status)
+        status ${APP_NAME}
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    *)
+        echo "Usage:  {start|stop|status|restart}"
+        exit 1
+        ;;
+esac
+exit $?
+    

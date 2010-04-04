@@ -32,7 +32,7 @@ Created on 02/04/2010 17:16:05
 from goliat._version import version
 import platform
 
-class Headers:
+class Headers(object):
     """
     An object that build the Application page header and returns it
     as a well formated XHTML/HTML string.    
@@ -106,18 +106,18 @@ class Headers:
         self._favicon = val
     
     def getLanguageContent(self):
-        return '<meta name="language" content="%s" />' % ( self._language )
+        return '<meta name="language" content="{0}" />'.format( self._language )
     
     def getDescriptionContent(self):
-        return '<meta name="description" content="%s" />' % ( self._description )
+        return '<meta name="description" content="{0}" />'.format( self._description )
     
     def getGeneratorContent(self):
-        return '<meta name="generator" content="Goliat Web Application Framework version %s" />' % ( version.short() )
+        return '<meta name="generator" content="Goliat Web Application Framework version {0}" />'.format( version.short() )
     
     def getGoliatContent(self):
-        return '<meta name="goliat-content" content="Platform: %s;Version: %s;Arch: %s" />' % ( platform.system(), platform.release(), platform.machine() )    
+        return '<meta name="goliat-content" content="Platform: {0};Version: {1};Arch: {2}" />'.format( platform.system(), platform.release(), platform.machine() )    
     
-    def getFaviconContent(self, media='media'):
-        return '<link rel="shortcut icon" href="%s/%s" />' % ( media, self._favicon )    
+    def getFaviconContent(self, media='/media'):
+        return '<link rel="shortcut icon" href="{0}/{1}" />'.format( media, self._favicon )    
      
                 

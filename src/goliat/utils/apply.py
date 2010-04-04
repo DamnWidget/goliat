@@ -31,13 +31,13 @@ Created on 02/04/2010 16:16:12
 '''
 
 def Apply(dict1, dict2):
-    for k,v in dict2:
+    for k,v in dict2.iteritems():
         dict1[k] = v
     
     return dict1
 
 def ApplyIf(dict1, dict2):
-    for k,v in dict2:
+    for k,v in dict2.iteritems():
         if k not in dict1:
             dict1[k] = v
 

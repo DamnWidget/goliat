@@ -18,7 +18,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 ##
 # $id Goliat/src/goliat/modules.py created on 02/04/2010 23:33:11 by damnwidget
-from codegen.codegen import globals
 '''
 Created on 02/04/2010 23:33:11
 
@@ -30,38 +29,34 @@ Created on 02/04/2010 23:33:11
 @summary: Module Object 
 @version: 0.1
 '''
-class Module:    
+class Module(object):    
     _urlPath = None
     _object = None
     _name = None
     _loaded = False
     
     def __init__(self, name):
-        self._name = name    
+        super(Module, self).__init__()
+        self._name = name   
+          
     
     def getUrlPath(self):
         return self._urlPath
-        
-    def setUrlPath(self, url):
-        self._urlPath = url
     
-    def getModule(self):
+    def getModule(self):        
         return self._object    
     
     def getName(self):
         return self._name
     
-    def setName(self, name):
-        self._name = name
-    
-    def Load(self, module_path):
+    def Load(self):
         if self._loaded:
             return
         
-        _moduleName = "%s.%s" % ( module_path, self._name )
+        _moduleName = "application.%s".format(self._name )
         _objList = [self._name.capitalize()]
         _tempModule = __import__(_moduleName, globals(), locals(), _objList) 
-        self._object = getattr(_tempModule, _objList[0])
+        self._object = getattr(_tempModule, _objList[0])() # We need an instance, not a class
         self._urlPath = self._object.getRegisterPath()
         self._loaded = True             
     

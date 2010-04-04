@@ -17,17 +17,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 ##
-# $id Goliat/src/goliat/exceptions.py created on 02/04/2010 23:31:52 by damnwidget
+# $id Goliat/src/goliat/cli/__init__.py created on 03/04/2010 23:01:34 by damnwidget
 '''
-Created on 02/04/2010 23:31:52
+Created on 03/04/2010 23:01:34
 
 @license: GPLv2
 @copyright: © 2010 Open Phoenix IT SCA
 @organization: Open Phoenix IT S.Coop.And
 @author: Oscar Campos
 @contact: oscar.campos@open-phoenix.com
-@summary: Goliat Exceptions
+@summary: Goliat Command Line Interface
 @version: 0.1
 '''
-class ResourcesLoaderException(Exception):
-    pass

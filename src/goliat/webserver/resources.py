@@ -31,15 +31,13 @@ Created on 02/04/2010 13:28:44
 '''
 
 from twisted.python.filepath import FilePath
-from twisted.web import static
-import goliat
-from goliat.utils.apply import Apply
-from goliat.webserver.page import Page
+from twisted.web import static, resource
+from storm.base import Storm
 from goliat.module import Module
-from goliat.exceptions import ResourcesLoaderException
+import goliat
 import os, re
     
-class ResourcesLoader:
+class ResourcesLoader(object):
     """ResourcesLoader Object."""
     _root = None
     _modules = None
@@ -47,19 +45,12 @@ class ResourcesLoader:
     _scripts = []     
     _appPath = 'application'
     _scriptPath = 'scripts'    
-    _options = {
-        'useOrbited'        : False,        
-        'resPath'           : {},
-        'extjsTheme'        : 'xtheme-gray',
-        'goliatTheme'       : 'goliat-gray'
-    }    
+    _options = dict()        
     
-    def __init__(self, root, options={}):
-        if root is None or not isinstance(root, Page):
-            raise ResourcesLoaderException("The root parameter for ResourcesLoader will be a Goliat Page Instance")
-            
+    def __init__(self, root, options=dict()):           
         self._root = root
-        self._options = Apply(self._options, options)
+        self._options = options
+        self._loadScripts()
     
     def Setup(self, module_manager):
         """Setup the loader and load the Goliat Application files"""
@@ -77,16 +68,19 @@ class ResourcesLoader:
             # Start logging orbited services
             orbited.start.logger = logging.get_logger('orbited.start')
             # Add static URL to Goliat Page Hierarchy so we can add Stomp JS files on Application         
-            self._root.putChild('orbited', static.File(os.path.dirname(orbited.__file__)+os.sep+'static'))
+            self._root.putChild('orbited', static.File(os.path.dirname(orbited.__file__)+'/static'))
         
         # ExtJS related
-        self._root.putChild('extjs', static.File(os.path.dirname(goliat.__file__)+os.sep+'extjs'))        
+        self._root.putChild('extjs', static.File(os.path.dirname(goliat.__file__)+'/extjs'))        
         
         # Goliat related
-        self._root.putChild('goliat', static.File(os.path.dirname(goliat.__file__)+os.sep+'static'))
+        self._root.putChild('goliat', static.File(os.path.dirname(goliat.__file__)+'/static'))
         
         # Goliat application related
-        self._root.putChild('goliat_app', '%s%s%s' % (self._appPath, os.sep, self._scriptPath)) 
+        self._root.putChild('ui', static.File('{0}/{1}'.format( self._appPath, self._scriptPath )))         
+        self._root.putChild('js', static.File('web/js'))
+        self._root.putChild('media', static.File('web/media'))
+        self._root.putChild('css', static.File('web/css'))
         
         # User paths related
         for key, value in self._options['resPath']:            
@@ -99,10 +93,10 @@ class ResourcesLoader:
         
         # ExtJS
         self._root.addStyle('<link rel="stylesheet" href="/extjs/resources/css/ext-all.css" type="text/css" />')
-        self._root.addStyle('<link rel="stylesheet" href="/extjs/resources/css/%s.css" type="text/css" />' % self._options['extjsTheme'])
+        self._root.addStyle('<link rel="stylesheet" href="/extjs/resources/css/{0}.css" type="text/css" />'.format( self._options['extjsTheme'] ))
         
         # Goliat
-        self._root.addStyle('<link rel="stylesheet" href="/goliat/resources/css/%s.css" type="text/css" />' % self._options['goliatTheme'])
+        self._root.addStyle('<link rel="stylesheet" href="/goliat/resources/css/{0}.css" type="text/css" />'.format( self._options['goliatTheme'] ))
         
         # ===========================
         # JavaScript
@@ -132,35 +126,56 @@ class ResourcesLoader:
             self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/goliat/Goliat.js"></script>')
             #self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/goliat/Layout-debug.js"></script>')
             #self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/goliat/LayoutManager-debug.js"></script>')
-            #self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/goliat/Socket-debug.js"></script>')
+            #self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/goliat/Socket-debug.js"></script>')        
         
         # ===========================
         # Application main
-        # (Defined by User)
+        # (Coded by User)
         # ===========================
-        self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/scrips/main.js"></script>')
+        self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/js/main.js"></script>')
+        
+        # ===========================
+        # Application UI
+        # ===========================
+        for uiScript in self._scripts:
+            self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/ui/{0}"></script>'.format( uiScript ))
         
         # ===========================
         # Resource Modules
         # ===========================        
         for file in self._exploreApplication():
-            module_manager.Register(Module(file))        
+            module_manager.Register(Module(file))
+        
+        # Append Resources to the root object        
+        for module in module_manager.getModules():
+            self._root.putChild(module.getUrlPath(), module.getModule())    
     
-    def loadScripts(self):
+    def _loadScripts(self):
         """Load scripts and fill scripts application list"""
         for file_name in self._exploreApplication(True):
-            self._scripts.append(file_name)
-
-    def loadModules(self):
-        """Load modules and adds it to the root as childs"""
-        for module in self._modules:
-            self._root.putChild(module['url_path'], module['module'])
+            self._scripts.append(file_name)    
 
     def _exploreApplication(self, script=False):
         """Explores the module path directory and returns a tuple with filenames."""
-        files = os.listdir(self._modulePath)        
-        pattern = re.compile('\.py$', re.IGNORECASE) if script == False else re.compile('\.js$', re.IGNORECASE)
-        files = filter(pattern.search, files)
-        
-        return files
-            
+        try:
+            files = os.listdir('application')        
+            pattern = re.compile('\.py$', re.IGNORECASE) if script == False else re.compile('\.js$', re.IGNORECASE)
+            files = filter(pattern.search, files)
+            return files
+        except OSError:
+            return list()
+
+class Resource(resource.Resource, Storm):
+    """The Goliat Resource Object inherits from Twisted Resource and Storm
+    This Object only exists for convenience
+    """ 
+    def __init__(self):
+        resource.Resource.__init__(self)   
+                    
+    def renderGet(self, request):
+        """This method will be redefined by child classes"""
+        pass
+    
+    def renderPost(self, request):
+        """This method will be redefined by child classes"""
+        pass

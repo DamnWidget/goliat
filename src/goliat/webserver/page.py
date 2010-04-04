@@ -33,6 +33,8 @@ from twisted.web import resource
 from goliat._version import version
 from goliat.utils.apply import Apply
 from goliat.http.headers import Headers
+from goliat.modulemgr import ModuleManager
+from goliat.webserver.resources import ResourcesLoader
 import os
 
 class Page(resource.Resource):
@@ -45,21 +47,32 @@ class Page(resource.Resource):
         'meta'          : [],
         'styles'        : [],
         'scripts'       : [],
-        'title'         : 'Open Phoenix IT, Goliat Webservice v%s ' % ( version.short() ),
-        'description'   : 'Goliat %s is a Webframework over Twsited, Orbited and Storm using ExtJS and OpenPhoenixJS as GUI enhancement. Goliat has been developed by Open Phoenix IT SCA.' % ( version.short() ),
-        'language'      : os.environ['LANG'].split('_')[0]
+        'title'         : 'Open Phoenix IT, Goliat Webservice v{0} '.format( version.short() ),
+        'description'   : 'Goliat {0} is a Webframework over Twsited, Orbited and Storm using ExtJS and OpenPhoenixJS as GUI enhancement. Goliat has been developed by Open Phoenix IT SCA.'.format( version.short() ),
+        'language'      : os.environ['LANG'].split('_')[0],
+        'rl'            :  {
+            'debug'             : False,
+            'useOrbited'        : False,        
+            'resPath'           : {},
+            'extjsTheme'        : 'xtheme-gray',
+            'goliatTheme'       : 'goliat-gray'
+        }
     }
     
     _header = Headers()
     _loader = None
+    _mgr = ModuleManager()
     
-    def __init__(self, options={}):
+    def __init__(self, options=dict()):
         resource.Resource.__init__(self)
         self._options = Apply(self._options, options)
         # Set page language
         self._header.setLanguage(self._options['language'])
         # Set page description
-        self._header.setDescription(self._options['description'])        
+        self._header.setDescription(self._options['description'])
+        # Set the ResourcesLoader
+        self._loader = ResourcesLoader(self, self._options['rl'])    
+        self._loader.Setup(self._mgr)    
     
     def getChild(self, path, request):
         if path == '' or path == None or path == 'index' or path == 'app':
@@ -76,33 +89,33 @@ class Page(resource.Resource):
         a('%s\n' % self._header.getDocType(self._options['docType']))        
         a('%s\n' % self._header.getHtmlElement())        
         a('    <head>\n')
-        a('        %s\n' % self._header.getContentType())
-        a('        %s\n' % self._header.getGeneratorContent())
-        a('        %s\n' % self._header.getDescriptionContent())
-        a('        %s\n' % self._header.getLanguageContent())
-        a('        %s\n' % self._header.getGoliatContent())
+        a('        {0}\n'.format( self._header.getContentType() ))
+        a('        {0}\n'.format( self._header.getGeneratorContent() ))
+        a('        {0}\n'.format( self._header.getDescriptionContent() ))
+        a('        {0}\n'.format( self._header.getLanguageContent() ))
+        a('        {0}\n'.format( self._header.getGoliatContent() ))
         
         media = self._options['resPath']['media'] if 'resPath' in self._options and 'media' in self._options['resPath'] else 'media'
-        a('        %s\n' % self._header.getFaviconContent(media))
+        a('        {0}\n'.format( self._header.getFaviconContent(media) ))
         
         # Iterate over the user defined meta keys and add it to the header's page
         for meta in self._options['meta']:
-            a('        %s\n' % meta )
+            a('        {0}\n'.format( meta ))
         
         # Iterate over the user defined styles and add it to the header's page
         for style in self._options['styles']:
-            a('        %s\n' % style )
+            a('        {0}\n'.format( style ))
         
         # Iterate over the user defined scripts and add it to the header's page
         for script in self._options['scripts']:
-            a('        %s\n' % script )
+            a('        {0}\n'.format( script ))
         
-        a('        <title>%s</title>\n' % ( self._options['title'] ))
+        a('        <title>{0}</title>\n'.format( self._options['title'] ))
         a('    </head>\n')
         a('</html>')
         
-        # Return the page encoded in utf-8 
-        return ''.join(_page).encode('utf8')
+        # Return the rendered page       
+        return ''.join(_page)
     
     def addStyle(self, style):
         """Adds a style to the page"""
@@ -115,3 +128,7 @@ class Page(resource.Resource):
     def addMeta(self, meta):
         """Adds a meta to the page hedaer"""
         self._options['meta'].append(meta)
+    
+    def getModuleManager(self):
+        """Returns the page module manager"""
+        return self._mgr
