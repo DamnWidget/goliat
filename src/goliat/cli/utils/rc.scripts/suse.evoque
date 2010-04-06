@@ -6,34 +6,34 @@
 #
 # /etc/init.d/${app_name}
 #   and its symbolic link
-# /usr/local/sbin/%{app_name}
+# /usr/local/sbin/${app_name}
 
 ### BEGIN INIT INFO
-# Provides:          %{app_name}
-# Required-Start:    $network
+# Provides:          ${app_name}
+# Required-Start:    $$network
 # Required-Stop:
 # Default-Start:     3 5
 # Default-Stop:      0 1 2 6
-# Short-Description: %{app_name}
-# Description:       %{app_desc}
+# Short-Description: ${app_name}
+# Description:       ${app_desc}
 ### END INIT INFO
 
-APP_NAME=%{app_name}
+APP_NAME=${app_name}
 
 # Check for missing binaries
 TWISTD_BIN=/usr/bin/twistd
-test -x $TWISTD_BIN || { echo "$TWISTD_BIN not installed";
-    if [ "$1" = "stop" ]; then exit 0;
+test -x $$TWISTD_BIN || { echo "$$TWISTD_BIN not installed";
+    if [ "$$1" = "stop" ]; then exit 0;
     else exit 5; fi; }
 
 # Check for existence of needed config file and read it
-TWISTD_CONFIG=/etc/${APP_NAME}.cfg
-test -r $TWISTD_CONFIG || { echo "$TWISTD_CONFIG not existing";
-    if [ "$1" = "stop" ]; then exit 0;
+TWISTD_CONFIG=/etc/$${APP_NAME}.cfg
+test -r $$TWISTD_CONFIG || { echo "$$TWISTD_CONFIG not existing";
+    if [ "$$1" = "stop" ]; then exit 0;
     else exit 6; fi; }
 
 # Read config
-. $TWISTD_CONFIG
+. $$TWISTD_CONFIG
 
 # Load the rc.status script for this service.
 . /etc/rc.status
@@ -41,22 +41,22 @@ test -r $TWISTD_CONFIG || { echo "$TWISTD_CONFIG not existing";
 # Reset status of this service
 rc_reset
 
-case "$1" in
+case "$$1" in
     start)
-        echo -n "Starting ${APP_NAME} "
+        echo -n "Starting $${APP_NAME} "
         ## Start daemon with startproc(8). If this fails
         ## the return value is set appropriately by startproc.
-        startproc $TWISTD_BIN --pidfile=/var/run/${APP_NAME}.pid --logfile=%{app_log} --file=%{app_file} --rundir=%{app_share}
+        startproc $$TWISTD_BIN --pidfile=/var/run/$${APP_NAME}.pid --logfile=${app_log} --file=${app_file} --rundir=${app_share}
 
         # Remember status and be verbose
         rc_status -v
         ;;
     stop)
-        echo -n "Shutting down ${APP_NAME} "
+        echo -n "Shutting down $${APP_NAME} "
         ## Stop daemon with killproc(8) and if this fails
         ## killproc sets the return value according to LSB.
 
-        killproc -TERM $TWISTD_BIN
+        killproc -TERM $$TWISTD_BIN
 
         # Remember status and be verbose
         rc_status -v
@@ -64,16 +64,16 @@ case "$1" in
     restart)
         ## Stop the service and regardless of whether it was
         ## running or not, start it again.
-        $0 stop
-        $0 start
+        $$0 stop
+        $$0 start
 
         # Remember status and be quiet
         rc_status
         ;;
     reload)
         # If it supports signaling:
-        echo -n "Reload service ${APP_NAME} "
-        killproc -HUP $TWISTD_BIN                
+        echo -n "Reload service $${APP_NAME} "
+        killproc -HUP $$TWISTD_BIN                
         rc_status -v
 
         ## Otherwise if it does not support reload:
@@ -81,7 +81,7 @@ case "$1" in
         #rc_status -v
         ;;
     status)
-        echo -n "Checking for service ${APP_NAME} "
+        echo -n "Checking for service $${APP_NAME} "
         ## Check status with checkproc(8), if process is running
         ## checkproc will return with exit status 0.
 
@@ -94,14 +94,14 @@ case "$1" in
         # 5--199 reserved (5--99 LSB, 100--149 distro, 150--199 appl.)
         
         # NOTE: checkproc returns LSB compliant status values.
-        checkproc $TWISTD_BIN
+        checkproc $$TWISTD_BIN
         # NOTE: rc_status knows that we called this init script with
         # "status" option and adapts its messages accordingly.
         rc_status -v
         ;;
     *)
         ## If no parameters are given, print which are avaiable.
-        echo "Usage: $0 {start|stop|status|restart|reload}"
+        echo "Usage: $$0 {start|stop|status|restart|reload}"
         exit 1
         ;;
 esac

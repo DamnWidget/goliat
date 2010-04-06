@@ -17,32 +17,25 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 ##
-# $id Goliat/src/goliat/__init__.py created on 02/04/2010 13:15:10 by damnwidget
+# $id Goliat/src/goliat/utils/borg.py created on 05/04/2010 02:07:10 by damnwidget $
 '''
-Created on 02/04/2010 13:15:10
+Created on 05/04/2010 02:07:10
 
 @license: GPLv2
 @copyright: © 2010 Open Phoenix IT SCA
 @organization: Open Phoenix IT S.Coop.And
-@author: damnwidget
+@author: Oscar Campos
 @contact: oscar.campos@open-phoenix.com
-@summary: Goliat is a Web Framework that integrates well known Python technologies with
-the hope that it will help to develop RAD Web Applications.
-Goliat uses the following Technologies:
-Orbited for COMET
-Twisted for Internet Framework
-Storm as ORM
-ExtJS as GUI System
-Goliat as been developed by Open Phoenix IT S.Coop.And. http://www.open-phoenix.com 
+@summary: Goliat implementation of Alex Martelli's Borg 'no-pattern'
 @version: 0.1
 '''
-
-# Ensure the user is running the version of python we require.
-import sys
-if not hasattr(sys, "version_info") or sys.version_info < (2,5):
-    raise RuntimeError("Goliat requires Python 2.5 or later.")
-del sys
-
-# setup version
-from _version import version
-__version__ = version.short()
+class Borg(object):
+    """The Goliat Borg Class.
+    
+    Every object created using the Borg pattern will share their information, as long as
+    they refer to the same state information. This is a more elegant type of singleton, but, 
+    in other hand, Borg objects doesn't have the same ID, every object have his own ID
+    """
+    _shared_state = {}
+    def __init__(self):
+        self.__dict__ = self._shared_state
