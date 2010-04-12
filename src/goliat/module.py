@@ -37,7 +37,7 @@ class Module(object):
     
     def __init__(self, name):
         super(Module, self).__init__()
-        self._name = name   
+        self._name = name.replace('.py', '')
           
     
     def getUrlPath(self):
@@ -53,8 +53,8 @@ class Module(object):
         if self._loaded:
             return
         
-        _moduleName = "application.%s".format(self._name )
-        _objList = [self._name.capitalize()]
+        _moduleName = "application.{0}".format(self._name)        
+        _objList = [self._name.capitalize()]        
         _tempModule = __import__(_moduleName, globals(), locals(), _objList) 
         self._object = getattr(_tempModule, _objList[0])() # We need an instance, not a class
         self._urlPath = self._object.getRegisterPath()

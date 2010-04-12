@@ -1,0 +1,6 @@
+#! /bin/bash
+
+echo "Deleting older compilatios"
+[ -f 'goliat-min.js' ] && rm goliat-min.js
+find ./ -name "*js" -not -name '*-lang-*' -not -name 'goliat-min.js' -exec yuicompressor --charset utf-8 --type js -v {} >> goliat-min.js \;
+echo "Compilation done"

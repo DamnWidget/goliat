@@ -1,0 +1,70 @@
+# Install the Linux Epoll Reactor
+from twisted.internet import epollreactor
+epollreactor.install()
+        
+from goliat.webserver import page
+from goliat.utils.config import ConfigManager
+from twisted.application import internet, service
+from twisted.web import server
+        
+application = service.Application('${app_name}')
+
+config = ConfigManager()
+config.loadConfig('Goliat', '${app_config}', True)
+cfg = config.getConfig('Goliat')
+page = page.Page(cfg['Project'])
+
+# Check for Orbited 
+if cfg['Project']['orbited']:
+    # Start the embedded MorbidQ Stomp Server
+    # NOTE: If you need clustering, multicore, transactions, receipts etc etc
+    # will be better if you use ActiveMQ from The Apache Software Foundation
+    # and run it in standalone mode, for do that just remove those lines.
+    # More information is available under http://www.orbited.org
+    # ANOTHER NOTE: You will create a STOMP Productor in your own Python code
+    # and connect it as TCPClient to localhost:61613 (or another), then use the
+    # Goliat JavaScript object `Goliat.StompClient` in your UI code in order
+    # to connect data sockets. You can attach the Goliat.StompClient to any
+    # Goliat or ExtJS object, including ExtJS Stores.
+    # More information is available under http://goliat.open-phoenix.com/wiki
+    
+    # Perform the Orbited imports and configurations
+    from orbited import logging, config
+    config.map['[access]'][('localhost',61613)] = ['*']
+    logging.setup(config.map)
+            
+    import orbited.system
+    import orbited.start     
+            
+    # Start logging orbited services
+    orbited.start.logger = logging.get_logger('orbited.start')
+    
+    # Start orbited
+    orbited.start._setup_protocols(page)    
+    
+    from morbid.morbid import StompFactory
+    stomp = StompFactory()
+    stompserv = internet.TCPServer( 61613, stomp )
+    stompserv.setName('StompService')
+    stompserv.setServiceParent(application)
+
+goliat_app_site = server.Site(page)
+httpserver = internet.TCPServer(cfg['Project']['app_port'], goliat_app_site)
+httpserver.setName('${app_name} Application')
+httpserver.setServiceParent(application)
+
+# You can add as many services as you need using the MultiService interface
+# More info available over http://goliat.open-phoenix.com/wiki
+# To activate MultiServices jus uncomment the following lines and add your
+# services to the services directory at project root, you will add
+# admin=<admin name>, password=<password> and admin_port=<port> to project
+# configuration file ${app_config} 
+
+#from goliat.multiservice import MultiService
+#services = MultiService(application)
+#services.createServiceAdminPage()
+#services.registerNewServices()
+
+# Store the service on 'Goliat' global config, in that way, it will be accessible
+# at whole application. (Remember: ConfigManager is a Borg object)
+cfg['service'] = application

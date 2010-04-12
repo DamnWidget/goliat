@@ -18,6 +18,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 ##
 # $id Goliat/src/goliat/webserver/resourcesloader.py created on 02/04/2010 13:28:44 by damnwidget
+from bzrlib.store import Store
+from storm.twisted import store
 '''
 Created on 02/04/2010 13:28:44
 
@@ -59,19 +61,13 @@ class ResourcesLoader(object):
         # ===========================
         
         # Orbited related
-        if self._options['useOrbited']:
-            # Perform the Orbited imports
-            from orbited import logging, config
-            import orbited.system
-            import orbited.start
-            
-            # Start logging orbited services
-            orbited.start.logger = logging.get_logger('orbited.start')
+        if self._options['orbited']:
+            import orbited # For get the __file__            
             # Add static URL to Goliat Page Hierarchy so we can add Stomp JS files on Application         
-            self._root.putChild('orbited', static.File(os.path.dirname(orbited.__file__)+'/static'))
+            self._root.putChild('static', static.File(os.path.dirname(orbited.__file__)+'/static'))
         
         # ExtJS related
-        self._root.putChild('extjs', static.File(os.path.dirname(goliat.__file__)+'/extjs'))        
+        self._root.putChild('extjs', static.File(os.path.dirname(goliat.__file__)+'/static/extjs'))        
         
         # Goliat related
         self._root.putChild('goliat', static.File(os.path.dirname(goliat.__file__)+'/static'))
@@ -83,7 +79,7 @@ class ResourcesLoader(object):
         self._root.putChild('css', static.File('web/css'))
         
         # User paths related
-        for key, value in self._options['resPath']:            
+        for key, value in self._options['respath']:            
             if FilePath(value).exists():
                 self._root.putChild(key, static.File(value))
         
@@ -103,9 +99,9 @@ class ResourcesLoader(object):
         # ===========================
         
         # Orbited
-        if self._options['useOrbited']:
-            self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/orbited/Orbited.js"></script>')
-            self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/orbited/protocols/stomp.js"></script>')
+        if self._options['orbited']:
+            self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/static/Orbited.js"></script>')
+            self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/static/protocols/stomp/stomp.js"></script>')
         
         # ExtJS
         if self._options['debug']:
@@ -116,17 +112,19 @@ class ResourcesLoader(object):
             self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/extjs/ext-all.js"></script>')        
         
         # Goliat
-        if self._options['debug']:
-            self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/goliat/Goliat-debug.js"></script>')
+        if self._options['debug']:            
+            self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/goliat/js/Loader.js"></script>')            
             self._root.addScript('<script type="text/javascript" characterSet="utf-8">')
             self._root.addScript('    var Goliat_Loader = new Goliat.Loader();')
             self._root.addScript('    Goliat_Loader.loadComponents();')
             self._root.addScript('</script>')
+                       
         else:
-            self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/goliat/Goliat.js"></script>')
+            self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/goliat/js/goliat-min.js"></script>')
             #self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/goliat/Layout-debug.js"></script>')
             #self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/goliat/LayoutManager-debug.js"></script>')
-            #self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/goliat/Socket-debug.js"></script>')        
+            #self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/goliat/Socket-debug.js"></script>')
+        self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/goliat/js/locale/goliat-lang-{0}.js"></script>'.format( self._options['locale'] ))        
         
         # ===========================
         # Application main
@@ -148,7 +146,8 @@ class ResourcesLoader(object):
         
         # Append Resources to the root object        
         for module in module_manager.getModules():
-            self._root.putChild(module.getUrlPath(), module.getModule())    
+            self._root.putChild(module.getUrlPath(), module.getModule())       
+            
     
     def _loadScripts(self):
         """Load scripts and fill scripts application list"""
@@ -159,7 +158,7 @@ class ResourcesLoader(object):
         """Explores the module path directory and returns a tuple with filenames."""
         try:
             files = os.listdir('application')        
-            pattern = re.compile('\.py$', re.IGNORECASE) if script == False else re.compile('\.js$', re.IGNORECASE)
+            pattern = re.compile('[^_?]\.py$', re.IGNORECASE) if script == False else re.compile('\.js$', re.IGNORECASE)
             files = filter(pattern.search, files)
             return files
         except OSError:
@@ -170,12 +169,12 @@ class Resource(resource.Resource, Storm):
     This Object only exists for convenience
     """ 
     def __init__(self):
-        resource.Resource.__init__(self)   
-                    
-    def renderGet(self, request):
-        """This method will be redefined by child classes"""
-        pass
+        resource.Resource.__init__(self)
     
-    def renderPost(self, request):
+    def createTable(self):
         """This method will be redefined by child classes"""
-        pass
+        raise NotImplementedError()
+        
+        
+    
+        

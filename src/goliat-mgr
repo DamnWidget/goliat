@@ -1,0 +1,128 @@
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+##
+# Goliat: The Twisted and ExtJS Web Framework
+# Copyright (C) 2010 Open Phoenix IT
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+##
+try:
+    import goliat as goliat
+    from goliat.cli import Command, buildReverseMap
+    from goliat.cli.utils.output import bold, white, turquoise, purple, red, yellow, green, blue
+    import goliat.cli.project as project
+except:
+    raise RuntimeError('Goliat is not installed on this system!')    
+
+import sys
+
+class CmdProject(Command):
+    """Goliat Project Command"""
+    def __init__(self):
+        pass
+    
+    def parseArgs(self, args):     
+        return project.parseArgs(args)    
+    
+    def perform(self, args):
+        (app_name, opts) = self.parseArgs(args)        
+
+        if app_name != '' and app_name is not None:
+            (cmd, local_opts) = project.parseArgs(sys.argv[1:])
+            cmd.perform(local_opts)
+        else:
+            project.printUsage()
+            sys.exit(-1) 
+    
+    def shortHelp(self):
+        return green(" <local-opts> - manage goliat projects\n") + \
+        green("                        (use goliat project --help for details)\n")   
+    
+_known_commands = {
+    'project' : CmdProject()
+}
+
+def printUsage():
+    """Print full usage information for this tool"""    
+        
+    print bold('Usage: goliat command <local opts>\n') + \
+    bold('where command is one of\n')
+    keys = _known_commands.keys()
+    keys.sort()
+    for x in keys:
+        print ' ' + yellow(x) + green(_known_commands[x].shortHelp())
+        
+def printVersion():
+    """Print the version of this tool"""
+    print bold('Goliat v{0} - Twisted and ExtJS (and others) Web Application Framework'.format( goliat.version.short() ))    
+    print bold('Copyright (C) 2010 Open Phoenix IT SCA')
+    print bold('Author(s): Oscar Campos Ruiz')
+
+def parseArgs(args):
+    """Parse tool specific arguments.
+    
+    Arguments are on the form goliat <goliat specific> [command] <tool specific> [command] <command specific>
+    
+    This function will only parse the <goliat specific> bit.
+    """
+    command = None
+    local_opts = []
+    showhelp = False
+    showversion = False
+    
+    for i in xrange(len(args)):
+        x = args[i]
+        if x in ["-h", "--help"]:
+            showhelp = True
+        elif x in ["-V", "--version"]:
+            showversion = True
+        elif x in _known_commands.keys():
+            command = _known_commands[x]
+            local_opts.extend(args[i+1:])
+            if showhelp:
+                local_opts.append('--help')
+            if showversion:
+                local_opts.append('-V')
+            break
+        else:
+            local_opts.append(x)
+    if not command and showhelp:
+        printUsage()
+        sys.exit(0)
+    if not command and showversion:
+        printVersion()
+        sys.exit(0)   
+    
+    return (command, local_opts)
+
+
+if __name__ == "__main__":
+    (cmd, local_opts) = parseArgs(sys.argv[1:])
+    if cmd:
+        try:            
+            cmd.perform(local_opts)  
+        except KeyError, e:
+            print red("Internal goliat error, terminating")
+            if len(e[0]):
+                print red(str(e))
+        except ValueError, e: 
+            print red("Internal goliat error, terminating")                       
+            if len(e[0]):                     
+                print red(str(e))
+        except KeyboardInterrupt:
+            print blue("Interrupted by user, aborting.")
+    else:
+        printUsage()
+        

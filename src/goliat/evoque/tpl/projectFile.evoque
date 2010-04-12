@@ -1,0 +1,16 @@
+; Goliat: The Twisted and ExtJS Web Framework
+; Copyright (C) 2010 Open Phoenix IT
+
+; Goliat config
+[Goliat]
+version=${goliat_ver}
+
+; Project config
+[Project]
+version=${project_ver}
+app_name=${app_name}
+app_desc=${app_desc}
+app_layout=${app_layout}
+app_port=${app_port}
+
+; EOF

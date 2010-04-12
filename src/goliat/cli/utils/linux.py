@@ -18,6 +18,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 ##
 # $id Goliat/src/goliat/utils/linux.py created on 04/04/2010 01:54:45 by damnwidget
+from _xmlplus.xpath.BuiltInExtFunctions import join, split
 '''
 Created on 04/04/2010 01:54:45
 
@@ -93,16 +94,19 @@ def tacFile(options):
     """Generates the Twisted tac file from temnplate"""
     mgr = TemplateManager()
     t = mgr.getSysDomain().get_template('tpl/tacFile.evoque')
-    return t.evoque()
+    return t.evoque(
+            app_name=options['app_name'],
+            app_config=options['app_config']
+    )
 
 def mainJsFile(options):
     """Generates the Goliat main application JavaScript file from template"""
     mgr = TemplateManager()
     t = mgr.getSysDomain().get_template('tpl/mainJsFile.evoque')
     return t.evoque(
-            app_name=options['app_name'],
+            app_name=options['app_name'].replace(' ', ''),
             app_version=options['app_version'],
-            app_layout=options['app_layout']            
+            app_layout='Goliat.layout.'+''.join([p.capitalize() for p in options['app_layout'].split('_')])            
     )
 
 def projectFile(options):
@@ -111,10 +115,11 @@ def projectFile(options):
     t = mgr.getSysDomain().get_template('tpl/projectFile.evoque')
     return t.evoque(
             goliat_ver=options['goliat_ver'],
-            project_ver=options['project_ver'],            
+            project_ver=options['app_version'],            
             app_name=options['app_name'],
             app_desc=options['app_desc'],
-            app_layout=options['app_layout']            
+            app_layout=options['app_layout'],  
+            app_port=options['app_port']          
     )
 
 def initFile(installPath, options):

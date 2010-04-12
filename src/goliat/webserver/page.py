@@ -32,9 +32,9 @@ Created on 02/04/2010 17:05:12
 from twisted.web import resource
 from goliat._version import version
 from goliat.utils.apply import Apply
-from goliat.http.headers import Headers
+from goliat.http import headers
 from goliat.modulemgr import ModuleManager
-from goliat.webserver.resources import ResourcesLoader
+from goliat.webserver import resources
 import os
 
 class Page(resource.Resource):
@@ -43,7 +43,7 @@ class Page(resource.Resource):
     @var options: The Goliat options for the Page content.   
     """
     _options = {
-        'docType'       : 'xhtml-transitional',
+        'doctype'       : 'xhtml-transitional',
         'meta'          : [],
         'styles'        : [],
         'scripts'       : [],
@@ -52,27 +52,34 @@ class Page(resource.Resource):
         'language'      : os.environ['LANG'].split('_')[0],
         'rl'            :  {
             'debug'             : False,
-            'useOrbited'        : False,        
-            'resPath'           : {},
+            'orbited'           : False,        
+            'respath'           : {},
             'extjsTheme'        : 'xtheme-gray',
             'goliatTheme'       : 'goliat-gray'
         }
     }
     
-    _header = Headers()
+    _header = headers.Headers()
     _loader = None
     _mgr = ModuleManager()
     
     def __init__(self, options=dict()):
         resource.Resource.__init__(self)
-        self._options = Apply(self._options, options)
+        self._options['rl']['debug'] = options['debug']
+        self._options['rl']['orbited'] = options['orbited']
+        self._options['rl']['extjsTheme'] = options['ext_theme']
+        self._options['rl']['goliatTheme'] = options['goliat_theme']
+        self._options['title'] = options['app_desc'] if len(options['app_desc']) else self._options['title']
+        self._options['description'] = options['meta_description'] if len(options['meta_description']) else self._options['description']
+        self._options['language'] = options['language'] if len(options['language']) else self._options['language']
         # Set page language
         self._header.setLanguage(self._options['language'])
+        self._options['rl']['locale'] = self._options['language']
         # Set page description
         self._header.setDescription(self._options['description'])
         # Set the ResourcesLoader
-        self._loader = ResourcesLoader(self, self._options['rl'])    
-        self._loader.Setup(self._mgr)    
+        self._loader = resources.ResourcesLoader(self, self._options['rl'])    
+        self._loader.Setup(self._mgr)
     
     def getChild(self, path, request):
         if path == '' or path == None or path == 'index' or path == 'app':
@@ -80,13 +87,13 @@ class Page(resource.Resource):
         
         return resource.Resource.getChild(self, path, request)
     
-    def renderGet(self, request):
+    def render_GET(self, request):
         """Renders the index page"""
         _page = []        
         a = _page.append
         
         # Create the page headers
-        a('%s\n' % self._header.getDocType(self._options['docType']))        
+        a('%s\n' % self._header.getDocType(self._options['doctype']))        
         a('%s\n' % self._header.getHtmlElement())        
         a('    <head>\n')
         a('        {0}\n'.format( self._header.getContentType() ))

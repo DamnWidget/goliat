@@ -41,7 +41,8 @@ except ImportError:
 
 def getSysTemplatesPath():
     """Returns the Goliat system templates path"""
-    return os.path.abspath(os.path.join(os.path.dirname(__file__), 'cli/utils'))
+    from goliat import __file__ as goliat_file
+    return os.path.abspath(os.path.join(os.path.dirname(goliat_file), 'evoque'))
 
 class TemplateManager(Borg):
     """Goliat Template Manager.

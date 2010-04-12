@@ -29,18 +29,23 @@ Created on 05/04/2010 05:39:33
 @summary:
 @version: 0.1
 '''
-from ConfigParser import SafeConfigParser, RawConfigParser
+from ConfigParser import SafeConfigParser, RawConfigParser,\
+    MissingSectionHeaderError
 from goliat.utils.borg import Borg
+from goliat.utils.apply import Apply
 import os
 
+class ConfigManagerException(Exception):
+    pass
+
 class ConfigManager(Borg):
-    """Goliat Config File Reader
+    """Goliat Config File Reader and Writer
     
     Goliat implements a very simple INI files reader to load confiuration from files on disk.
     For load a new config file just 
     """
     
-    _configFiles = {}        
+    _configFiles = {}            
     
     def __init__(self):
         Borg.__init__(self)
@@ -52,10 +57,17 @@ class ConfigManager(Borg):
             if self._configFiles[configName]['file'] != fileName and os.path.exists(fileName):
                 self._configFiles[configName]['file'] = fileName
         
-        if raw:
-            self._processRawConfigFile(configName, RawConfigParser(), config)
-        else:
-            self._processConfigFile(configName, SafeConfigParser(), config) 
+        try:
+            if raw:
+                self._processRawConfigFile(configName, RawConfigParser(), config)                
+            else:                                
+                self._processConfigFile(configName, SafeConfigParser(), config)
+            
+            return True
+        except MissingSectionHeaderError:
+            return False     
+        except ConfigManagerException:
+            return False
             
     def reload(self, configName, raw=False):
         if configName in self._configFiles:
@@ -68,22 +80,25 @@ class ConfigManager(Borg):
         return None    
     
     def _processConfigFile(self, configName, cp, config):
-        cp.read(self._configFiles[configName]['file'])                
+        self._configFiles[configName] = Apply(self._configFiles[configName], config)                
+        cp.read(self._configFiles[configName]['file'])        
+        if 'Goliat' not in cp.sections():
+            raise ConfigManagerException('{0} is not a Goliat config file'.format( self._configFiles[configName]['file'] ))                         
         for s in cp.sections():
             if not s in self._configFiles[configName]: self._configFiles[configName][s] = {}
             self._configFiles[configName][s] = {}
             for o in cp.options(s):
                 self._configFiles[configName][s][o] = cp.get(s, o)
-        
-        del cp
     
     def _processRawConfigFile(self, configName, rp, config):
-        self._configFiles[configName] = config
-        rp.read(self._configFiles[configName]['file'])
+        self._configFiles[configName] = Apply(self._configFiles[configName], config)
+        rp.read(self._configFiles[configName]['file'])        
+        if 'Goliat' not in rp.sections():
+            raise ConfigManagerException('{0} is not a Goliat config file'.format( self._configFiles[configName]['file'] ))
         for s in rp.sections():
             if not s in self._configFiles[configName]: self._configFiles[configName][s] = {} 
             for o in rp.options(s):
-                # From more specialiced to more general
+                # From more special to more general
                 try: 
                     self._configFiles[configName][s][o] = rp.getboolean(s, o)
                 except ValueError:
@@ -94,4 +109,15 @@ class ConfigManager(Borg):
                             self._configFiles[configName][s][o] = rp.getfloat(s, o)
                         except ValueError:
                             self._configFiles[configName][s][o] = rp.get(s, o)
-        del rp                
+    
+    @staticmethod
+    def writeConfig(config):
+        """Writes a config to a file"""
+        cp = SafeConfigParser()
+        for section, options in config.iteritems():
+            if section is not 'file' and section is not 'service':
+                cp.add_section(section)
+                for key, value in options.iteritems():
+                    cp.set(section, key, str(value))
+        cp.write(open(config['file'], 'w'))
+                                    
