@@ -1,0 +1,18 @@
+Requirements
+  Python >= 2.5 
+
+  Twisted >= 10.0.0
+
+  Orbited >= 0.7
+  
+  Storm >= 0.16.0.0 or Twisted-Storm >= 0.16.0.0 (Recommended)
+  
+  Evoque >= 0.4 and Qpy >= 1.8
+
+Installation 
+
+  * Any
+    As with other Python packages, the standard way of installing from source
+    is:
+
+      python setup.py install
