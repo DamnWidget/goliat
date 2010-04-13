@@ -24,7 +24,7 @@ Created on 10/04/2010 13:16:47
 @license: GPLv2
 @copyright: © 2010 Open Phoenix IT SCA
 @organization: Open Phoenix IT S.Coop.And
-@author: damnwidget
+@author: Oscar Campos
 @contact: oscar.campos@open-phoenix.com
 @summary:
 @version: 0.1

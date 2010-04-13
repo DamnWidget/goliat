@@ -18,7 +18,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 ##
 # $id Goliat/src/goliat/webserver/resourcesloader.py created on 02/04/2010 13:28:44 by damnwidget
-from bzrlib.store import Store
 from storm.twisted import store
 '''
 Created on 02/04/2010 13:28:44
