@@ -92,7 +92,7 @@ distro_utils = {
 def tacFile(options):
     """Generates the Twisted tac file from temnplate"""
     mgr = TemplateManager()
-    t = mgr.getSysDomain().get_template('tpl/tacFile.evoque')
+    t = mgr.getSysDomain().get_template('tpl/tac.evoque')
     return t.evoque(
             app_name=options['app_name'],
             app_config=options['app_config']
@@ -101,7 +101,7 @@ def tacFile(options):
 def mainJsFile(options):
     """Generates the Goliat main application JavaScript file from template"""
     mgr = TemplateManager()
-    t = mgr.getSysDomain().get_template('tpl/mainJsFile.evoque')
+    t = mgr.getSysDomain().get_template('tpl/mainJs.evoque')
     return t.evoque(
             app_name=options['app_name'].replace(' ', ''),
             app_version=options['app_version'],
@@ -111,7 +111,7 @@ def mainJsFile(options):
 def projectFile(options):
     """Generates the Goliat project file from template"""
     mgr = TemplateManager()
-    t = mgr.getSysDomain().get_template('tpl/projectFile.evoque')
+    t = mgr.getSysDomain().get_template('tpl/project.evoque')
     return t.evoque(
             goliat_ver=options['goliat_ver'],
             project_ver=options['app_version'],            

@@ -154,14 +154,14 @@ class CmdCreate(Command):
             # Write tacFile template
             if pr._verbose: print bold('Writing {0} Twisted tac file.'.format(pr.getName()))
             fp = open(pr.getName().lower().replace(' ', '_')+'.tac', 'w')
-            fp.write(pr.getTemplate('tacFile'))
+            fp.write(pr.getTemplate('tac'))
             fp.close()
             # Create init.d directory and wirte init script on it
             if pr._verbose: print bold('Creating init.d directory.')
             os.mkdir('init.d')
             if pr._verbose: print bold('Writing {0} System V init script on local init.d dir.'.format(pr.getName().lower().replace(' ','_')))
             fp = open('init.d/'+pr.getName().lower().replace(' ','_'), 'w')
-            fp.write(pr.getTemplate('serviceFile'))
+            fp.write(pr.getTemplate('service'))
             fp.close()
             # Create application needed directories
             if pr._verbose: print bold('Creating application directory.\nCreating application/scripts directory.')                
@@ -180,12 +180,12 @@ class CmdCreate(Command):
             # Write the main UI JavaScript file
             if pr._verbose: print bold('Writing web/js/main.js UI file.')
             fp = open('web/js/main.js', 'w')
-            fp.write(pr.getTemplate('mainJsFile'))
+            fp.write(pr.getTemplate('mainJs'))
             fp.close()
             # Write the project config file
             if pr._verbose: print bold('Writing {0} project file.'.format(pr.getName().lower().replace(' ','_')+'.cfg'))
             fp = open(pr.getName().lower().replace(' ','_')+'.cfg', 'w')
-            fp.write(pr.getTemplate('projectFile'))
+            fp.write(pr.getTemplate('project'))
             fp.close()             
             fp = open('application/__init__.py', 'w')
             fp.write('')
@@ -506,10 +506,10 @@ class Project(object):
         and will *not* auto update the rc system.     
     """
     _templates = {
-        'tacFile'       : None,
-        'mainJsFile'    : None,
-        'serviceFile'   : None,
-        'projectFile'   : None
+        'tac'       : None,
+        'mainJs'    : None,
+        'service'   : None,
+        'project'   : None
     }
     
     _installPaths = dict()
@@ -595,20 +595,20 @@ class Project(object):
         
         # Template for twisted tac file
         self._options['app_config'] = self._options['app_name'].lower().replace(' ', '_')+'.cfg'
-        self._templates['tacFile'] = linux.tacFile(self._options)
+        self._templates['tac'] = linux.tacFile(self._options)
         if self._verbose: print bold('Template for tac file generated:')
                     
         # Template for main.js file 
-        self._templates['mainJsFile'] = linux.mainJsFile(self._options)
+        self._templates['mainJs'] = linux.mainJsFile(self._options)
         if self._verbose: print bold('Template for main UI script file generated:')            
         
         # Template for Goliat project file
-        self._templates['projectFile'] = linux.projectFile(self._options)
+        self._templates['project'] = linux.projectFile(self._options)
         if self._verbose: print bold('Template for Goliat project file generated:')             
         
         # Template for System V init file
         self.buildInstallPaths()
-        self._templates['serviceFile'] = linux.initFile(self._installPaths, self._options)
+        self._templates['service'] = linux.initFile(self._installPaths, self._options)
         if self._verbose: print bold('Template for System V service file generated:')
                     
         

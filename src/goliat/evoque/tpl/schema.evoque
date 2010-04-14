@@ -1,0 +1,119 @@
+##
+# Goliat: The Twisted and ExtJS Web Framework
+# Copyright (C) 2010 Open Phoenix IT
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+#
+#
+#-------------------------------------------------------------------------------
+#-- Database Schema definition file
+#-------------------------------------------------------------------------------
+#
+# You can use this yaml schema definition file to define your Database Schema
+# and generate your project database tables and Python models using the
+# goliat-mgr tool or another else way you will create in your application code
+#
+# The Goliat schema defintion file will follow some syntax rules, you can use
+# any valid Goliat schema keyword
+#
+# Valid schemas are those supported by Storm ORM (sqlite, mysql and postgres)
+#
+# ---- The Schema definition format ----
+# You can add only one database in your schema definition (this maybe change in
+# some later Goliat release), the schema definition will follow the syntax below
+#
+# database:
+#   _properties:
+#     uri:               'schema://user:password@hostname:port/database_name'
+#     # In case we are using MySQL as the schema backend
+#     engine:            InnoDB
+#   tables:
+#     person:
+#       _config:         { modName: Person }
+#       id:              ~
+#       name:            { type: varchar, size: '50', required: true }
+#       surname:         { type: varchar, size: '100', required: true }
+#       age:             { type: smallint, size: '2' }
+#     # We can also use extended syntax as follow
+#     employee:
+#       _config:
+#         modName:       Employee
+#       id:
+#         type:          integer
+#         primaryKey:    true
+#         autoIncrement: true
+#         required:      true        
+#       company_id:      { type: integer, required: true, foreignTable: company, foreignReference: id }
+#     # We can mix extended and reduced syntax at same table if we want as follow
+#     company:
+#       _config:         { modName: Company }
+#       id:              { type: integer, primaryKey: true, autoIncrement: true, required: true }
+#       name:
+#         type:          varchar
+#         size:          '100'
+#         required:      true
+#       vat:             { type: varchar, size: '12', required: true }
+#
+# The uri will be a valid Storm database URI
+# _config attribute in tables is used to set the Python model name for the table 
+# and other configuration options. For more info visit: http://goliat.open-phoenix.com
+#
+# You can use the '~' with id attributes, Goliat will add the correct options for the 
+# selected schema for Primary Keys identificators
+#
+#-------------------------------------------------------------------------------
+#-- Valid Goliat schema keywords
+#-------------------------------------------------------------------------------
+#         
+# Goliat should convert Goliat Schema type keywords to schema keywords
+#
+# Types:
+#
+# Goliat Schema         SQLite              MySQL               Postgres
+# ==============================================================================
+# integer               INTEGER             INT                 INT
+# smallint              INTEGER             SMALLINT            SMALLINT
+# longint               INTEGER             BIGINT              BIGINT
+# serial                INTEGER             INT                 SERIAL
+# bigserial             INTEGER             BIGINT              BIGSERIAL
+# boolean               INTEGER             TINYINT(1)          BOOLEAN
+# bool                  INTEGER             TINYINT(1)          BOOLEAN
+# real                  REAL                REAL                REAL
+# float                 FLOAT               FLOAT               FLOAT
+# double                DOUBLE              DOUBLE PRECISION    DOUBLE PRECISION
+# decimal               TEXT                DECIMAL             DECIMAL
+# unicode               TEXT                TEXT                TEXT
+# varchar               VARCHAR             VARCHAR             VARCHAR
+# longvarchar           TEXT                TEXT                TEXT
+# rawstr                BLOB                VARBINARY           BYTEA
+# any                   BLOB                BYNARY              BYTEA
+# timestamp             TEXT                TIMESTAMP           TIMESTAMP
+# date                  TEXT                DATE                DATE
+# time                  TEXT                TIME                TIME
+# timedelta             TEXT                TEXT                INTERVAL
+# list                  TEXT                TEXT                ARRAY
+#
+#
+# Keywords:
+#
+# type [any type] - Sets the attribute type
+# size [size] - Sets the size of attribute
+# primaryKey [true|false] - Sets the attribute as primary key
+# autoIncrement [true|false] - Sets the attribute as autoincrement
+# default [any] - Sets the default value for the attribute
+# required [true|false] - Sets the attribute as NOT NULL or not
+# foreignTable [table] - Sets the foreign table for References
+# foreignReference [attr] - Sets the foreign referende attribute
+# onDelete [ACTION] - Sets the cascading ACTION in foreign references
