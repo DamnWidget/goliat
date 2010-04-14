@@ -161,61 +161,6 @@ class Database(Borg):
                 raise ProgrammingError(e[0])
             self._conn.commit()
         self._conn.commit()   
-    
-    def fixTables(self):
-        if self._fixed:
-            return
-        if not len(self._schema.getTables()):
-            return (False, 'The data tables are empty.')
-        
-        for table, columns in self._schema.getTables().iteritems():
-            pKey = False
-            
-            for column, properties in columns.iteritems():
-                if column in ['_config', '_behavior']:
-                    continue
-                # Fix the '~' columns at Yaml definition
-                if properties is None:
-                    if column == 'created_at' or column == 'updated_at':
-                        self._schema.setColumnPropertyData(table, column, type, 'timestamp')
-                    
-                    if column == 'id':
-                        data = {
-                            'type'          : 'integer',
-                            'required'      : True,
-                            'primaryKey'    : True,
-                            'autoIncrement' : True
-                        }
-                        self._schema.setColumnData(table, column, data)
-                        pKey = True  
-                    
-                    if column.endswith('_id') and len(column.split('_id')[0]) == column.find('_id'):
-                        fTable = self._schema.findTable(column.split('_id')[0])
-                        if fTable:
-                            data = {
-                                'type'              : 'integer',
-                                'foreignTable'      : fTable,
-                                'foreignReference'  : 'id'
-                            }
-                            self._schema.setColumnData(table, column, data)
-                        else:
-                            raise DatabaseException('Unable to resolve foreign table for column {0} on table {1}'.format( column, table ))
-                else:
-                    if not isinstance(properties, dict):
-                        raise DatabaseException('Column {0} properties are not a dict, the only valid values for define columns are dicts'.format( column ))                    
-                    if properties.get('primaryKey') != None:
-                        pKey = True
-                
-            if not pKey:
-                data = {
-                    'type'          : 'integer',
-                    'required'      : True,
-                    'primaryKey'    : True,
-                    'autoIncrement' : True
-                }
-                self._schema.setColumnData(table, column, data)
-        
-        self._fixed = True
                              
     def getSchema(self):
         return self._schema    
@@ -236,7 +181,9 @@ class Generator(object):
             print '\nAborting'
             exit(-1)
         if self._verbose: print bold('Fixing null values on schema...')        
-        db.fixTables()
+        (success, msg) = db.getSchema().fixTables()
+        if not success:
+            raise DatabaseException(msg)
         if self._verbose:
             print green('Schema fixed!')
             print bold('Retrieving database configuration...')

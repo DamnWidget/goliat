@@ -37,6 +37,7 @@ class SchemaException(Exception):
 class Schema(object):
     _schemaFile = None    
     _schema = {}
+    _fixed = False
     
     def __init__(self, schemaFile):
         if os.path.exists(schemaFile):
@@ -45,11 +46,7 @@ class Schema(object):
             raise SchemaException('The database schema {0} doesn\'t exists.'.format( schemaFile ))             
         
         super(Schema, self).__init__()                        
-        self._loadSchema()
-    
-    def _loadSchema(self):
-        stream = file(self._schemaFile, 'r')
-        self._schema = yaml.load(stream)
+        self._loadSchema()      
     
     def getTables(self):
         try : 
@@ -90,3 +87,65 @@ class Schema(object):
             if name == table or column.get('_config') != None and column['_config'].get('modName') != None and column['_config']['modName'] == name:
                 return column 
             return False
+    
+    def fixTables(self):
+        if self._fixed:
+            return
+        if not len(self.getTables()):
+            return (False, 'The data tables are empty.')
+        
+        for table, columns in self.getTables().iteritems():
+            pKey = False
+            
+            for column, properties in columns.iteritems():
+                if column in ['_config', '_behavior']:
+                    continue
+                # Fix the '~' columns at Yaml definition
+                if properties is None:
+                    if column == 'created_at' or column == 'updated_at':
+                        self.setColumnPropertyData(table, column, type, 'timestamp')
+                    
+                    if column == 'id':
+                        data = {
+                            'type'          : 'integer',
+                            'required'      : True,
+                            'primaryKey'    : True,
+                            'autoIncrement' : True
+                        }
+                        self.setColumnData(table, column, data)
+                        pKey = True  
+                    
+                    if column.endswith('_id') and len(column.split('_id')[0]) == column.find('_id'):
+                        fTable = self.findTable(column.split('_id')[0])
+                        if fTable:
+                            data = {
+                                'type'              : 'integer',
+                                'foreignTable'      : fTable,
+                                'foreignReference'  : 'id'
+                            }
+                            self.setColumnData(table, column, data)
+                        else:
+                            raise SchemaException('Unable to resolve foreign table for column {0} on table {1}'.format( column, table ))
+                else:
+                    if not isinstance(properties, dict):
+                        raise SchemaException('Column {0} properties are not a dict, the only valid values for define columns are dicts'.format( column ))                    
+                    if properties.get('primaryKey') != None:
+                        pKey = True
+                
+            if not pKey:
+                data = {
+                    'type'          : 'integer',
+                    'required'      : True,
+                    'primaryKey'    : True,
+                    'autoIncrement' : True
+                }
+                self.setColumnData(table, column, data)
+        
+        self._fixed = True
+
+        return (True, '')
+    
+    def _loadSchema(self):
+        stream = file(self._schemaFile, 'r')
+        self._schema = yaml.load(stream)
+
