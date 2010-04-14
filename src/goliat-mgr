@@ -23,6 +23,7 @@ try:
     from goliat.cli import Command, buildReverseMap
     from goliat.cli.utils.output import bold, white, turquoise, purple, red, yellow, green, blue
     import goliat.cli.project as project
+    import goliat.cli.database as database
 except:
     raise RuntimeError('Goliat is not installed on this system!')    
 
@@ -48,10 +49,32 @@ class CmdProject(Command):
     
     def shortHelp(self):
         return green(" <local-opts> - manage goliat projects\n") + \
-        green("                        (use goliat project --help for details)\n")   
+        green("                        (use goliat project --help for details)\n")
+
+class CmdDatabase(Command):
+    """Goliat Database Command"""
+    def __init__(self):
+        pass
+    
+    def parseArgs(self, args):     
+        return database.parseArgs(args)    
+    
+    def perform(self, args):
+        opts = self.parseArgs(args)        
+
+        (cmd, local_opts) = database.parseArgs(sys.argv[1:])
+        if cmd == None:
+            database.printUsage()
+            sys.exit(-1)
+        cmd.perform(local_opts)         
+    
+    def shortHelp(self):
+        return green(" <local-opts> - generate goliat projects tables\n") + \
+        green("                        (use goliat database --help for details)\n")   
     
 _known_commands = {
-    'project' : CmdProject()
+    'project' : CmdProject(),
+    'database': CmdDatabase(),
 }
 
 def printUsage():
@@ -111,18 +134,18 @@ def parseArgs(args):
 if __name__ == "__main__":
     (cmd, local_opts) = parseArgs(sys.argv[1:])
     if cmd:
-        try:            
-            cmd.perform(local_opts)  
-        except KeyError, e:
-            print red("Internal goliat error, terminating")
-            if len(e[0]):
-                print red(str(e))
-        except ValueError, e: 
-            print red("Internal goliat error, terminating")                       
-            if len(e[0]):                     
-                print red(str(e))
-        except KeyboardInterrupt:
-            print blue("Interrupted by user, aborting.")
+        #try:            
+        cmd.perform(local_opts)  
+        #except KeyError, e:
+        #    print red("Internal goliat error, terminating: {0}")
+        #    if len(e[0]):
+        #        print red(str(e))
+        #except ValueError, e: 
+        #    print red("Internal goliat error, terminating")                       
+        #    if len(e[0]):                     
+        #        print red(str(e))
+        #except KeyboardInterrupt:
+        #    print blue("Interrupted by user, aborting.")
     else:
         printUsage()
         

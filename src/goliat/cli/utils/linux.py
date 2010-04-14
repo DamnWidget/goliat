@@ -18,7 +18,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 ##
 # $id Goliat/src/goliat/utils/linux.py created on 04/04/2010 01:54:45 by damnwidget
-from _xmlplus.xpath.BuiltInExtFunctions import join, split
 '''
 Created on 04/04/2010 01:54:45
 
