@@ -199,6 +199,17 @@ class Generator(object):
             
         for table, columns in db.getSchema().getTables().iteritems():
             self._createTable(table, columns)  
+        
+        for relation in db.getSchema().many2many():
+            table = relation['table']
+            cols = {}
+            for key in relation['keys']:
+                cols[key if type(key) == str else key.keys()[0]] = { 'type' : 'integer', 'required' : True, 'primaryKey' : True }                
+            if relation.get('fields') != None:
+                for field in relation['fields']:
+                    for fname, fvalue in field.iteritems():
+                        cols[fname] = fvalue
+            self._createTable(table, cols)
     
     def getDatabase(self):
         return self._tables  
@@ -240,7 +251,7 @@ class Generator(object):
         
         tb = { 'name' : table, 'script' : query }
         
-        self._tables.append(tb)
+        self._tables.append(tb)    
             
     def _parseColumn(self, data):
         ret = ''
@@ -288,7 +299,7 @@ class Generator(object):
         
         columnsList = []        
         for name, property in columns.iteritems():
-            if name in ['_config', '_beavior']:
+            if name in ['_config', '_indexes', '_relation']:
                 continue
             if 'primaryKey' in property:
                 columnsList.append('{0}{1}{2}'.format( self.getSqlQuotes(), name, self.getSqlQuotes() ))

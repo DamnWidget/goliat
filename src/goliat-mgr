@@ -157,18 +157,18 @@ def parseArgs(args):
 if __name__ == "__main__":
     (cmd, local_opts) = parseArgs(sys.argv[1:])
     if cmd:
-        #try:            
-        cmd.perform(local_opts)  
-        #except KeyError, e:
-        #    print red("Internal goliat error, terminating")
-        #    if len(e[0]):
-        #        print red(str(e))
-        #except ValueError, e: 
-        #    print red("Internal goliat error, terminating")                       
-        #    if len(e[0]):                     
-        #        print red(str(e))
-        #except KeyboardInterrupt:
-        #    print blue("Interrupted by user, aborting.")
+        try:            
+            cmd.perform(local_opts)  
+        except KeyError, e:
+            print red("Internal goliat error, terminating")
+            if len(e[0]):
+                print red(str(e))
+        except ValueError, e: 
+            print red("Internal goliat error, terminating")                       
+            if len(e[0]):                     
+                print red(str(e))
+        except KeyboardInterrupt:
+            print blue("Interrupted by user, aborting.")
     else:
         printUsage()
         

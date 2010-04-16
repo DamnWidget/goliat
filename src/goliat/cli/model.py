@@ -31,19 +31,20 @@ Created on 15/04/2010 03:52:30
 '''
 from goliat.cli import Command, buildReverseMap
 from goliat.cli.utils.output import bold, white, turquoise, purple, red, yellow, green, blue, brown
-from goliat.module import Generator
+from goliat.model import Generator
 from goliat.database.schema import Schema
 import sys
 
 _version = ('Model', '0.1.0')
 
 _schema = Schema('config/schema.yaml')
+_schema.fixTables()
 
 class CmdGenerate(Command):
-    """Create a new Goliat model module"""
+    """Create a new Goliat model"""
     def __init__(self):
         self._default_opts = { 'verbose' : False, 'dump' : False }
-        self._valid_opts = ['-v', '--verbose', '-d', '--dump']
+        self._valid_opts = ['-v', '--verbose', '-d', '--dump', '-l', '--list']
     
     def parseArgs(self, args):
         opts = self._default_opts
@@ -80,45 +81,44 @@ class CmdGenerate(Command):
         if not checkModel(model_name):
             print red('\n{0} model does not exist at the project schema.\nUse model -l or model --list to show a list of available models.'.format( model_name if len(model_name) else 'Noname' ))
             sys.exit(0)        
-        print '\n'+bold('Generating {0} module...'.format( model_name ))
+        print '\n'+bold('Generating {0} model...'.format( model_name ))
         gen = Generator(opts['verbose']) 
         templates = gen.create(model_name, _schema.findTable(model_name))        
         if opts['dump']:            
-            print '\napplication/base/{0}Base.py'.format(templates['base'][0])
+            print '\napplication/model/base/{0}Base.py'.format(templates['base'][0])
             print templates['base'][1]
-            print '\n\napplication/{0}.py'.format(templates['work'][0])
-            print templates['work'][1]
-            for rel in templates['rel']:
-                print '\n\napplication/relation/{0}.py'.format(rel[0])
-                print rel[1]        
-            sys.exit(1)
+            if templates.get('rel') != None:            
+                for rel in templates['rel']:
+                    print '\n\napplication/model/relation/{0}.py'.format(rel[0])
+                    print rel[1]
         else :
             gen.writeBaseModule(templates['base'][0], templates['base'][1])
-            gen.writeModule(templates['work'][0], templates['work'][1])
-            for rel in templates['rel']:
-                gen.writeRelation(rel[0], rel[1])
+            if templates.get('rel') != None:            
+                for rel in templates['rel']:
+                    gen.writeRelation(rel[0], rel[1])
         
-        print bold('Module created successfully.')
+        print bold('Model created successfully.')
     
     def shortHelp(self):
-        return green("<local-opts> - generate a new Goliat module model (generate --help for detailed help)")
+        return green("<local-opts> - generate a new Goliat model (generate-model --help for detailed help)")
     
     def longHelp(self):
-        return bold("Crate a new Goliat module model.") + \
+        return bold("Crate a new Goliat model.") + \
             "\n" + \
             bold("Syntax:\n") + \
-            " " + green("generate-module <local-opts> <application-name>\n") + \
+            " " + green("generate-model <local-opts> <application-name>\n") + \
             " " + yellow("-d, --dump       ") + green("   - dump to standard output\n") + \
             " " + yellow("-l, --list       ") + green("   - show a list of available model at current schema\n") + \
             " " + yellow("--verbose        ") + green("   - run in verbose mode\n")
   
 
 class CmdGenerateAll(Command):
-    pass
-
-class CmdSql(Command):
-    """Prints Goliat project database a standard output"""   
-    def parseArgs(self, args):        
+    def __init__(self):
+        self._default_opts = { 'verbose' : False, 'dump' : False }
+        self._valid_opts = ['-v', '--verbose', '-d', '--dump']
+    
+    def parseArgs(self, args):
+        opts = self._default_opts
         need_help = False
         
         for i in xrange(len(args)):
@@ -126,49 +126,62 @@ class CmdSql(Command):
             
             if x in ['-h', '--help']:
                 need_help = True
-                break;            
+                break;
+            elif x in ['-v', '--verbose']:
+                opts['verbose'] = True
+            elif x in ['-d', '--dump']:
+                opts['dump'] = True            
+            elif x.startswith('-') and x not in self._valid_opts:
+                continue; 
+            else:
+                continue
         
         if need_help:
             print self.longHelp()
             sys.exit(-1)
         
-        return
+        return opts
     
-    def perform(self, args):        
-        self.parseArgs(args)          
-        gen = Generator(False)
-        gen.generateDatabase()
-        tables = gen.getDatabase()                   
+    def perform(self, args):
+        opts = self.parseArgs(args)
+        gen = Generator(opts['verbose'])
+        for model_name in _schema.getTablesList():
+            print '\n'+bold('Generating {0} model...'.format( model_name ))         
+            templates = gen.create(model_name, _schema.findTable(model_name))        
+            if opts['dump']:            
+                print '\napplication/model/base/{0}Base.py'.format(templates['base'][0])
+                print templates['base'][1]
+                if templates.get('rel') != None:            
+                    for rel in templates['rel']:
+                        print '\n\napplication/model/relation/{0}.py'.format(rel[0])
+                        print rel[1]
+            else :
+                gen.writeBaseModule(templates['base'][0], templates['base'][1])
+                if templates.get('rel') != None:            
+                    for rel in templates['rel']:
+                        gen.writeRelation(rel[0], rel[1])
         
-        for table in tables:
-            if gen.getSqlType() in ['sqlite', 'postgres']:
-                print '-----------------------------------------------------------------------------'
-                print '-- {0}'.format( table['name'] )
-                print '-----------------------------------------------------------------------------'                
-            else:
-                print '#-----------------------------------------------------------------------------'
-                print '#-- {0}'.format( table['name'] )
-                print '#-----------------------------------------------------------------------------'
-            print table['script']
-                
+            print bold('Model {0} created successfully.'.format( model_name ))        
     
     def shortHelp(self):
-        return green("<local-opts> - dump a Goliat project database SQL script to standard output (create --help for detailed help)")
+        return green("<local-opts> - generate all Goliat models following the schema.yaml file (generate --help for detailed help)")
     
     def longHelp(self):
-        return bold("Dump a Goliat project database to the standard output.") + \
+        return bold("Crate a full schema Goliat model.") + \
             "\n" + \
             bold("Syntax:\n") + \
-            " " + green("create <local-opts> <application-name>\n")
-               
+            " " + green("generate-model <local-opts> <application-name>\n") + \
+            " " + yellow("-d, --dump       ") + green("   - dump to standard output\n") + \
+            " " + yellow("-l, --list       ") + green("   - show a list of available model at current schema\n") + \
+            " " + yellow("--verbose        ") + green("   - run in verbose mode\n")               
 
 _known_commands = {
-    'generate-module'    : CmdGenerate(),
+    'generate-model'    : CmdGenerate(),
     'generate-all'       : CmdGenerateAll()      
 }
     
 _short_commands = {
-    'g' : 'generate-module',
+    'g' : 'generate-model',
     'a' : 'generate-all',
 }
 

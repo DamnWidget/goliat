@@ -133,6 +133,12 @@ def initFile(installPath, options):
              app_share=installPath['share']
     )     
 
+def schemaFile():
+    """Generates the Goliat database schema file template"""
+    mgr = TemplateManager()
+    t = mgr.getSysDomain().get_template('tpl/schema.evoque')
+    return t.evoque()
+
 def rcUpdate(app_name, add='add'):
     """Enable or diable a distro System V init script"""
     if distro == 'generic':

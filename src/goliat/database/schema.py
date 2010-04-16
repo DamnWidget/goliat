@@ -35,6 +35,7 @@ class SchemaException(Exception):
     pass
 
 class Schema(object):
+    """Goliat YAML based Schema object"""
     _schemaFile = None    
     _schema = {}
     _fixed = False
@@ -49,6 +50,7 @@ class Schema(object):
         self._loadSchema()      
     
     def getTables(self):
+        """Return the schema tables"""
         try : 
             tables = self._schema['database']['tables']
         except KeyError:
@@ -56,6 +58,7 @@ class Schema(object):
         return tables
     
     def getProperties(self):
+        """Return the schema properties"""
         try:
             properties = self._schema['database']['_properties']
         except KeyError:
@@ -63,6 +66,7 @@ class Schema(object):
         return properties
     
     def getColumnData(self, table, column):
+        """Return data from column on table"""
         try:
             properties = self._schema['database']['tables'][table][column]
         except KeyError:
@@ -70,6 +74,7 @@ class Schema(object):
         return properties
     
     def getColumnPropertyData(self, table, column, property):
+        """Return table column attribute value"""
         try:
             data = self._schema['database']['tables'][table][column][property]
         except KeyError:
@@ -77,21 +82,50 @@ class Schema(object):
         return data
     
     def setColumnPropertyData(self, table, column, property, data):
+        """Sets table column attribute value"""
         self._schema['database']['tables'][table][column][property] = data
     
     def setColumnData(self, table, column, data):
+        """Sets column attributes values"""
         self._schema['database']['tables'][table][column] = data
     
     def findTable(self, name):
+        """Find a table on schema and return it"""
         for table, column in self.getTables().iteritems():        
             if name == table or column.get('_config') != None and column['_config'].get('modName') != None and column['_config']['modName'] == name:
                 return column 
         return False
     
     def getTablesList(self):
+        """Return a list of tables"""
         return self._schema['database']['tables'].keys()
     
+    def hasRelation(self, table):
+        """Returns true if the table has an relation"""
+        if table.get('_relation') != None:
+            return True
+        
+        return False
+    
+    def many2many(self):
+        """Get all the many to many relations on schema"""
+        relations = []
+        for table, cols in self.getTables().iteritems():
+            if self.hasRelation(cols):
+                for field, definition in cols['_relation'].iteritems():
+                    if definition.get('foreignKey') != None:
+                        if self.findTable(definition['foreignTable']) != False:
+                            data = {
+                                'table' : table+'_'+definition['foreignTable'],
+                                'keys'  : definition.get('keys'),
+                                'fields': definition.get('fields')                             
+                            }
+                            relations.append(data)   
+        return relations                
+                    
+    
     def fixTables(self):
+        """Fix tables for empty types"""
         if self._fixed:
             return
         if not len(self.getTables()):
@@ -101,7 +135,7 @@ class Schema(object):
             pKey = False
             
             for column, properties in columns.iteritems():
-                if column in ['_config', '_relation']:
+                if column in ['_config', '_relation', '_indexes']:
                     continue
                 # Fix the '~' columns at Yaml definition
                 if properties is None:
@@ -149,6 +183,7 @@ class Schema(object):
         return (True, '')
     
     def _loadSchema(self):
+        """Loads a schema from file"""
         stream = file(self._schemaFile, 'r')
         self._schema = yaml.load(stream)
 

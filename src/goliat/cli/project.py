@@ -163,10 +163,17 @@ class CmdCreate(Command):
             fp = open('init.d/'+pr.getName().lower().replace(' ','_'), 'w')
             fp.write(pr.getTemplate('service'))
             fp.close()
+            if pr.verbose: print bold('Creating config directory.')
+            os.makedirs('config')
+            if pr.verbose: print bold('Writing schema file.')
+            fp = open('config/schema.yaml', 'w')
+            fp.write(pr.getTemplate('schema'))
+            fp.close()
             # Create application needed directories
-            if pr._verbose: print bold('Creating application directory.\nCreating application/base directory.\nCreating application/scripts directory.')
-            os.makedirs('application/base')                
-            os.makedirs('application/scripts')            
+            if pr._verbose: print bold('Creating application directory.\nCreating model directory.\nCreating scripts directory.')
+            os.makedirs('application/model/base')
+            os.makedirs('application/model/relation')                
+            os.makedirs('application/scripts')                        
             if pr._verbose: print bold('Creating web directory.\nCreating web/js directory.')
             os.makedirs('web/js')            
             if pr._verbose: print bold('Creating web/media directory.')
@@ -193,6 +200,9 @@ class CmdCreate(Command):
             fp.close()
             fp = open('application/base/__init__.py', 'w')
             fp.write('# Goliat will place here all the generated model modules.')
+            fp.close()
+            fp = open('application/relation/__init__.py', 'w')
+            fp.write('# Goliat will place here all the generated relational model modules.')
             fp.close()
             print bold('Project Generated!')              
             self._configure(pr)
@@ -513,7 +523,8 @@ class Project(object):
         'tac'       : None,
         'mainJs'    : None,
         'service'   : None,
-        'project'   : None
+        'project'   : None,
+        'schema'    : None
     }
     
     _installPaths = dict()
@@ -614,7 +625,10 @@ class Project(object):
         self.buildInstallPaths()
         self._templates['service'] = linux.initFile(self._installPaths, self._options)
         if self._verbose: print bold('Template for System V service file generated:')
-                    
+        
+        # Template for schema file
+        self._templates['schema'] = linux.schemaFile()
+        if self._verbose: print bold('Template for schema file generated:')                    
         
     
     def buildInstallPaths(self):

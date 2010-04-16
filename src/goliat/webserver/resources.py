@@ -18,7 +18,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 ##
 # $id Goliat/src/goliat/webserver/resourcesloader.py created on 02/04/2010 13:28:44 by damnwidget
-from compiler.pycodegen import gen
 '''
 Created on 02/04/2010 13:28:44
 
@@ -163,41 +162,3 @@ class ResourcesLoader(object):
             return files
         except OSError:
             return list()
-
-class Resource(resource.Resource, Storm):
-    """The Goliat Resource Object inherits from Twisted Resource and Storm
-    This Object only exists for convenience
-    """ 
-    def __init__(self):
-        resource.Resource.__init__(self)
-    
-    def createTable(self):
-        """Create the object table at defined schema database"""
-        table = self.getTable()
-        if table == None:
-            raise DatabaseException('{0} does not exist on schema.yaml, revise your schema definition'.format( self.__storm_table__ ))        
-        self.execute('create', table['script'])                 
-    
-    def dropTable(self):
-        """Drop the object table"""
-        table = self.getTable()
-        if table == None:
-            raise DatabaseException('{0} does not exist on schema.yaml, revise your schema definition'.format( self.__storm_table__ ))
-        self.execute('drop', table['script'])
-    
-    def getTable(self):
-        gen = Generator(False)
-        gen.generateDatabase()
-        table = None
-        for t in gen.getDatabase():
-            if t['name'] == self.__storm_table__:
-                table = t
-                break
-        return table
-    
-    def execute(self, cmd, script):
-        db = Database()
-        db.connect()
-        dCmd = getattr(db, cmd)        
-        dCmd(script)
-        
