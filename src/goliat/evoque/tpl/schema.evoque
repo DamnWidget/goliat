@@ -40,38 +40,119 @@
 #     # In case we are using MySQL as the schema backend
 #     engine:            InnoDB
 #   tables:
-#     person:
-#       _config:         { modName: Person }
+#     person:#
 #       id:              ~
 #       name:            { type: varchar, size: '50', required: true }
 #       surname:         { type: varchar, size: '100', required: true }
 #       age:             { type: smallint, size: '2' }
 #     # We can also use extended syntax as follow
 #     employee:
-#       _config:
-#         modName:       Employee
 #       id:
 #         type:          integer
 #         primaryKey:    true
 #         autoIncrement: true
 #         required:      true        
-#       company_id:      { type: integer, required: true, foreignTable: company, foreignReference: id }
+#       company_id:      { type: integer, required: true }
 #     # We can mix extended and reduced syntax at same table if we want as follow
 #     company:
-#       _config:         { modName: Company }
 #       id:              { type: integer, primaryKey: true, autoIncrement: true, required: true }
 #       name:
 #         type:          varchar
 #         size:          '100'
 #         required:      true
 #       vat:             { type: varchar, size: '12', required: true }
+#     title:
+#       id:              ~
+#       name:            { type: varchar, size: '50', required: true }
 #
 # The uri will be a valid Storm database URI
-# _config attribute in tables is used to set the Python model name for the table 
-# and other configuration options. For more info visit: http://goliat.open-phoenix.com
-#
 # You can use the '~' with id attributes, Goliat will add the correct options for the 
-# selected schema for Primary Keys identificators
+# selected schema for Primary Keys identificators 
+# _relation attribute in tables is used to define complex table relationships
+#
+# To define one2one relation we can do it as follows
+#
+# At employee table:
+# _relation:
+#   title:              { type: one2one, foreignTable: title, foreignKey: id }
+#
+# This will add a new fields in model module class with a Reference to the new relation:
+# title_id = Int()
+# title = Reference(title_id, "Title.id")
+#
+# Then we can use this code:
+# consultant = store.add(Title(u"Consultant"))
+# john = store.add(Employee(u"John Smith"))
+# john.title = consultant
+# store.flush()
+# print "%r, %r" % (john.title_id, john.title.name)
+#
+# With result:
+# 1, u'Consultant'
+#
+# To define a many2one relation we con do it as follows
+#
+# At company table:
+# _relation:
+#   employees:          { type: many2one, localKey: id, foreignTable: employee, foreignKey: id }
+#
+# This will add a new field in model module class with a Reference to the new relation:
+# employees = ReferenceSet("Company.id", "Employee.company_id")
+#
+# Then we can use this code:
+# john = store.add(Employee(u"John Smith"))
+# myInc = store.add(Company(u"My Company"))
+# myInc.employees.add(john)
+# print john.company_id
+# print john.company is myInc
+# 
+# With result:
+# 1
+# True 
+#
+# To define an auto many2many relationship we can do it as follows
+#
+# company:
+#   _config:            { modName: Company }
+#   id:                 ~
+#   name:               { type: varchar, size: '100', required: true }
+#   vat:                { type: verchar, size: '12', required: true }
+#   _relation:
+#     employee_ids:     { type: many2many, foreignTable: employee, foreignKey: id, localKey: id, keys: [ company_id, employee_id ] }
+#
+# This will create a new table called company_employee with the following syntax:
+# 'CREATE TABLE company_employee (
+#       company_id INTEGER,
+#       employee_id INTEGER ,
+#       PRIMARY KEY (company_id, employee_id)
+# );'
+#
+# Then will create a new model module class CompanyEmployee like:
+# class CompanyEmployee(Storm):
+#   __storm_table__ = "company_employee"
+#   __storm_primary__ = "company_id", "employee_id"
+#   company_id = Int(allow_none=False)
+#   employee_id = Int(allow_none=False)
+#
+# And finally add a new field in model module class Company with a ReferenceSet to the new relation:
+# employee_ids = ReferenceSet("Company.id", "CompanyEmployee.company_id", "CompanyEmployee.employee_id", "Employee.id")
+#
+# Now, we can know which employees are working in any Company with this simple code:
+# employees = [ employee.name for employee in company.employee_ids ]
+# print employees
+#
+# If we want to add a reverse relation from employee to companies we can do it in easy way modifing a bit the relation
+# definition as is shown in this example:
+# employee_ids:     { type: many2many, foreignTable: employee, foreignKey: id, localKey: id, keys: [ company_id, employee_id ], reverseId: company_ids }
+#
+# This will modify the model module class Employe with a reversed ReferenceSet to the relation:
+# company_ids = ReferenceSet("Employee.id", "CompanyEmployee.employee_id", "CompanyEmployee.company_id", "Company.id")
+#
+# Now, we can know on which companies an employeer is working with this simple code:
+# companies = [ company.name for company in employee.company_ids ]
+# print companies
+#
+# For more information visit http://goliat.open-phoenix.com
 #
 #-------------------------------------------------------------------------------
 #-- Valid Goliat schema keywords
@@ -105,15 +186,3 @@
 # timedelta             TEXT                TEXT                INTERVAL
 # list                  TEXT                TEXT                ARRAY
 #
-#
-# Keywords:
-#
-# type [any type] - Sets the attribute type
-# size [size] - Sets the size of attribute
-# primaryKey [true|false] - Sets the attribute as primary key
-# autoIncrement [true|false] - Sets the attribute as autoincrement
-# default [any] - Sets the default value for the attribute
-# required [true|false] - Sets the attribute as NOT NULL or not
-# foreignTable [table] - Sets the foreign table for References
-# foreignReference [attr] - Sets the foreign referende attribute
-# onDelete [ACTION] - Sets the cascading ACTION in foreign references

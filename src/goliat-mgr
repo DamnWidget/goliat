@@ -24,6 +24,7 @@ try:
     from goliat.cli.utils.output import bold, white, turquoise, purple, red, yellow, green, blue
     import goliat.cli.project as project
     import goliat.cli.database as database
+    import goliat.cli.model as model
 except:
     raise RuntimeError('Goliat is not installed on this system!')    
 
@@ -70,11 +71,33 @@ class CmdDatabase(Command):
     
     def shortHelp(self):
         return green(" <local-opts> - generate goliat projects tables\n") + \
-        green("                        (use goliat database --help for details)\n")   
+        green("                        (use goliat database --help for details)\n")
+
+class CmdModel(Command):
+    """Goliat Model Command"""
+    def __init__(self):
+        pass
+    
+    def parseArgs(self, args):
+        return model.parseArgs(args)
+    
+    def perform(self, args):
+        opts = self.parseArgs(args)
+        
+        (cmd, local_opts) = model.parseArgs(sys.argv[1:])
+        if cmd == None:
+            model.printUsage()
+            sys.exit(-1)
+        cmd.perform(local_opts)
+    
+    def shortHelp(self):
+        return green(" <local-opts> - generate goliat model module\n") + \
+        green("                        (use goliat model --help for details)\n") 
     
 _known_commands = {
     'project' : CmdProject(),
     'database': CmdDatabase(),
+    'model'   : CmdModel()
 }
 
 def printUsage():
@@ -89,7 +112,7 @@ def printUsage():
         
 def printVersion():
     """Print the version of this tool"""
-    print bold('Goliat v{0} - Twisted and ExtJS (and others) Web Application Framework'.format( goliat.version.short() ))    
+    print bold('Goliat v{0} - Twisted and ExtJS (and others) Web Applications Framework'.format( goliat.version.short() ))    
     print bold('Copyright (C) 2010 Open Phoenix IT SCA')
     print bold('Author(s): Oscar Campos Ruiz')
 
@@ -134,18 +157,18 @@ def parseArgs(args):
 if __name__ == "__main__":
     (cmd, local_opts) = parseArgs(sys.argv[1:])
     if cmd:
-        try:            
-            cmd.perform(local_opts)  
-        except KeyError, e:
-            print red("Internal goliat error, terminating: {0}")
-            if len(e[0]):
-                print red(str(e))
-        except ValueError, e: 
-            print red("Internal goliat error, terminating")                       
-            if len(e[0]):                     
-                print red(str(e))
-        except KeyboardInterrupt:
-            print blue("Interrupted by user, aborting.")
+        #try:            
+        cmd.perform(local_opts)  
+        #except KeyError, e:
+        #    print red("Internal goliat error, terminating")
+        #    if len(e[0]):
+        #        print red(str(e))
+        #except ValueError, e: 
+        #    print red("Internal goliat error, terminating")                       
+        #    if len(e[0]):                     
+        #        print red(str(e))
+        #except KeyboardInterrupt:
+        #    print blue("Interrupted by user, aborting.")
     else:
         printUsage()
         

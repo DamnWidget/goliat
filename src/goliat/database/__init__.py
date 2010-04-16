@@ -222,7 +222,7 @@ class Generator(object):
         query += "CREATE TABLE {0}{1}{2}\n".format( self.getSqlQuotes(), table, self.getSqlQuotes() )
         query +="(\n" 
         for column in columns:
-            if column in ['_config', '_indexes', '_behaviors']:
+            if column in ['_config', '_indexes', '_relation']:
                 continue
             query += "    {0}{1}{2} ".format( self.getSqlQuotes(), column, self.getSqlQuotes() )            
             query += self._parseColumn(columns[column])

@@ -49,7 +49,10 @@ class TemplateManager(Borg):
     
     Goliat uses evoque as Template Engine.
     TemplateManager inherits from Borg, you can create as many TemplateManager objects as you want
-    and them all will share data as long as they refer to the same state information.     
+    and them all will share data as long as they refer to the same state information.
+    
+    To create new HTML or XHTML templates you will register a new domain do *not* use the system
+    domain because the system domain does not escape quotes.     
     """    
 
     _domains = dict()
@@ -60,7 +63,7 @@ class TemplateManager(Borg):
         self._options = Apply(self._options, options)
         # Create the system template if is not present already
         if 'Goliat' not in self._domains:
-            self.registerDomain('Goliat', getSysTemplatesPath())
+            self.registerDomain('Goliat', getSysTemplatesPath(), quoting="str")
         
     def registerDomain(self, name,
                     # Defaults for Domains

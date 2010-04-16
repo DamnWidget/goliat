@@ -83,10 +83,13 @@ class Schema(object):
         self._schema['database']['tables'][table][column] = data
     
     def findTable(self, name):
-        for table, column in self.getTables().iteritems():
+        for table, column in self.getTables().iteritems():        
             if name == table or column.get('_config') != None and column['_config'].get('modName') != None and column['_config']['modName'] == name:
                 return column 
-            return False
+        return False
+    
+    def getTablesList(self):
+        return self._schema['database']['tables'].keys()
     
     def fixTables(self):
         if self._fixed:
@@ -98,7 +101,7 @@ class Schema(object):
             pKey = False
             
             for column, properties in columns.iteritems():
-                if column in ['_config', '_behavior']:
+                if column in ['_config', '_relation']:
                     continue
                 # Fix the '~' columns at Yaml definition
                 if properties is None:

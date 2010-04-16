@@ -17,33 +17,33 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 ##
-# $id Goliat/src/goliat/modulemgr.py created on 03/04/2010 00:13:39 by damnwidget
+# $$id ${model_file}Base.py created on ${model_creation_date} by Goliat $$
 '''
-Created on 03/04/2010 00:13:39
+Created on ${model_creation_date}
 
 @license: GPLv2
 @copyright: © 2010 Open Phoenix IT SCA
 @organization: Open Phoenix IT S.Coop.And
-@author: Oscar Campos
-@contact: oscar.campos@open-phoenix.com
-@summary: Modules Manager
+@author: Goliat
+@contact: goliat@open-phoenix.com
+@summary: ${model_name}Base Model Base Class
 @version: 0.1
 '''
-class ModuleManager(object):
-    _modules = list()    
+from storm.base import Storm
+from storm.locals import *
+from storm import Undef
+
+class ${model_name}Base(Storm):
+    __storm_table__ = "${model_table}"
+    ${model_primary_keys}
+    $for{i, (prop, type) in enumerate(attributes)}
+    ${prop} = ${type}
+    $rof    
     
     def __init__(self):
-        super(ModuleManager, self).__init__()        
-            
-    def Register(self, module):
-        """Add a new module to self"""
-        self._modules.append(module)
-        module.Load()    
-    
-    def lenght(self):
-        """Returns the self lenght"""
-        return len(self._modules)    
-    
-    def getModules(self):
-        return self._modules    
-   
+        """Storm object representation of SQL table ${model_table}
+        
+        This method will be overriden by ${model_name} class
+        """
+        pass
+         
