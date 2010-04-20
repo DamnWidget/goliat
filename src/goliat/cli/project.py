@@ -32,7 +32,7 @@ Created on 03/04/2010 23:03:15
 import goliat._version as _goliat_version
 import goliat.cli.utils.linux as linux
 from goliat.cli import Command, buildReverseMap, userquery, userchoice, userinput
-from goliat.cli.utils.output import bold, white, turquoise, purple, red, yellow, green, blue, brown
+from goliat.cli.utils.output import *
 from goliat.utils.apply import Apply
 from goliat.utils import config
 import sys, os, fnmatch
@@ -198,8 +198,11 @@ class CmdCreate(Command):
             fp = open('application/__init__.py', 'w')
             fp.write('# Modules should be located on this directory')
             fp.close()
-            fp = open('application/base/__init__.py', 'w')
+            fp = open('application/__init__.py', 'w')
             fp.write('# Goliat will place here all the generated model modules.')
+            fp.close()
+            fp = open('application/base/__init__.py', 'w')
+            fp.write('# Goliat will place here all the generated base model modules.')
             fp.close()
             fp = open('application/relation/__init__.py', 'w')
             fp.write('# Goliat will place here all the generated relational model modules.')

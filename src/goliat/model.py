@@ -76,23 +76,27 @@ class Generator(object):
             raise SchemaException(msg)
         if self._verbose: print green('Schema fixed!')
     
-    def generateModules(self):        
+    def generateModels(self):        
         for table, columns in self._schema.getTables().iteritems():
-            modName, tpl = self.generateModuleBase(table, columns)
-            self.writeBaseModule(modName, tpl)
-            modName, tpl = self.generateModule(table, columns)
-            self.writeModule(modName, tpl)
+            modName, tpl = self.generateModelBase(table, columns)
+            self.writeBaseModel(modName, tpl)
+            modName, tpl = self.generateModel(table, columns)
+            self.writeModel(modName, tpl)
     
-    def create(self, table, columns):        
+    def create_b(self, table, columns):        
         templates = {
-            'base'  : self.generateModuleBase(table, columns),
-            'work'  : self.generateModule(table, columns),
+            'base'  : self.generateModelBase(table, columns),            
             'rel'   : self.generateMany2Many(table, columns)
         }
         
         return templates
     
-    def generateModule(self, table, columns):        
+    def create_m(self, table, columns):
+        return {
+            'work'  : self.generateModel(table, columns)
+        }
+    
+    def generateModel(self, table, columns):        
         t = self._mgr.getSysDomain().get_template('tpl/model.evoque')        
         modelName = self._generateModelName(table)
         return (modelName, t.evoque(
@@ -101,7 +105,7 @@ class Generator(object):
             model_file='application/model/{0}'.format( modelName ),            
         ))
     
-    def generateModuleBase(self, table, columns):        
+    def generateModelBase(self, table, columns):        
         t = self._mgr.getSysDomain().get_template('tpl/modelbase.evoque')        
         relation = columns['_relation'] if columns.get('_relation') != None else None
         modelName = self._generateModelName(table)
@@ -123,11 +127,13 @@ class Generator(object):
                 if rel['type'] == 'one2one':                    
                     _attributes.append(('{0}_id'.format(field), 'Int()'))
                     _attributes.append((field, 'Reference({0}_id, "{1}.{2}"'.format(field, self._generateModelName(rel['foreignTable']), rel['foreignKey'])))
-                    _relations.append(('application.base.{0}'.format(self._generateModelName(rel['foreignTable'])), self._generateModelName(rel['foreignTable'])))                    
+                    _relations.append(('application.model.base.{0}Base'.format(self._generateModelName(rel['foreignTable'])),
+                        '{0}Base'.format(self._generateModelName(rel['foreignTable']))))                    
                 elif rel['type'] == 'many2one':
                     _attributes.append(('{0}'.format(field, 'ReferenceSet("{0}.{1}", "{2}.{3})'.format( 
                         self._generateModelName(table), rel['localKey'], self._generateModelName(rel['foreignTable']), rel['foreignKey'] ))))
-                    _relations.append(('application.base.{0}'.format(self._generateModelName(rel['foreignTable'])), self._generateModelName(rel['foreignTable'])))
+                    _relations.append(('application.model.base.{0}Base'.format(self._generateModelName(rel['foreignTable'])),
+                        '{0}Base'.format(self._generateModelName(rel['foreignTable']))))
                 elif rel['type'] == 'many2many':
                     reference = 'ReferenceSet('
                     _new_keys = []
@@ -141,9 +147,10 @@ class Generator(object):
                     reference += '"{0}.{1}"'.format( self._generateModelName(rel['foreignTable']), rel['foreignKey'] )
                     reference += ')'                    
                     _attributes.append(('{0}'.format(field), reference))                    
-                    _relations.append(('application.base.{0}'.format(self._generateModelName(rel['foreignTable'])), self._generateModelName(rel['foreignTable'])))
+                    _relations.append(('application.model.base.{0}Base'.format(self._generateModelName(rel['foreignTable'])),
+                        '{0}Base'.format(self._generateModelName(rel['foreignTable']))))
                     _relations.append((
-                        'application.relation.{0}'.format(self._generateModelName(table)+self._generateModelName(rel['foreignTable'])),
+                        'application.model.relation.{0}'.format(self._generateModelName(table)+self._generateModelName(rel['foreignTable'])),
                         self._generateModelName(table)+self._generateModelName(rel['foreignTable'])
                     ))                    
         
@@ -161,7 +168,7 @@ class Generator(object):
         if columns.get('_relation') == None:
             return None
         
-        modules = []
+        models = []
         for field, relation in columns['_relation'].iteritems():
             if not self._analyze(relation):
                 raise SchemaException('%s table has an invalid _relation section, please fix it!!!' % ( table ))        
@@ -183,7 +190,7 @@ class Generator(object):
                         attrType = self._parseColumn(fvalue, True)
                         _attributes.append((attrName, attrType))
             
-            modules.append((modelName, t.evoque(
+            models.append((modelName, t.evoque(
                 model_name=modelName,
                 model_creation_date=datetime.now(),
                 model_file='application/model/relation/{0}'.format( modelName ),
@@ -192,7 +199,7 @@ class Generator(object):
                 attributes=_attributes
             )))        
         
-        return modules       
+        return models       
 
     def _generateModelName(self, table):
         return ''.join([ word.capitalize() for word in table.split('_') ])
@@ -216,12 +223,12 @@ class Generator(object):
         
         return '__storm_primary__ = '+','.join([ '"'+k+'"' for k in _new_keys ])
     
-    def writeBaseModule(self, modName, tpl):
+    def writeBaseModel(self, modName, tpl):
         fp = file('application/model/base/{0}Base.py'.format(modName), 'w')        
         fp.write(tpl.encode('utf8'))
         fp.close()
     
-    def writeModule(self, modName, tpl):
+    def writeModel(self, modName, tpl):
         fp = file('application/model/{0}.py'.format(modName), 'w')
         fp.write(tpl.encode('utf8'))
         fp.close()
@@ -255,3 +262,4 @@ class Generator(object):
                 return '{0}(primary={1}, value={2}, allow_none={3})'.format(tr(col.get('type')), _primary, _default_value, _allow_none)
             else:
                 return '{0}(value={1}, allow_none={2})'.format(tr(col.get('type')), _default_value, _allow_none)
+            

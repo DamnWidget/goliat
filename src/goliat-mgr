@@ -21,10 +21,11 @@
 try:
     import goliat as goliat
     from goliat.cli import Command, buildReverseMap
-    from goliat.cli.utils.output import bold, white, turquoise, purple, red, yellow, green, blue
+    from goliat.cli.utils.output import *
     import goliat.cli.project as project
     import goliat.cli.database as database
     import goliat.cli.model as model
+    import goliat.cli.module as module
 except:
     raise RuntimeError('Goliat is not installed on this system!')    
 
@@ -49,8 +50,7 @@ class CmdProject(Command):
             sys.exit(-1) 
     
     def shortHelp(self):
-        return green(" <local-opts> - manage goliat projects\n") + \
-        green("                        (use goliat project --help for details)\n")
+        return green(" <local-opts> - manage goliat projects (use goliat project --help for details)\n")
 
 class CmdDatabase(Command):
     """Goliat Database Command"""
@@ -70,8 +70,7 @@ class CmdDatabase(Command):
         cmd.perform(local_opts)         
     
     def shortHelp(self):
-        return green(" <local-opts> - generate goliat projects tables\n") + \
-        green("                        (use goliat database --help for details)\n")
+        return green(" <local-opts> - generate goliat projects tables (use goliat database --help for details)\n")
 
 class CmdModel(Command):
     """Goliat Model Command"""
@@ -91,13 +90,33 @@ class CmdModel(Command):
         cmd.perform(local_opts)
     
     def shortHelp(self):
-        return green(" <local-opts> - generate goliat model module\n") + \
-        green("                        (use goliat model --help for details)\n") 
+        return green(" <local-opts> - generate goliat model (use goliat model --help for details)\n") 
+
+class CmdModule(Command):
+    """Goliat Module Command"""
+    def __init__(self):
+        pass
+    
+    def parseArgs(self, args):
+        return module.parseArgs(args)
+    
+    def perform(self, args):
+        opts = self.parseArgs(args)
+        
+        (cmd, local_opts) = module.parseArgs(sys.argv[1:])
+        if cmd == None:
+            module.printUsage()
+            sys.exit(-1)
+        cmd.perform(local_opts)
+    
+    def shortHelp(self):
+        return green(" <local-opts> - generate goliat module (use goliat module --help for details)\n")
     
 _known_commands = {
     'project' : CmdProject(),
     'database': CmdDatabase(),
-    'model'   : CmdModel()
+    'model'   : CmdModel(),
+    'module'  : CmdModule()
 }
 
 def printUsage():

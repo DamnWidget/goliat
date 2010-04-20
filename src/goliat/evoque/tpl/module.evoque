@@ -17,22 +17,33 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 ##
-# $$id ${model_file}.py created on ${model_creation_date} by Goliat $$
+# $$id ${module_file}.py created on ${module_creation_date} by Goliat $$
 '''
-Created on ${model_creation_date}
+Created on ${module_creation_date}
 
 @license: GPLv2
 @copyright: © 2010 Open Phoenix IT SCA
 @organization: Open Phoenix IT S.Coop.And
 @author: Goliat
 @contact: goliat@open-phoenix.com
-@summary: ${model_name} Model
+@summary: ${module_name} Module
 @version: 0.1
 '''
-from application.model.base.${model_name}Base import ${model_name}Base
+from twisted.web import resource
+from goliat.database import Database
+${module_model_import}
+ToS = False
+try:
+    from storm.twisted.store import DeferredStore as Store
+    ToS = True
+except ImportError:
+    from storm.store import Store
 
-class ${model_name}(${model_name}Base):
-    """This class inherits from ${model_name}Base class"""
+${module_database}
+
+class ${module_name}(resource.Resource):
+    """This class inherits from twsited.web.resource.Resource class"""
+    ${module_model_init}
     
     def __init__(self):
         """Consructor:
@@ -40,3 +51,11 @@ class ${model_name}(${model_name}Base):
         ADD HERE YOUR INITIALIZATION CODE
         """
         pass
+    
+    def render_GET(self, request):
+        """This method will be overriden"""
+        return 'Not implemented yet.'
+    
+    def render_POST(self, request):
+        """This method will be overriden"""
+        return 'Not implemented yet.'
