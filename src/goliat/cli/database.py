@@ -30,7 +30,7 @@ Created on 14/04/2010 01:30:19
 @version: 0.1
 '''
 from goliat.cli import Command, buildReverseMap, userquery
-from goliat.cli.utils.output import bold, white, turquoise, purple, red, yellow, green, blue, brown
+from goliat.cli.utils.output import *
 from goliat.database import Database, Generator
 import sys
 

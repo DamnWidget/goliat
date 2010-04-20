@@ -17,9 +17,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 ##
-# $id Goliat/src/goliat/cli/model.py created on 15/04/2010 03:52:30 by damnwidget $
+# $id Goliat/src/goliat/cli/module.py created on 19/04/2010 15:05:00 by damnwidget $
 '''
-Created on 15/04/2010 03:52:30
+Created on 19/04/2010 15:05:00
 
 @license: GPLv2
 @copyright: © 2010 Open Phoenix IT SCA
@@ -33,6 +33,8 @@ from goliat.cli import Command, buildReverseMap
 from goliat.cli.utils.output import *
 from goliat.model import Generator
 from goliat.database.schema import Schema
+from goliat.template import TemplateManager
+from datetime import datetime
 import sys
 
 _version = ('Model', '0.1.0')
@@ -40,16 +42,16 @@ _version = ('Model', '0.1.0')
 _schema = Schema('config/schema.yaml')
 _schema.fixTables()
 
-class CmdGenerate(Command):
+class CmdGenerateModule(Command):
     """Create a new Goliat model"""
     def __init__(self):
         self._default_opts = { 'verbose' : False, 'dump' : False }
-        self._valid_opts = ['-v', '--verbose', '-d', '--dump', '-l', '--list']
+        self._valid_opts = ['-v', '--verbose', '-d', '--dump', '-l', '--list', '-m', '--model']
     
     def parseArgs(self, args):
         opts = self._default_opts
         need_help = False
-        model_name = ''
+        module_name = ''        
         
         for i in xrange(len(args)):
             x = args[i]
@@ -61,6 +63,8 @@ class CmdGenerate(Command):
                 opts['verbose'] = True
             elif x in ['-d', '--dump']:
                 opts['dump'] = True
+            elif x in ['-m', '--model']:
+                opts['model'] = args[i+1]
             elif x in ['-l', '--list']:
                 modelList()
                 sys.exit(1)
@@ -68,120 +72,75 @@ class CmdGenerate(Command):
                 continue; 
             else:
                 if x not in opts.values():
-                    model_name = x
+                    module_name = x
         
         if need_help:
             print self.longHelp()
             sys.exit(-1)
         
-        return (model_name, opts)
+        return (module_name, opts)
     
     def perform(self, args):
-        model_name, opts = self.parseArgs(args)
-        if not checkModel(model_name):
-            print red('\n{0} model does not exist at the project schema.\nUse model -l or model --list to show a list of available models.'.format( model_name if len(model_name) else 'Noname' ))
-            sys.exit(0)        
-        print '\n'+bold('Generating {0} model...'.format( model_name ))
-        gen = Generator(opts['verbose']) 
-        templates = gen.create_b(model_name, _schema.findTable(model_name))        
+        module_name, opts = self.parseArgs(args)
+        _module_model_import = ''
+        _module_database = ''
+        _module_model_init = ''
+        if opts.get('model') != None:            
+            if not checkModel(opts['model']):
+                print red('\n{0} model does not exist at the project schema.\nUse module -l or module --list to show a list of available models.'.format( opts['model'] if len(opts['model']) else 'Noname' ))
+                sys.exit(0)        
+            gen = Generator(opts['verbose']) 
+            tmodel = gen.create_m(opts['model'], _schema.findTable(opts['model']))
+            _module_model_import='from application.model.{0} import {1}'.format( gen._generateModelName(opts['model']), gen._generateModelName(opts['model']) )
+            _module_database='_db = Database().getDatabase()'
+            _module_model_init='_store = Store(_db)'
+            
+        print '\n'+bold('Generating {0} module...'.format( module_name ))
+        mgr = TemplateManager()
+        t = mgr.getSysDomain().get_template('tpl/module.evoque')
+        module =  t.evoque(
+            module_file="application/{0}.py".format(module_name),
+            module_creation_date=datetime.now(),
+            module_name=module_name,
+            module_model_import=_module_model_import,
+            module_database=_module_database,
+            module_model_init=_module_model_init
+        )               
         if opts['dump']:            
-            print '\napplication/model/base/{0}Base.py'.format(templates['base'][0])
-            print templates['base'][1]
-            if templates.get('rel') != None:            
-                for rel in templates['rel']:
-                    print '\n\napplication/model/relation/{0}.py'.format(rel[0])
-                    print rel[1]
+            if opts.get('model') != None:
+                print '\napplication/model/{0}.py'.format(tmodel['work'][0])
+                print tmodel['work'][1]
+            print '\napplication/{0}.py'.format(module_name)         
+            print  module      
         else :
-            gen.writeBaseModel(templates['base'][0], templates['base'][1])
-            if templates.get('rel') != None:            
-                for rel in templates['rel']:
-                    gen.writeRelation(rel[0], rel[1])
+            if opts.get('model') != None:
+                gen.writeModel(tmodel['work'][0], tmodel['work'][1])
+            fp = file('application/{0}.py'.format(module_name), 'w')
+            fp.write(module.encode('utf8'))
+            fp.close()            
         
-        print bold('Model created successfully.')
+        print bold('Module created successfully.')
     
     def shortHelp(self):
-        return green("<local-opts> - generate a new Goliat model (generate-model --help for detailed help)")
+        return green("<local-opts> - generate a new Goliat module (generate --help for detailed help)")
     
     def longHelp(self):
-        return bold("Crate a new Goliat model.") + \
+        return bold("Crate a new Goliat module.\n") + \
             "\n" + \
             bold("Syntax:\n") + \
-            " " + green("generate-model <local-opts> <model-name>\n") + \
+            " " + green("generate-model <local-opts> <module-name>\n") + \
+            " " + yellow("-m, --model      ") + green("   - model based on\n") + \
             " " + yellow("-d, --dump       ") + green("   - dump to standard output\n") + \
             " " + yellow("-l, --list       ") + green("   - show a list of available model at current schema\n") + \
             " " + yellow("--verbose        ") + green("   - run in verbose mode\n")
-  
-
-class CmdGenerateAll(Command):
-    def __init__(self):
-        self._default_opts = { 'verbose' : False, 'dump' : False }
-        self._valid_opts = ['-v', '--verbose', '-d', '--dump']
-    
-    def parseArgs(self, args):
-        opts = self._default_opts
-        need_help = False
-        
-        for i in xrange(len(args)):
-            x = args[i]
-            
-            if x in ['-h', '--help']:
-                need_help = True
-                break;
-            elif x in ['-v', '--verbose']:
-                opts['verbose'] = True
-            elif x in ['-d', '--dump']:
-                opts['dump'] = True            
-            elif x.startswith('-') and x not in self._valid_opts:
-                continue; 
-            else:
-                continue
-        
-        if need_help:
-            print self.longHelp()
-            sys.exit(-1)
-        
-        return opts
-    
-    def perform(self, args):
-        opts = self.parseArgs(args)
-        gen = Generator(opts['verbose'])
-        for model_name in _schema.getTablesList():
-            print '\n'+bold('Generating {0} model...'.format( model_name ))         
-            templates = gen.create(model_name, _schema.findTable(model_name))        
-            if opts['dump']:            
-                print '\napplication/model/base/{0}Base.py'.format(templates['base'][0])
-                print templates['base'][1]
-                if templates.get('rel') != None:            
-                    for rel in templates['rel']:
-                        print '\n\napplication/model/relation/{0}.py'.format(rel[0])
-                        print rel[1]
-            else :
-                gen.writeBaseModel(templates['base'][0], templates['base'][1])
-                if templates.get('rel') != None:            
-                    for rel in templates['rel']:
-                        gen.writeRelation(rel[0], rel[1])
-        
-            print bold('Model {0} created successfully.'.format( model_name ))        
-    
-    def shortHelp(self):
-        return green("<local-opts> - generate all Goliat models following the schema.yaml file (generate --help for detailed help)")
-    
-    def longHelp(self):
-        return bold("Crate a full schema Goliat model.") + \
-            "\n" + \
-            bold("Syntax:\n") + \
-            " " + green("generate-model <local-opts>\n") + \
-            " " + yellow("-d, --dump       ") + green("   - dump to standard output\n") + \
-            " " + yellow("--verbose        ") + green("   - run in verbose mode\n")               
+               
 
 _known_commands = {
-    'generate-model'    : CmdGenerate(),
-    'generate-all'       : CmdGenerateAll()      
+    'generate'    : CmdGenerateModule()          
 }
     
 _short_commands = {
-    'g' : 'generate-model',
-    'a' : 'generate-all',
+    'g' : 'generate'    
 }
 
 def modelList():
@@ -204,7 +163,7 @@ def printUsage():
     """Print full usage information for this tool"""
     short_cmds = buildReverseMap(_short_commands)
         
-    print bold('Usage: goliat model command <local opts>\n') + \
+    print bold('Usage: goliat module command <local opts>\n') + \
     bold('where command(short) is one of\n')
     keys = _known_commands.keys()
     keys.sort()
@@ -214,7 +173,7 @@ def printUsage():
         
 def printVersion():
     """Print the version of this tool"""
-    print bold('Model Tool v{0} - Goliat Model Manager\n'.format( _version[1] )) + \
+    print bold('Module Tool v{0} - Goliat Module Manager\n'.format( _version[1] )) + \
     bold('Copyright (C) 2010 Open Phoenix IT SCA\n') + \
     bold('Author(s): Oscar Campos Ruiz')
     
@@ -248,8 +207,8 @@ def parseArgs(args):
                 local_opts.append("--help")
             break
         else:
-            if x not in ['model']: local_opts.append(x)
-        
+            if x not in ['module']: local_opts.append(x)    
+    
     if not command and showhelp:
         printUsage()
         sys.exit(0)   
