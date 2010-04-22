@@ -37,11 +37,8 @@ import sys
 
 _version = ('Model', '0.1.0')
 
-_schema = Schema('config/schema.yaml')
-_schema.fixTables()
-
-class CmdGenerate(Command):
-    """Create a new Goliat model"""
+class CmdGenerate(Command):    
+    """Create a new Goliat model"""    
     def __init__(self):
         self._default_opts = { 'verbose' : False, 'dump' : False }
         self._valid_opts = ['-v', '--verbose', '-d', '--dump', '-l', '--list']
@@ -76,8 +73,10 @@ class CmdGenerate(Command):
         
         return (model_name, opts)
     
-    def perform(self, args):
+    def perform(self, args):        
         model_name, opts = self.parseArgs(args)
+        _schema = Schema('config/schema.yaml')
+        _schema.fixTables()
         if not checkModel(model_name):
             print red('\n{0} model does not exist at the project schema.\nUse model -l or model --list to show a list of available models.'.format( model_name if len(model_name) else 'Noname' ))
             sys.exit(0)        
@@ -119,6 +118,8 @@ class CmdGenerateAll(Command):
     
     def parseArgs(self, args):
         opts = self._default_opts
+        _schema = Schema('config/schema.yaml')
+        _schema.fixTables()
         need_help = False
         
         for i in xrange(len(args)):
@@ -186,8 +187,8 @@ _short_commands = {
 
 def modelList():
     """Return a list of available models at current schema"""
-    return _schema.getTablesList()
-    
+    for table in _schema.getTablesList():
+        print brown(table)        
 
 def checkModel(model_name):
     """Checks if a model given by model name exists at the current schema"""
