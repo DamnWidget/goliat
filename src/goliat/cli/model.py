@@ -37,8 +37,9 @@ import sys
 
 _version = ('Model', '0.1.0')
 
+
 class CmdGenerate(Command):    
-    """Create a new Goliat model"""    
+    """Create a new Goliat model"""
     def __init__(self):
         self._default_opts = { 'verbose' : False, 'dump' : False }
         self._valid_opts = ['-v', '--verbose', '-d', '--dump', '-l', '--list']
@@ -75,6 +76,7 @@ class CmdGenerate(Command):
     
     def perform(self, args):        
         model_name, opts = self.parseArgs(args)
+
         _schema = Schema('config/schema.yaml')
         _schema.fixTables()
         if not checkModel(model_name):
@@ -145,6 +147,8 @@ class CmdGenerateAll(Command):
     
     def perform(self, args):
         opts = self.parseArgs(args)
+	_schema = Schema('config/schema.yaml')
+	_schema.fixTables()
         gen = Generator(opts['verbose'])
         for model_name in _schema.getTablesList():
             print '\n'+bold('Generating {0} model...'.format( model_name ))         
@@ -187,6 +191,7 @@ _short_commands = {
 
 def modelList():
     """Return a list of available models at current schema"""
+    _schema = Schema('config/schema.yaml')
     for table in _schema.getTablesList():
         print brown(table)        
 

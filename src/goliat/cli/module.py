@@ -144,8 +144,10 @@ _short_commands = {
 
 def modelList():
     """Return a list of available models at current schema"""
+    _schema = Schema('config/schema.yaml')
     for table in _schema.getTablesList():
         print brown(table)    
+ 
 
 def checkModel(model_name):
     """Checks if a model given by model name exists at the current schema"""
