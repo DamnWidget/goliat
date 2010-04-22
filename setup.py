@@ -19,7 +19,6 @@
 #from setuptools import setup, find_packages
 import setuptools
 import os, sys
-import bzrlib
 
 sys.path.insert(0, './src')
 
