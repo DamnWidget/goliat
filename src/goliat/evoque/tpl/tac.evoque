@@ -4,6 +4,7 @@ epollreactor.install()
         
 from goliat.webserver import page
 from goliat.utils.config import ConfigManager
+from goliat.database import Database
 from twisted.application import internet, service
 from twisted.web import server
         
@@ -16,7 +17,10 @@ cfg = config.getConfig('Goliat')
 # Create the root page
 page = page.Page(cfg['Project'])
 # Initialize the database
-database = Database()
+try:
+    database = Database()
+except TypeError:
+    print 'WARNING: Your database schema is not initialized.'
 
 # Check for Orbited 
 if cfg['Project']['orbited']:
