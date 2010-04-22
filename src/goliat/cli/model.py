@@ -37,9 +37,6 @@ import sys
 
 _version = ('Model', '0.1.0')
 
-_schema = Schema('config/schema.yaml')
-_schema.fixTables()
-
 class CmdGenerate(Command):
     """Create a new Goliat model"""
     def __init__(self):
@@ -78,6 +75,8 @@ class CmdGenerate(Command):
     
     def perform(self, args):
         model_name, opts = self.parseArgs(args)
+	_schema = Schema('config/schema.yaml')
+	_schema.fixTables()
         if not checkModel(model_name):
             print red('\n{0} model does not exist at the project schema.\nUse model -l or model --list to show a list of available models.'.format( model_name if len(model_name) else 'Noname' ))
             sys.exit(0)        
@@ -144,6 +143,8 @@ class CmdGenerateAll(Command):
     
     def perform(self, args):
         opts = self.parseArgs(args)
+	_schema = Schema('config/schema.yaml')
+	_schema.fixTables()
         gen = Generator(opts['verbose'])
         for model_name in _schema.getTablesList():
             print '\n'+bold('Generating {0} model...'.format( model_name ))         

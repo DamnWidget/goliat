@@ -39,9 +39,6 @@ import sys
 
 _version = ('Model', '0.1.0')
 
-_schema = Schema('config/schema.yaml')
-_schema.fixTables()
-
 class CmdGenerateModule(Command):
     """Create a new Goliat model"""
     def __init__(self):
@@ -82,6 +79,8 @@ class CmdGenerateModule(Command):
     
     def perform(self, args):
         module_name, opts = self.parseArgs(args)
+	_schema = Schema('config/schema.yaml')
+	_schema.fixTables()
         _module_model_import = ''
         _module_database = ''
         _module_model_init = ''
