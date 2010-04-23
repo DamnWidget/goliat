@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 ##
-# $id Goliat/src/goliat/database/__init__.py created on 13/04/2010 15:53:40 by damnwidget $
+# $id goliat/database/__init__.py created on 13/04/2010 15:53:40 by damnwidget $
 '''
 Created on 13/04/2010 15:53:40
 
@@ -37,10 +37,10 @@ from storm.uri import URI
 
 from goliat.utils.borg import Borg
 from goliat.database.schema import Schema
-from goliat.cli.utils.output import bold, white, turquoise, purple, red, yellow, green, blue, brown
+from goliat.cli.utils.output import *
 
 
-_type_properties = {
+_type_properties={
     'sqlite' : {
         'bool'          : 'INTEGER',
         'boolean'       : 'INTEGER',
@@ -112,199 +112,210 @@ _type_properties = {
     }
 }
 
-class DatabaseException( Exception ):
+class DatabaseException(Exception):
     pass
 
-class Database( Borg ):
-    _db = None
-    _conn = None
-    _schema = None
-    _fixed = False
+class Database(Borg):
+    _db=None
+    _conn=None
+    _schema=None
+    _fixed=False
 
-    def __init__( self ):
-        super( Database, self ).__init__()
+    def __init__(self):
+        super(Database, self).__init__()
 
-        self._schema = Schema( 'config/schema.yaml' )
-        self._db = create_database( self._schema.get_properties()['uri'] )
+        self._schema=Schema('config/schema.yaml')
+        self._db=create_database(self._schema.get_properties()['uri'])
 
-    def get_database( self ):
+    def get_database(self):
         return self._db
 
-    def connect( self ):
-        if self._conn == None:
-            self._conn = self._db.connect()
+    def connect(self):
+        if self._conn==None:
+            self._conn=self._db.connect()
 
-    def query( self, data ):
-        self._conn.execute( data )
+    def query(self, data):
+        self._conn.execute(data)
         self._conn.commit()
 
-    def create( self, script ):
-        drop = script.split( '\n' )[0]
-        create = ''.join( script.split( '\n' )[2:] )
+    def create(self, script):
+        drop=script.split('\n')[0]
+        create=''.join(script.split('\n')[2:])
         try:
-            self._conn.execute( drop )
+            self._conn.execute(drop)
         except ProgrammingError, e:
             if 'does not exist' in e[0]:
                 print 'Drop fail: ', e[0]
             else:
-                raise ProgrammingError( e[0] )
+                raise ProgrammingError(e[0])
             self._conn.commit()
 
-        self._conn.execute( create )
+        self._conn.execute(create)
         self._conn.commit()
 
-    def drop( self, script ):
+    def drop(self, script):
         try:
-            self._conn.execute( script.split( '\n' )[0] )
+            self._conn.execute(script.split('\n')[0])
         except ProgrammingError, e:
             if 'does not exist' in e[0]:
                 print 'Drop fail: ', e[0]
             else:
-                raise ProgrammingError( e[0] )
+                raise ProgrammingError(e[0])
             self._conn.commit()
         self._conn.commit()
 
-    def get_schema( self ):
+    def get_schema(self):
         return self._schema
 
 
-class Generator( object ):
-    def __init__( self, verbose ):
-        self._verbose = verbose
-        self._tables = []
-        self._sqlType = ''
-        self._dbconfig = None
+class Generator(object):
+    def __init__(self, verbose):
+        self._verbose=verbose
+        self._tables=[]
+        self._sqlType=''
+        self._dbconfig=None
 
-    def generate_database( self ):
+    def generate_database(self):
         try:
-            db = Database()
+            db=Database()
         except Exception, e:
-            print '\n' + red( e[0] )
+            print '\n'+red(e[0])
             print '\nAborting'
-            exit( -1 )
-        if self._verbose: print bold( 'Fixing null values on schema...' )
-        ( success, msg ) = db.get_schema().fix_tables()
+            exit(-1)
+        if self._verbose: print bold('Fixing null values on schema...')
+        (success, msg)=db.get_schema().fix_tables()
         if not success:
-            raise DatabaseException( msg )
+            raise DatabaseException(msg)
         if self._verbose:
-            print green( 'Schema fixed!' )
-            print bold( 'Retrieving database configuration...' )
-        self._dbconfig = db.get_schema().get_properties()
-        uri = URI( self._dbconfig['uri'] )
+            print green('Schema fixed!')
+            print bold('Retrieving database configuration...')
+        self._dbconfig=db.get_schema().get_properties()
+        uri=URI(self._dbconfig['uri'])
         if self._verbose:
-            if uri.scheme == 'sqlite':
-                print bold( 'Trying to connect to {0} database'.format( uri.database ) )
+            if uri.scheme=='sqlite':
+                print bold('Trying to connect to {0} database'.format(
+                    uri.database))
             else:
-                print bold( 'Trying to connect to {0} server on {1} port {2} database {3} with user {4} and passsword {5}...'.format( 
-                    uri.scheme.capitalize(), uri.host, uri.port, uri.database, uri.username, uri.password ) )
-        self._sqlType = uri.scheme
+                print bold('Trying to connect to {0} server on {1} port {2} ' \
+                    'database {3} with user {4} and passsword {5}...'.format(
+                    uri.scheme.capitalize(), uri.host, uri.port,
+                        uri.database, uri.username, uri.password))
+        self._sqlType=uri.scheme
 
         for table, columns in db.get_schema().get_tables().iteritems():
-            self._createTable( table, columns )
+            self._createTable(table, columns)
 
         for relation in db.get_schema().many2many():
-            table = relation['table']
-            cols = {}
+            table=relation['table']
+            cols={}
             for key in relation['keys']:
-                cols[key if type( key ) == str else key.keys()[0]] = { 'type' : 'integer', 'required' : True, 'primaryKey' : True }
-            if relation.get( 'fields' ) != None:
+                cols[key if type(key)==str else key.keys()[0]]=\
+                { 'type' : 'integer', 'required' : True, 'primaryKey' : True }
+            if relation.get('fields')!=None:
                 for field in relation['fields']:
                     for fname, fvalue in field.iteritems():
-                        cols[fname] = fvalue
-            self._createTable( table, cols )
+                        cols[fname]=fvalue
+            self._createTable(table, cols)
 
-    def get_database( self ):
+    def get_database(self):
         return self._tables
 
-    def get_sql_type( self ):
+    def get_sql_type(self):
         return self._sqlType
 
-    def get_sql_quotes( self ):
-        if self._sqlType == 'postgres': return '"'
-        if self._sqlType == 'mysql': return "`"
+    def get_sql_quotes(self):
+        if self._sqlType=='postgres': return '"'
+        if self._sqlType=='mysql': return "`"
         else: return ""
 
-    def _createTable( self, table, columns ):
-        query = "DROP TABLE "
-        if self._sqlType == 'postgres':
-            query += "{0}{1}{2} CASCADE;\n\n".format( self.get_sql_quotes(), table, self.get_sql_quotes() )
-        if self._sqlType == 'mysql':
-            query += "IF EXISTS {0}{1}{2};\n\n".format( self.get_sql_quotes(), table, self.get_sql_quotes() )
-        if self._sqlType == 'sqlite':
-            query += '{0};\n\n'.format( table )
-        query += "CREATE TABLE {0}{1}{2}\n".format( self.get_sql_quotes(), table, self.get_sql_quotes() )
-        query += "(\n"
+    def _createTable(self, table, columns):
+        query="DROP TABLE "
+        if self._sqlType=='postgres':
+            query+="{0}{1}{2} CASCADE;\n\n" \
+            .format(self.get_sql_quotes(), table, self.get_sql_quotes())
+        if self._sqlType=='mysql':
+            query+="IF EXISTS {0}{1}{2};\n\n" \
+            .format(self.get_sql_quotes(), table, self.get_sql_quotes())
+        if self._sqlType=='sqlite':
+            query+='{0};\n\n'.format(table)
+        query+="CREATE TABLE {0}{1}{2}\n" \
+        .format(self.get_sql_quotes(), table, self.get_sql_quotes())
+        query+="(\n"
         for column in columns:
             if column in ['_config', '_indexes', '_relation']:
                 continue
-            query += "    {0}{1}{2} ".format( self.get_sql_quotes(), column, self.get_sql_quotes() )
-            query += self._parse_column( columns[column] )
-            query += ',\n'
+            query+="    {0}{1}{2} " \
+            .format(self.get_sql_quotes(), column, self.get_sql_quotes())
+            query+=self._parse_column(columns[column])
+            query+=',\n'
 
         # MySQL and PostgreSQL PRIMARY KEYS
         if self._sqlType in ['mysql', 'postgres']:
-            query += '    PRIMARY KEY ( '
-            query += self._get_primary_keys( columns )
-            query += ' )'
-        if self._sqlType == 'mysql':
-            query += "\n)Type={0};\n".format( self._dbconfig['engine'] ) if self._dbconfig.get( 'engine' ) != None else "\n);\n"
+            query+='    PRIMARY KEY ( '
+            query+=self._get_primary_keys(columns)
+            query+=' )'
+        if self._sqlType=='mysql':
+            query+="\n)Type={0};\n".format(self._dbconfig['engine']) \
+            if self._dbconfig.get('engine')!=None else "\n);\n"
         else:
-            query += "\n);\n"
+            query+="\n);\n"
 
-        tb = { 'name' : table, 'script' : query }
+        tb={ 'name' : table, 'script' : query }
 
-        self._tables.append( tb )
+        self._tables.append(tb)
 
-    def _parse_column( self, data ):
-        ret = ''
+    def _parse_column(self, data):
+        ret=''
         # Common SQL stuff
-        if data.get( 'type' ) != None:
+        if data.get('type')!=None:
             try:
-                _type = _type_properties[self._sqlType][data['type'].lower()]
+                _type=_type_properties[self._sqlType][data['type'].lower()]
             except KeyError, e:
-                print red( 'The {0} type is not a valid type, revise your yaml definition.'.format( e[0] ) )
-                sys.exit( -1 )
+                print red('The {0} type is not a valid type, revise ' \
+                    'your yaml definition.'.format(e[0]))
+                sys.exit(-1)
 
-            size = ''
-            if data.get( 'size' ) != None:
-                if self._sqlType != 'sqlite':
-                    size = '({0}) '.format( data['size'] )
-            if data.get( 'primaryKey' ) != None:
-                if self._sqlType == 'postgres':
+            size=''
+            if data.get('size')!=None:
+                if self._sqlType!='sqlite':
+                    size='({0}) '.format(data['size'])
+            if data.get('primaryKey')!=None:
+                if self._sqlType=='postgres':
                     if _type in ['SMALLINT', 'INT']:
-                        _type = 'serial'
+                        _type='serial'
                     if _type in ['BIGINT']:
-                        _type = 'bigserial'
-            ret += '{0}{1} '.format( _type, size )
+                        _type='bigserial'
+            ret+='{0}{1} '.format(_type, size)
 
-        if data.get( 'default' ) != None:
-            ret += 'DEFAULT '
-            if type( data['default'] ) == bool:
-                ret += 'true ' if data['default'] else 'false '
+        if data.get('default')!=None:
+            ret+='DEFAULT '
+            if type(data['default'])==bool:
+                ret+='true ' if data['default'] else 'false '
             else:
-                ret += '{0} '.format( data['default'] )
+                ret+='{0} '.format(data['default'])
 
-        if data.get( 'required' ) != None:
-            ret += 'NOT NULL ' if data['required'] else ''
+        if data.get('required')!=None:
+            ret+='NOT NULL ' if data['required'] else ''
 
-        if data.get( 'autoIncrement' ) != None:
-            if self._sqlType == 'mysql':
-                ret += 'AUTO_INCREMENT '
-            elif self._sqlType == 'sqlite':
-                ret += 'PRIMARY KEY'
+        if data.get('autoIncrement')!=None:
+            if self._sqlType=='mysql':
+                ret+='AUTO_INCREMENT '
+            elif self._sqlType=='sqlite':
+                ret+='PRIMARY KEY'
 
         return ret
 
-    def _get_primary_keys( self, columns ):
-        if self._sqlType == 'sqlite':
+    def _get_primary_keys(self, columns):
+        if self._sqlType=='sqlite':
             return
 
-        columnsList = []
+        columnsList=[]
         for name, property in columns.iteritems():
             if name in ['_config', '_indexes', '_relation']:
                 continue
             if 'primaryKey' in property:
-                columnsList.append( '{0}{1}{2}'.format( self.get_sql_quotes(), name, self.get_sql_quotes() ) )
+                columnsList.append('{0}{1}{2}'.format(
+                    self.get_sql_quotes(), name, self.get_sql_quotes()))
 
-        return ','.join( columnsList )
+        return ','.join(columnsList)
 

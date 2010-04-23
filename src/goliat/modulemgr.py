@@ -29,21 +29,25 @@ Created on 03/04/2010 00:13:39
 @summary: Modules Manager
 @version: 0.1
 '''
-class ModuleManager( object ):
-    _modules = list()
+class ModuleManager(object):
+    """The module manager keeps a pool of active modules."""
 
-    def __init__( self ):
-        super( ModuleManager, self ).__init__()
+    _modules=list()
 
-    def register( self, module ):
-        """Add a new module to self"""
-        self._modules.append( module )
+    def __init__(self):
+        """Initialize the module manager."""
+        super(ModuleManager, self).__init__()
+
+    def register(self, module):
+        """Add a new module to the pool."""
+        self._modules.append(module)
         module.load()
 
-    def lenght( self ):
-        """Returns the self lenght"""
-        return len( self._modules )
+    def lenght(self):
+        """Returns the module pool lenght."""
+        return len(self._modules)
 
-    def get_modules( self ):
+    def get_modules(self):
+        """Return the pool."""
         return self._modules
 

@@ -73,6 +73,6 @@ httpserver.setServiceParent(application)
 #services.create_service_admin_page()
 #services.register_new_services()
 
-# Store the service on 'Goliat' global config, in that way, it will be accessible
-# at whole application. (Remember: ConfigManager is a Borg object)
+# Store the service on 'Goliat' global config, in that way, it will be
+# accessible at whole application. (Remember: ConfigManager is a Borg object)
 cfg['service'] = application

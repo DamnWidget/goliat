@@ -40,7 +40,7 @@
 #     # In case we are using MySQL as the schema backend
 #     engine:            InnoDB
 #   tables:
-#     person:#
+#     person:
 #       id:              ~
 #       name:            { type: varchar, size: '50', required: true }
 #       surname:         { type: varchar, size: '100', required: true }

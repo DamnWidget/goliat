@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 ##
-# $id Goliat/src/goliat/cli/database.py created on 14/04/2010 01:30:19 by damnwidget $
+# $id goliat/cli/database.py created on 14/04/2010 01:30:19 by damnwidget $
 '''
 Created on 14/04/2010 01:30:19
 
@@ -35,117 +35,124 @@ from goliat.cli import Command, build_reverse_map, userquery
 from goliat.cli.utils.output import *
 from goliat.database import Database, Generator
 
-_version = ( 'Database', '0.1.0' )
+_version=('Database', '0.1.0')
 
-class CmdCreate( Command ):
+class CmdCreate(Command):
     """Create a new Goliat project database"""
-    def __init__( self ):
-        self._default_opts = { 'verbose' : False }
-        self._valid_opts = ['-v', '--verbose']
+    def __init__(self):
+        self._default_opts={ 'verbose' : False }
+        self._valid_opts=['-v', '--verbose']
 
-    def parse_args( self, args ):
-        opts = self._default_opts
-        need_help = False
+    def parse_args(self, args):
+        opts=self._default_opts
+        need_help=False
 
-        for i in xrange( len( args ) ):
-            x = args[i]
+        for i in xrange(len(args)):
+            x=args[i]
 
             if x in ['-h', '--help']:
-                need_help = True
+                need_help=True
                 break;
             elif x in ['-v', '--verbose']:
-                opts['verbose'] = True
+                opts['verbose']=True
             else:
                 continue;
 
         if need_help:
             print self.long_help()
-            sys.exit( -1 )
+            sys.exit(-1)
 
         return opts
 
-    def perform( self, args ):
-        opts = self.parse_args( args )
-        if userquery( 'ATENTION: This command will delete any project tables at database server.\nWould you like yo continue?' ) == 'no':
+    def perform(self, args):
+        opts=self.parse_args(args)
+        if userquery('ATENTION: This command will delete any project tables at'\
+                   ' database server.\nWould you like yo continue?')=='no':
             print '\nQuitting.'
-            sys.exit( 1 )
-        print '\n' + bold( 'Creating tables...' )
-        gen = Generator( opts['verbose'] )
+            sys.exit(1)
+        print '\n'+bold('Creating tables...')
+        gen=Generator(opts['verbose'])
         gen.generate_database()
-        tables = gen.get_database()
-        db = Database()
+        tables=gen.get_database()
+        db=Database()
         db.connect()
 
         for table in tables:
             if opts['verbose']:
-                print bold( 'Creating table {0}...'.format( table['name'] ) )
-            db.create( table['script'] )
+                print bold('Creating table {0}...'.format(table['name']))
+            db.create(table['script'])
 
-        print bold( 'Database created successfully.' )
+        print bold('Database created successfully.')
 
-    def short_help( self ):
-        return green( "<local-opts> - create a new Goliat project database (create --help for detailed help)" )
+    def short_help(self):
+        return green("<local-opts> - create a new Goliat project database "\
+            "(create --help for detailed help)")
 
-    def long_help( self ):
-        return bold( "Crate a new Goliat project database." ) + \
-            "\n" + \
-            bold( "Syntax:\n" ) + \
-            " " + green( "create <local-opts> <application-name>\n" ) + \
-            " " + yellow( "--verbose        " ) + green( "   - run in verbose mode\n" )
+    def long_help(self):
+        return bold("Crate a new Goliat project database.")+\
+            "\n"+\
+            bold("Syntax:\n")+\
+            " "+green("create <local-opts> <application-name>\n")+\
+            " "+yellow("--verbose        ")+green("   - run in verbose mode\n")
 
 
-class CmdSql( Command ):
+class CmdSql(Command):
     """Prints Goliat project database a standard output"""
-    def parse_args( self, args ):
-        need_help = False
+    def parse_args(self, args):
+        need_help=False
 
-        for i in xrange( len( args ) ):
-            x = args[i]
+        for i in xrange(len(args)):
+            x=args[i]
 
             if x in ['-h', '--help']:
-                need_help = True
+                need_help=True
                 break;
 
         if need_help:
             print self.long_help()
-            sys.exit( -1 )
+            sys.exit(-1)
 
         return
 
-    def perform( self, args ):
-        self.parse_args( args )
-        gen = Generator( False )
+    def perform(self, args):
+        self.parse_args(args)
+        gen=Generator(False)
         gen.generate_database()
-        tables = gen.get_database()
+        tables=gen.get_database()
 
         for table in tables:
             if gen.get_sql_type() in ['sqlite', 'postgres']:
-                print '-----------------------------------------------------------------------------'
-                print '-- {0}'.format( table['name'] )
-                print '-----------------------------------------------------------------------------'
+                print '---------------------------------------------------' \
+                '--------------------------'
+                print '-- {0}'.format(table['name'])
+                print '----------------------------------------------------' \
+                '-------------------------'
             else:
-                print '#-----------------------------------------------------------------------------'
-                print '#-- {0}'.format( table['name'] )
-                print '#-----------------------------------------------------------------------------'
+                print '#----------------------------------------------------' \
+                '-------------------------'
+                print '#-- {0}'.format(table['name'])
+                print '#----------------------------------------------------' \
+                '-------------------------'
             print table['script']
 
 
-    def short_help( self ):
-        return green( "<local-opts> - dump a Goliat project database SQL script to standard output (sql --help for detailed help)" )
+    def short_help(self):
+        return green("<local-opts> - dump a Goliat project database SQL " \
+            "script to standard output (sql --help for detailed help)")
 
-    def long_help( self ):
-        return bold( "Dump a Goliat project database to the standard output." ) + \
-            "\n" + \
-            bold( "Syntax:\n" ) + \
-            " " + green( "sql <local-opts> <application-name>\n" )
+    def long_help(self):
+        return bold("Dump a Goliat project database to standard output.")+\
+            "\n"+\
+            bold("Syntax:\n")+\
+            " "+green("sql <local-opts> <application-name>\n")
 
 
-_known_commands = {
+_known_commands={
     'create'    : CmdCreate(),
     'sql'       : CmdSql()
 }
 
-_short_commands = {
+_short_commands={
     'c' : 'create',
     's' : 'sql',
 }
@@ -153,56 +160,58 @@ _short_commands = {
 
 def print_usage():
     """Print full usage information for this tool"""
-    short_cmds = build_reverse_map( _short_commands )
+    short_cmds=build_reverse_map(_short_commands)
 
-    print bold( 'Usage: goliat database command <local opts>\n' ) + \
-    bold( 'where command(short) is one of\n' )
-    keys = _known_commands.keys()
+    print bold('Usage: goliat database command <local opts>\n')+\
+    bold('where command(short) is one of\n')
+    keys=_known_commands.keys()
     keys.sort()
     for x in keys:
-        print ' ' + yellow( x ) + bold( '(' ) + turquoise( short_cmds[x] ) + bold( ') ' ) + \
-        green( _known_commands[x].short_help() )
+        print ' '+yellow(x)+bold('(')+turquoise(short_cmds[x])+bold(') ')+\
+        green(_known_commands[x].short_help())
 
 def print_version():
     """Print the version of this tool"""
-    print bold( 'Database Tool v{0} - Goliat Database Manager\n'.format( _version[1] ) ) + \
-    bold( 'Copyright (C) 2010 Open Phoenix IT SCA\n' ) + \
-    bold( 'Author(s): Oscar Campos Ruiz' )
+    print bold('Database Tool v{0} - Goliat Database Manager\n'\
+               .format(_version[1]))+\
+    bold('Copyright (C) 2010 Open Phoenix IT SCA\n')+\
+    bold('Author(s): Oscar Campos Ruiz')
 
-def parse_args( args ):
+def parse_args(args):
     """Parse tool specific arguments.
         
-    Arguments are on the form goliat database <tool-specific> [command] <command-specific>
+    Arguments are on the form goliat database <tool-specific> [command]
+    <command-specific>
     This method will only parse the <too-specific> bit.
     """
-    command = None
-    local_opts = []
-    showhelp = False
+    command=None
+    local_opts=[]
+    showhelp=False
 
-    def expand( x ):
+    def expand(x):
         if x in _short_commands.keys():
             return _short_commands[x]
         return x
 
-    for i in xrange( len( args ) ):
-        x = args[i]
+    for i in xrange(len(args)):
+        x=args[i]
 
         if x in ['-h', '--help']:
-            showhelp = True
+            showhelp=True
         elif x in ["-V"]:
             print_version()
-            sys.exit( 0 )
-        elif expand( x ) in _known_commands.keys():
-            command = _known_commands[expand( x )]
-            local_opts.extend( args[i + 1:] )
+            sys.exit(0)
+        elif expand(x) in _known_commands.keys():
+            command=_known_commands[expand(x)]
+            local_opts.extend(args[i+1:])
             if showhelp:
-                local_opts.append( "--help" )
+                local_opts.append("--help")
             break
         else:
-            if x not in ['database']: local_opts.append( x )
+            if x not in ['database']: local_opts.append(x)
 
     if not command and showhelp:
         print_usage()
-        sys.exit( 0 )
+        sys.exit(0)
 
-    return ( command, local_opts )
+    return (command, local_opts)

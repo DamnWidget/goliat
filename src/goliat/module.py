@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 ##
-# $id Goliat/src/goliat/modules.py created on 02/04/2010 23:33:11 by damnwidget
+# $id goliat/modules.py created on 02/04/2010 23:33:11 by damnwidget
 '''
 Created on 02/04/2010 23:33:11
 
@@ -29,36 +29,41 @@ Created on 02/04/2010 23:33:11
 @summary: Module Object 
 @version: 0.1
 '''
-class Module( object ):
-    _url_path = None
-    _object = None
-    _name = None
-    _loaded = False
+class Module(object):
+    """Base class for modules.
+    
+    Every module will declare his url_path and name.
+    """
+    _url_path=None
+    _object=None
+    _name=None
+    _loaded=False
 
-    def __init__( self, name ):
-        super( Module, self ).__init__()
-        self._name = name.replace( '.py', '' )
+    def __init__(self, name):
+        super(Module, self).__init__()
+        self._name=name.replace('.py', '')
 
 
-    def get_url_path( self ):
+    def get_url_path(self):
         return self._url_path
 
-    def get_module( self ):
+    def get_module(self):
         return self._object
 
-    def get_name( self ):
+    def get_name(self):
         return self._name
 
-    def load( self ):
+    def load(self):
         if self._loaded:
             return
 
-        _module_name = "application.{0}".format( self._name )
-        _obj_list = [self._name.capitalize()]
-        _tempModule = __import__( _module_name, globals(), locals(), _obj_list )
-        self._object = getattr( _tempModule, _obj_list[0] )() # We need an instance, not a class
-        self._url_path = self._object.get_register_path()
-        self._loaded = True
+        _module_name="application.{0}".format(self._name)
+        _obj_list=[self._name.capitalize()]
+        _temp_module=__import__(_module_name, globals(), locals(), _obj_list)
+        # We need an instance, not a class
+        self._object=getattr(_temp_module, _obj_list[0])()
+        self._url_path=self._object.get_register_path()
+        self._loaded=True
 
-    def is_loaded( self ):
+    def is_loaded(self):
         return self._loaded
