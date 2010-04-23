@@ -40,11 +40,11 @@ class Command(object):
     """
     def __init__(self):
         pass
-    def shortHelp(self):
+    def short_help(self):
         """Return a help formatted to fit a single line, approx 70 characters.
         Must be overridden in the subclass."""
         return " - not implemented yet"
-    def longHelp(self):
+    def long_help(self):
         """Return full, multiline, color-formatted help.
         Must be overridden in the subclass."""
         return "help for syntax and options"
@@ -52,12 +52,12 @@ class Command(object):
         """Stub code for performing the command.
         Must be overridden in the subclass"""
         pass
-    def parseArgs(self, args):
+    def parse_args(self, args):
         """Stub code for parsing command line arguments for this command.
         Must be overridden in the subclass."""
         pass
 
-def buildReverseMap(m):
+def build_reverse_map(m):
     r = {}
     for x in m.keys():
         r[m[x]] = x

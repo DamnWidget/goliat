@@ -37,7 +37,7 @@ class Headers(object):
     An object that build the Application page header and returns it
     as a well formated XHTML/HTML string.    
     """
-    _docTypes = {
+    _doc_types = {
         'html'      : {
             'strict'        : '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">',
             'transitional'  : '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">',
@@ -50,13 +50,13 @@ class Headers(object):
         }
     }
     
-    _htmlElement = '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">'    
-    _contentType = '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'
+    _html_element = '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">'    
+    _content_type = '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'
     _description = 'Non Description'
     _language = 'en'
     _favicon = 'favicon.ico'        
     
-    def getDocType(self, doctype):
+    def get_doc_type(self, doctype):
         """Translate a L{Goliat.webserver.Page} docType options to a
         valid DOCTYPE Header string.
         
@@ -64,60 +64,60 @@ class Headers(object):
         """
         type = doctype.split('-')[0]
         dtd = doctype.split('-')[1]        
-        if type in self._docTypes:
-            if dtd in self._docTypes[type]:
-                return self._docTypes[type][dtd]
+        if type in self._doc_types:
+            if dtd in self._doc_types[type]:
+                return self._doc_types[type][dtd]
         
         return ''
     
-    def setDocType(self, doctype, val):
+    def set_doc_type(self, doctype, val):
         type = doctype.split('-')[0]
         dtd = doctype.split('-')[1]  
-        self._docTypes[type] = { dtd : val }
+        self._doc_types[type] = { dtd : val }
     
-    def getHtmlElement(self):
-        return self._htmlElement
+    def get_html_element(self):
+        return self._html_element
     
-    def setHtmlElement(self, val):
-        self._htmlElement = val
+    def set_html_element(self, val):
+        self._html_element = val
     
-    def getContentType(self):
-        return self._contentType
+    def get_content_type(self):
+        return self._content_type
 
-    def setContentType(self, val):
-        self._contentType = val
+    def set_content_type(self, val):
+        self._content_type = val
     
-    def getDescription(self):
+    def get_description(self):
         return self._description
     
-    def setDescription(self, val):
+    def set_description(self, val):
         self._description = val
     
-    def getLanguage(self):
+    def get_language(self):
         return self._language
     
-    def setLanguage(self, val):
+    def set_language(self, val):
         self._language = val
     
-    def getFavicon(self):
+    def get_favicon(self):
         return self._favicon
     
-    def setFavicon(self, val):
+    def set_favicon(self, val):
         self._favicon = val
     
-    def getLanguageContent(self):
+    def get_language_content(self):
         return '<meta name="language" content="{0}" />'.format( self._language )
     
-    def getDescriptionContent(self):
+    def get_description_content(self):
         return '<meta name="description" content="{0}" />'.format( self._description )
     
-    def getGeneratorContent(self):
+    def get_generator_content(self):
         return '<meta name="generator" content="Goliat Web Application Framework version {0}" />'.format( version.short() )
     
-    def getGoliatContent(self):
+    def get_goliat_content(self):
         return '<meta name="goliat-content" content="Platform: {0};Version: {1};Arch: {2}" />'.format( platform.system(), platform.release(), platform.machine() )    
     
-    def getFaviconContent(self, media='/media'):
+    def get_favicon_content(self, media='/media'):
         return '<link rel="shortcut icon" href="{0}/{1}" />'.format( media, self._favicon )    
      
                 

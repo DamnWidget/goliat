@@ -12,8 +12,8 @@ application = service.Application('${app_name}')
 
 # Create the System config object
 config = ConfigManager()
-config.loadConfig('Goliat', '${app_config}', True)
-cfg = config.getConfig('Goliat')
+config.load_config('Goliat', '${app_config}', True)
+cfg = config.get_config('Goliat')
 # Create the root page
 page = page.Page(cfg['Project'])
 # Initialize the database
@@ -70,8 +70,8 @@ httpserver.setServiceParent(application)
 
 #from goliat.multiservice import MultiService
 #services = MultiService(application)
-#services.createServiceAdminPage()
-#services.registerNewServices()
+#services.create_service_admin_page()
+#services.register_new_services()
 
 # Store the service on 'Goliat' global config, in that way, it will be accessible
 # at whole application. (Remember: ConfigManager is a Borg object)

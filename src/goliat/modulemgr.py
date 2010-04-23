@@ -29,21 +29,21 @@ Created on 03/04/2010 00:13:39
 @summary: Modules Manager
 @version: 0.1
 '''
-class ModuleManager(object):
-    _modules = list()    
-    
-    def __init__(self):
-        super(ModuleManager, self).__init__()        
-            
-    def Register(self, module):
+class ModuleManager( object ):
+    _modules = list()
+
+    def __init__( self ):
+        super( ModuleManager, self ).__init__()
+
+    def register( self, module ):
         """Add a new module to self"""
-        self._modules.append(module)
-        module.Load()    
-    
-    def lenght(self):
+        self._modules.append( module )
+        module.load()
+
+    def lenght( self ):
         """Returns the self lenght"""
-        return len(self._modules)    
-    
-    def getModules(self):
-        return self._modules    
-   
+        return len( self._modules )
+
+    def get_modules( self ):
+        return self._modules
+

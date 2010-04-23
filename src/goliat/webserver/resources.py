@@ -29,136 +29,136 @@ Created on 02/04/2010 13:28:44
 @summary: Web Server resources loader module
 @version: 0.1
 '''
-
+import os
+import re
 from twisted.python.filepath import FilePath
 from twisted.web import static, resource
 from storm.base import Storm
+
 from goliat.module import Module
 from goliat.database import Database, Generator, DatabaseException
 import goliat
-import os, re
-    
-class ResourcesLoader(object):
+
+
+class ResourcesLoader( object ):
     """ResourcesLoader Object."""
     _root = None
     _modules = None
     _modules_loaded = False
-    _scripts = []     
-    _appPath = 'application'
-    _scriptPath = 'scripts'    
-    _options = dict()        
-    
-    def __init__(self, root, options=dict()):           
+    _scripts = []
+    _app_path = 'application'
+    _script_path = 'scripts'
+    _options = dict()
+
+    def __init__( self, root, options=dict() ):
         self._root = root
         self._options = options
-        self._loadScripts()
-    
-    def Setup(self, module_manager):
+        self._load_scripts()
+
+    def setup( self, module_manager ):
         """Setup the loader and load the Goliat Application files"""
         # ===========================
         # Resources
         # ===========================
-        
+
         # Orbited related
         if self._options['orbited']:
             import orbited # For get the __file__            
             # Add static URL to Goliat Page Hierarchy so we can add Stomp JS files on Application         
-            self._root.putChild('static', static.File(os.path.dirname(orbited.__file__)+'/static'))
-        
+            self._root.putChild( 'static', static.File( os.path.dirname( orbited.__file__ ) + '/static' ) )
+
         # ExtJS related
-        self._root.putChild('extjs', static.File(os.path.dirname(goliat.__file__)+'/static/extjs'))        
-        
+        self._root.putChild( 'extjs', static.File( os.path.dirname( goliat.__file__ ) + '/static/extjs' ) )
+
         # Goliat related
-        self._root.putChild('goliat', static.File(os.path.dirname(goliat.__file__)+'/static'))
-        
+        self._root.putChild( 'goliat', static.File( os.path.dirname( goliat.__file__ ) + '/static' ) )
+
         # Goliat application related
-        self._root.putChild('ui', static.File('{0}/{1}'.format( self._appPath, self._scriptPath )))         
-        self._root.putChild('js', static.File('web/js'))
-        self._root.putChild('media', static.File('web/media'))
-        self._root.putChild('css', static.File('web/css'))
-        
+        self._root.putChild( 'ui', static.File( '{0}/{1}'.format( self._app_path, self._script_path ) ) )
+        self._root.putChild( 'js', static.File( 'web/js' ) )
+        self._root.putChild( 'media', static.File( 'web/media' ) )
+        self._root.putChild( 'css', static.File( 'web/css' ) )
+
         # User paths related
-        for key, value in self._options['respath']:            
-            if FilePath(value).exists():
-                self._root.putChild(key, static.File(value))
-        
+        for key, value in self._options['respath']:
+            if FilePath( value ).exists():
+                self._root.putChild( key, static.File( value ) )
+
         # ===========================
         # CSS Styles
         # ===========================
-        
+
         # ExtJS
-        self._root.addStyle('<link rel="stylesheet" href="/extjs/resources/css/ext-all.css" type="text/css" />')
-        self._root.addStyle('<link rel="stylesheet" href="/extjs/resources/css/{0}.css" type="text/css" />'.format( self._options['extjsTheme'] ))
-        
+        self._root.add_style( '<link rel="stylesheet" href="/extjs/resources/css/ext-all.css" type="text/css" />' )
+        self._root.add_style( '<link rel="stylesheet" href="/extjs/resources/css/{0}.css" type="text/css" />'.format( self._options['extjsTheme'] ) )
+
         # Goliat
-        self._root.addStyle('<link rel="stylesheet" href="/goliat/resources/css/{0}.css" type="text/css" />'.format( self._options['goliatTheme'] ))
-        
+        self._root.add_style( '<link rel="stylesheet" href="/goliat/resources/css/{0}.css" type="text/css" />'.format( self._options['goliatTheme'] ) )
+
         # ===========================
         # JavaScript
         # ===========================
-        
+
         # Orbited
         if self._options['orbited']:
-            self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/static/Orbited.js"></script>')
-            self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/static/protocols/stomp/stomp.js"></script>')
-        
+            self._root.add_script( '<script type="text/javascript" characterSet="utf-8" src="/static/Orbited.js"></script>' )
+            self._root.add_script( '<script type="text/javascript" characterSet="utf-8" src="/static/protocols/stomp/stomp.js"></script>' )
+
         # ExtJS
         if self._options['debug']:
-            self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/extjs/adapter/ext/ext-base-debug.js"></script>')
-            self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/extjs/ext-all-debug.js"></script>')
+            self._root.add_script( '<script type="text/javascript" characterSet="utf-8" src="/extjs/adapter/ext/ext-base-debug.js"></script>' )
+            self._root.add_script( '<script type="text/javascript" characterSet="utf-8" src="/extjs/ext-all-debug.js"></script>' )
         else:
-            self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/extjs/adapter/ext/ext-base.js"></script>')
-            self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/extjs/ext-all.js"></script>')        
-        
+            self._root.add_script( '<script type="text/javascript" characterSet="utf-8" src="/extjs/adapter/ext/ext-base.js"></script>' )
+            self._root.add_script( '<script type="text/javascript" characterSet="utf-8" src="/extjs/ext-all.js"></script>' )
+
         # Goliat
-        if self._options['debug']:            
-            self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/goliat/js/Loader.js"></script>')            
-            self._root.addScript('<script type="text/javascript" characterSet="utf-8">')
-            self._root.addScript('    var Goliat_Loader = new Goliat.Loader();')
-            self._root.addScript('    Goliat_Loader.loadComponents();')
-            self._root.addScript('</script>')
-                       
+        if self._options['debug']:
+            self._root.add_script( '<script type="text/javascript" characterSet="utf-8" src="/goliat/js/Loader.js"></script>' )
+            self._root.add_script( '<script type="text/javascript" characterSet="utf-8">' )
+            self._root.add_script( '    var goliat_loader = new Goliat.Loader();' )
+            self._root.add_script( '    goliat_loader.loadComponents();' )
+            self._root.add_script( '</script>' )
+
         else:
-            self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/goliat/js/goliat-min.js"></script>')
-            #self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/goliat/Layout-debug.js"></script>')
-            #self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/goliat/LayoutManager-debug.js"></script>')
-            #self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/goliat/Socket-debug.js"></script>')
-        self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/goliat/js/locale/goliat-lang-{0}.js"></script>'.format( self._options['locale'] ))        
-        
+            self._root.add_script( '<script type="text/javascript" characterSet="utf-8" src="/goliat/js/goliat-min.js"></script>' )
+
+        self._root.add_script( '<script type="text/javascript" characterSet="utf-8" src="/goliat/js/locale/goliat-lang-{0}.js"></script>'.format( self._options['locale'] ) )
+
         # ===========================
         # Application main
         # (Coded by User)
         # ===========================
-        self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/js/main.js"></script>')
-        
+        self._root.add_script( '<script type="text/javascript" characterSet="utf-8" src="/js/main.js"></script>' )
+
         # ===========================
         # Application UI
         # ===========================
-        for uiScript in self._scripts:
-            self._root.addScript('<script type="text/javascript" characterSet="utf-8" src="/ui/{0}"></script>'.format( uiScript ))
-        
+        for ui_script in self._scripts:
+            self._root.add_script( '<script type="text/javascript" characterSet="utf-8" src="/ui/{0}"></script>'.format( ui_script ) )
+
         # ===========================
         # Resource Modules
         # ===========================        
-        for file in self._exploreApplication():
-            module_manager.Register(Module(file))
-        
-        # Append Resources to the root object        
-        for module in module_manager.getModules():
-            self._root.putChild(module.getUrlPath(), module.getModule())       
-            
-    
-    def _loadScripts(self):
-        """Load scripts and fill scripts application list"""
-        for file_name in self._exploreApplication(True):
-            self._scripts.append(file_name)    
+        for file in self._explore_application():
+            module_manager.register( Module( file ) )
 
-    def _exploreApplication(self, script=False):
+        # Append Resources to the root object        
+        for module in module_manager.get_modules():
+            self._root.putChild( module.get_url_path(), module.get_module() )
+
+
+    def _load_scripts( self ):
+        """Load scripts and fill scripts application list"""
+        for file_name in self._explore_application( True ):
+            self._scripts.append( file_name )
+
+    def _explore_application( self, script=False ):
         """Explores the module path directory and returns a tuple with filenames."""
         try:
-            files = os.listdir('application')        
-            pattern = re.compile('[^_?]\.py$', re.IGNORECASE) if script == False else re.compile('\.js$', re.IGNORECASE)
-            files = filter(pattern.search, files)
+            files = os.listdir( 'application' )
+            pattern = re.compile( '[^_?]\.py$', re.IGNORECASE ) if script == False else re.compile( '\.js$', re.IGNORECASE )
+            files = filter( pattern.search, files )
             return files
         except OSError:
             return list()

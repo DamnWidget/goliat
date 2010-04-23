@@ -29,36 +29,36 @@ Created on 02/04/2010 23:33:11
 @summary: Module Object 
 @version: 0.1
 '''
-class Module(object):    
-    _urlPath = None
+class Module( object ):
+    _url_path = None
     _object = None
     _name = None
     _loaded = False
-    
-    def __init__(self, name):
-        super(Module, self).__init__()
-        self._name = name.replace('.py', '')
-          
-    
-    def getUrlPath(self):
-        return self._urlPath
-    
-    def getModule(self):        
-        return self._object    
-    
-    def getName(self):
+
+    def __init__( self, name ):
+        super( Module, self ).__init__()
+        self._name = name.replace( '.py', '' )
+
+
+    def get_url_path( self ):
+        return self._url_path
+
+    def get_module( self ):
+        return self._object
+
+    def get_name( self ):
         return self._name
-    
-    def Load(self):
+
+    def load( self ):
         if self._loaded:
             return
-        
-        _moduleName = "application.{0}".format(self._name)        
-        _objList = [self._name.capitalize()]        
-        _tempModule = __import__(_moduleName, globals(), locals(), _objList) 
-        self._object = getattr(_tempModule, _objList[0])() # We need an instance, not a class
-        self._urlPath = self._object.getRegisterPath()
-        self._loaded = True             
-    
-    def isLoaded(self):
-        return self._loaded        
+
+        _module_name = "application.{0}".format( self._name )
+        _obj_list = [self._name.capitalize()]
+        _tempModule = __import__( _module_name, globals(), locals(), _obj_list )
+        self._object = getattr( _tempModule, _obj_list[0] )() # We need an instance, not a class
+        self._url_path = self._object.get_register_path()
+        self._loaded = True
+
+    def is_loaded( self ):
+        return self._loaded

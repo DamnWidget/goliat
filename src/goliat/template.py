@@ -29,22 +29,22 @@ Created on 04/04/2010 18:33:47
 @summary: Goliat Templating System.
 @version: 0.1
 '''
-from goliat.utils.apply import Apply
-from goliat.utils.borg import Borg
 import os
-
 try:
     from evoque.domain import Domain, get_log
 except ImportError:
-    raise RuntimeError("Goliat requires evoque and qpy modules.")
+    raise RuntimeError( "Goliat requires evoque module." )
+
+from goliat.utils.apply import Apply
+from goliat.utils.borg import Borg
 
 
-def getSysTemplatesPath():
+def get_sys_templates_path():
     """Returns the Goliat system templates path"""
     from goliat import __file__ as goliat_file
-    return os.path.abspath(os.path.join(os.path.dirname(goliat_file), 'evoque'))
+    return os.path.abspath( os.path.join( os.path.dirname( goliat_file ), 'evoque' ) )
 
-class TemplateManager(Borg):
+class TemplateManager( Borg ):
     """Goliat Template Manager.
     
     Goliat uses evoque as Template Engine.
@@ -53,43 +53,42 @@ class TemplateManager(Borg):
     
     To create new HTML or XHTML templates you will register a new domain do *not* use the system
     domain because the system domain does not escape quotes.     
-    """    
+    """
 
     _domains = dict()
     _options = dict()
-    
-    def __init__(self, options=dict()):
-        Borg.__init__(self)
-        self._options = Apply(self._options, options)
+
+    def __init__( self, options=dict() ):
+        Borg.__init__( self )
+        self._options = Apply( self._options, options )
         # Create the system template if is not present already
         if 'Goliat' not in self._domains:
-            self.registerDomain('Goliat', getSysTemplatesPath(), quoting="str")
-        
-    def registerDomain(self, name,
+            self.register_domain( 'Goliat', get_sys_templates_path(), quoting="str" )
+
+    def register_domain( self, name,
                     # Defaults for Domains
                     default_dir,
                     restricted=False, errors=3, log=get_log(),
                     # Defaults for Collections
                     cache_size=0, auto_reload=60, slurpy_directives=True,
                     # Defaults for Collections (and Templates)
-                    quoting="xml", input_encoding="utf_8", filters=[] ):         
-        if self.hasDomain(name):
-            raise ValueError("TemplateManager already has a domain named [%s]".format( name ))
-        self._domains[name] = Domain(default_dir, restricted, errors, log, cache_size, auto_reload, slurpy_directives, quoting, input_encoding, filters)
-    
-    def hasDomain(self, name):
+                    quoting="xml", input_encoding="utf_8", filters=[] ):
+        if self.has_domain( name ):
+            raise ValueError( "TemplateManager already has a domain named [%s]".format( name ) )
+        self._domains[name] = Domain( default_dir, restricted, errors, log, cache_size, auto_reload, slurpy_directives, quoting, input_encoding, filters )
+
+    def has_domain( self, name ):
         return name in self._domains
-    
-    def getDomains(self):
+
+    def get_domains( self ):
         return self._domains
-    
-    def getDomain(self, name):
-        return self._domains[name] if self.hasDomain(name) else None
-    
-    def getSysDomain(self):
-        return self._domains['Goliat']    
-    
-    def __getitem__(self, name):
-        return self.getDomain(name)        
-    
-            
+
+    def get_domain( self, name ):
+        return self._domains[name] if self.has_domain( name ) else None
+
+    def get_sys_domain( self ):
+        return self._domains['Goliat']
+
+    def __getitem__( self, name ):
+        return self.get_domain( name )
+

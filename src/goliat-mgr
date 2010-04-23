@@ -20,7 +20,7 @@
 ##
 try:
     import goliat as goliat
-    from goliat.cli import Command, buildReverseMap
+    from goliat.cli import Command, build_reverse_map
     from goliat.cli.utils.output import *
     import goliat.cli.project as project
     import goliat.cli.database as database
@@ -36,20 +36,20 @@ class CmdProject(Command):
     def __init__(self):
         pass
     
-    def parseArgs(self, args):     
-        return project.parseArgs(args)    
+    def parse_args(self, args):     
+        return project.parse_args(args)    
     
     def perform(self, args):
-        (app_name, opts) = self.parseArgs(args)        
+        (app_name, opts) = self.parse_args(args)        
 
         if app_name != '' and app_name is not None:
-            (cmd, local_opts) = project.parseArgs(sys.argv[1:])
+            (cmd, local_opts) = project.parse_args(sys.argv[1:])
             cmd.perform(local_opts)
         else:
-            project.printUsage()
+            project.print_usage()
             sys.exit(-1) 
     
-    def shortHelp(self):
+    def short_help(self):
         return green(" <local-opts> - manage goliat projects (use goliat project --help for details)\n")
 
 class CmdDatabase(Command):
@@ -57,19 +57,19 @@ class CmdDatabase(Command):
     def __init__(self):
         pass
     
-    def parseArgs(self, args):     
-        return database.parseArgs(args)    
+    def parse_args(self, args):     
+        return database.parse_args(args)    
     
     def perform(self, args):
-        opts = self.parseArgs(args)        
+        opts = self.parse_args(args)        
 
-        (cmd, local_opts) = database.parseArgs(sys.argv[1:])
+        (cmd, local_opts) = database.parse_args(sys.argv[1:])
         if cmd == None:
-            database.printUsage()
+            database.print_usage()
             sys.exit(-1)
         cmd.perform(local_opts)         
     
-    def shortHelp(self):
+    def short_help(self):
         return green(" <local-opts> - generate goliat projects tables (use goliat database --help for details)\n")
 
 class CmdModel(Command):
@@ -77,19 +77,19 @@ class CmdModel(Command):
     def __init__(self):
         pass
     
-    def parseArgs(self, args):
-        return model.parseArgs(args)
+    def parse_args(self, args):
+        return model.parse_args(args)
     
     def perform(self, args):
-        opts = self.parseArgs(args)
+        opts = self.parse_args(args)
         
-        (cmd, local_opts) = model.parseArgs(sys.argv[1:])
+        (cmd, local_opts) = model.parse_args(sys.argv[1:])
         if cmd == None:
-            model.printUsage()
+            model.print_usage()
             sys.exit(-1)
         cmd.perform(local_opts)
     
-    def shortHelp(self):
+    def short_help(self):
         return green(" <local-opts> - generate goliat model (use goliat model --help for details)\n") 
 
 class CmdModule(Command):
@@ -97,19 +97,19 @@ class CmdModule(Command):
     def __init__(self):
         pass
     
-    def parseArgs(self, args):
-        return module.parseArgs(args)
+    def parse_args(self, args):
+        return module.parse_args(args)
     
     def perform(self, args):
-        opts = self.parseArgs(args)
+        opts = self.parse_args(args)
         
-        (cmd, local_opts) = module.parseArgs(sys.argv[1:])
+        (cmd, local_opts) = module.parse_args(sys.argv[1:])
         if cmd == None:
-            module.printUsage()
+            module.print_usage()
             sys.exit(-1)
         cmd.perform(local_opts)
     
-    def shortHelp(self):
+    def short_help(self):
         return green(" <local-opts> - generate goliat module (use goliat module --help for details)\n")
     
 _known_commands = {
@@ -119,7 +119,7 @@ _known_commands = {
     'module'  : CmdModule()
 }
 
-def printUsage():
+def print_usage():
     """Print full usage information for this tool"""    
         
     print bold('Usage: goliat command <local opts>\n') + \
@@ -127,15 +127,15 @@ def printUsage():
     keys = _known_commands.keys()
     keys.sort()
     for x in keys:
-        print ' ' + yellow(x) + green(_known_commands[x].shortHelp())
+        print ' ' + yellow(x) + green(_known_commands[x].short_help())
         
-def printVersion():
+def print_version():
     """Print the version of this tool"""
     print bold('Goliat v{0} - Twisted and ExtJS (and others) Web Applications Framework'.format( goliat.version.short() ))    
     print bold('Copyright (C) 2010 Open Phoenix IT SCA')
     print bold('Author(s): Oscar Campos Ruiz')
 
-def parseArgs(args):
+def parse_args(args):
     """Parse tool specific arguments.
     
     Arguments are on the form goliat <goliat specific> [command] <tool specific> [command] <command specific>
@@ -164,17 +164,17 @@ def parseArgs(args):
         else:
             local_opts.append(x)
     if not command and showhelp:
-        printUsage()
+        print_usage()
         sys.exit(0)
     if not command and showversion:
-        printVersion()
+        print_version()
         sys.exit(0)   
     
     return (command, local_opts)
 
 
 if __name__ == "__main__":
-    (cmd, local_opts) = parseArgs(sys.argv[1:])
+    (cmd, local_opts) = parse_args(sys.argv[1:])
     if cmd:
         try:            
             cmd.perform(local_opts)  
@@ -189,5 +189,5 @@ if __name__ == "__main__":
         except KeyboardInterrupt:
             print blue("Interrupted by user, aborting.")
     else:
-        printUsage()
+        print_usage()
         

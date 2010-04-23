@@ -39,132 +39,132 @@ from twisted.python import log
 import os, re, goliat, json
 
 config = ConfigManager()
-cfg = config.getConfig('Goliat')
+cfg = config.get_config( 'Goliat' )
 
-class MultiService(Borg):
+class MultiService( Borg ):
     """Goliat multiservice.
     
     Services are defined at /services directory on project root path.         
     """
     _serviceObjects = {}
-    _service = {}    
+    _service = {}
     _application = None
-    
-    def __init__(self, application):
-        Borg.__init__(self)
+
+    def __init__( self, application ):
+        Borg.__init__( self )
         self._application = application
         self._startDate = http.datetimeToString()
-    
-    def getService(self, name):
+
+    def get_service( self, name ):
         """Return the service given by name if any."""
-        return self._service.get(name, None)
-    
-    def getServices(self):
+        return self._service.get( name, None )
+
+    def get_services( self ):
         """Return all the services."""
         return self._service
 
-    def getStartDate(self):
+    def get_start_date( self ):
         """Return the main application start date"""
         return self._startDate;
-            
-    def registerService(self, name):
-        """Register a service"""        
-        self._serviceObjects[name] = Service(name)
-    
-    def registerNewServices(self):
+
+    def register_service( self, name ):
+        """Register a service"""
+        self._serviceObjects[name] = Service( name )
+
+    def register_new_services( self ):
         """Register new services found at /services application directory."""
         def _exploreServices():
             """Explores the module path directory and returns a tuple with filenames."""
             try:
-                files = os.listdir('application')        
-                pattern = re.compile('[^_?]\.py$', re.IGNORECASE)
-                files = filter(pattern.search, files)
+                files = os.listdir( 'application' )
+                pattern = re.compile( '[^_?]\.py$', re.IGNORECASE )
+                files = filter( pattern.search, files )
                 return files
             except OSError:
-                return list()  
-        
-        for file in  _exploreServices():        
-            self.registerService(file)
-        
-        for name, obj in self._serviceObjects.iteritems():
-            log.msg('Registering service {0} on port {1}...'.format( name, obj.getPort() ))
-            self._service[name] = internet.TCPServer(obj.getPort(), obj.getFactory())
-            self._service[name].setName(name)
-            self._service[name].setServiceParent(self._application)
-            self._service[name].setDescription(obj.getDescription())
-    
-    def createServiceAdminPage(self):
-        """Create the services admin page."""
-        webAdminRoot = resource.Resource()
-        webAdminRoot.putChild('', ServiceAdminPage(self._application))
-        webAdminRoot.putChild('extjs', static.File(os.path.dirname(goliat.__file__)+'/static/extjs'))
-        webAdminRoot.putChild('goliat', static.File(os.path.dirname(goliat.__file__)+'/static'))
-        webAdminRoot.putChild('web', static.File(os.path.dirname(goliat.__file__)+'/web'))
-        webAdminRoot.putChild('login', LoginRequest())
-        webAdminRoot.putChild('logout', LogoutRequest())
-        webAdminRoot.putChild('list', ListServices(self._application))
-        webAdminRoot.putChild('start', StartService(self._application))        
-        webAdminRoot.putChild('stop', StopService(self._application))
-        webAdminRoot.putChild('check_sess', CheckSession())
-        webAdminService = internet.TCPServer(cfg['Project']['admin_port'], server.Site(webAdminRoot))
-        webAdminService.setName("WebAdmin")
-        webAdminService.setServiceParent(self._application)
-            
+                return list()
 
-class Service(object):
+        for file in  _exploreServices():
+            self.register_service( file )
+
+        for name, obj in self._serviceObjects.iteritems():
+            log.msg( 'Registering service {0} on port {1}...'.format( name, obj.get_port() ) )
+            self._service[name] = internet.TCPServer( obj.get_port(), obj.getFactory() )
+            self._service[name].set_name( name )
+            self._service[name].setServiceParent( self._application )
+            self._service[name].set_description( obj.get_description() )
+
+    def create_service_admin_page( self ):
+        """Create the services admin page."""
+        web_admin_root = resource.Resource()
+        web_admin_root.putChild( '', ServiceAdminPage( self._application ) )
+        web_admin_root.putChild( 'extjs', static.File( os.path.dirname( goliat.__file__ ) + '/static/extjs' ) )
+        web_admin_root.putChild( 'goliat', static.File( os.path.dirname( goliat.__file__ ) + '/static' ) )
+        web_admin_root.putChild( 'web', static.File( os.path.dirname( goliat.__file__ ) + '/web' ) )
+        web_admin_root.putChild( 'login', LoginRequest() )
+        web_admin_root.putChild( 'logout', LogoutRequest() )
+        web_admin_root.putChild( 'list', ListServices( self._application ) )
+        web_admin_root.putChild( 'start', StartService( self._application ) )
+        web_admin_root.putChild( 'stop', StopService( self._application ) )
+        web_admin_root.putChild( 'check_sess', CheckSession() )
+        webAdminService = internet.TCPServer( cfg['Project']['admin_port'], server.Site( web_admin_root ) )
+        webAdminService.set_name( "WebAdmin" )
+        webAdminService.setServiceParent( self._application )
+
+
+class Service( object ):
     _name = 'Service'
     _description = ''
     _port = 0
     _activation = http.datetimeToString()
     _object = None
-    _loaded = False 
-    
-    def __init__(self, name):
-        super(Service, self).__init__(self)
-        self._name = name.replace('.py', '')
-    
-    def Load(self):
+    _loaded = False
+
+    def __init__( self, name ):
+        super( Service, self ).__init__( self )
+        self._name = name.replace( '.py', '' )
+
+    def load( self ):
         if self._loaded: return
-        
-        _serviceName = "services.{0}".format(self._name)
-        _objList = [self._name.capitalize()]        
-        _tempModule = __import__(_serviceName, globals(), locals(), _objList) 
-        self._object = getattr(_tempModule, _objList[0])() # We need an instance, not a class
-        self._description = self._object.getDescription()
-        self._port = self._object.getPort()
+
+        _serviceName = "services.{0}".format( self._name )
+        _objList = [self._name.capitalize()]
+        _tempModule = __import__( _serviceName, globals(), locals(), _objList )
+        self._object = getattr( _tempModule, _objList[0] )() # We need an instance, not a class
+        self._description = self._object.get_description()
+        self._port = self._object.get_port()
         self._loaded = True
-    
-    def isLoaded(self):
+
+    def is_loaded( self ):
         return self._loaded
-    
-    def getName(self):
+
+    def get_name( self ):
         return self._name
-    
-    def getService(self):
+
+    def get_service( self ):
         return self._object
-    
-    def getPort(self):
+
+    def get_port( self ):
         return self._port
-    
-    def getDescription(self):
+
+    def get_description( self ):
         return self._description
-    
-    def getActivation(self):
-        return self._activation 
+
+    def get_activation( self ):
+        return self._activation
 
 
-class ServiceAdminPage(resource.Resource):
-    def __init__(self, app):
-        self.app = app        
-        
-    def getChild(self, path, request):
+class ServiceAdminPage( resource.Resource ):
+    def __init__( self, app ):
+        self.app = app
+
+    def getChild( self, path, request ):
         if path == '' or path == None or path == 'index' or path == 'app':
             return self
-        
-        return resource.Resource.getChild(self, path, request)
 
-    def render_GET(self, request):
-        request.write("""<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+        return resource.Resource.getChild( self, path, request )
+
+    def render_GET( self, request ):
+        request.write( """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"> 
     <head> 
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
@@ -180,8 +180,8 @@ class ServiceAdminPage(resource.Resource):
         <script type="text/javascript" characterSet="utf-8" src="/goliat/js/goliat-min.js"></script>
         <!-- <script type="text/javascript" characterSet="utf-8" src="/goliat/js/Loader.js"></script>
         <script type="text/javascript" characterSet="utf-8">
-            var Goliat_Loader = new Goliat.Loader();
-            Goliat_Loader.loadComponents();
+            var goliat_loader = new Goliat.Loader();
+            goliat_loader.loadComponents();
         </script> -->         
         <script type="text/javascript" characterSet="utf-8" src="/web/main.js"></script>
         <script type="text/javascript" characterSet="utf-8" src="/web/ServicesManager.js"></script>        
@@ -191,117 +191,117 @@ class ServiceAdminPage(resource.Resource):
         <title>Goliat {1} :: Web Admin Services</title> 
     </head> 
 </html>
-        """.format( os.environ['LANG'].split('_')[0], goliat.version.short() ))
+        """.format( os.environ['LANG'].split( '_' )[0], goliat.version.short() ) )
 
-        return ''   
-                
-class StartService(resource.Resource):
-    def __init__(self, app):
+        return ''
+
+class StartService( resource.Resource ):
+    def __init__( self, app ):
         self.app = app
         self.serviceName = None
         self.srv = None
-        
-    def render_POST(self, request):        
-        ms = MultiService(self.app)
-        config = ConfigManager()
-        self.serviceName = request.args.get('name', None)                 
-        for srv in IServiceCollection(self.app):
-            if not srv.running and srv.name == self.serviceName[0]:
-                start = defer.maybeDeferred(srv.startService)
-                self.srv = srv
-                
-        if start != None:
-            start.addCallback(self._success, request)
-            start.addErrback(self._fail, self.srv, request)
-            
-            return server.NOT_DONE_YET        
-                
-        port = ms.getService(self.serviceName[0]).getPort() if ms.getService(self.serviceName[0]) != None else cfg['Project']['app_port']  
-        return json.dumps({ 'success' : True, 'name' : self.serviceName[0], 'port' : port })
-    
-    def _success(self, results, request):        
-        ms = MultiService(self.app)
-        port = ms.getService(self.serviceName[0]).getPort() if ms.getService(self.serviceName[0]) != None else cfg['Project']['app_port']
-        request.write(json.dumps({ 'success' : True, 'name' : self.serviceName[0], 'port' : port }))
-        request.finish()
-            
-    def _fail(self, results, srv, request):
-        srv.stopService()        
-        ms = MultiService(self.app)  
-        port = ms.getService(self.serviceName[0]).getPort() if ms.getService(self.serviceName[0]) != None else cfg['Project']['app_port']
-        request.write(json.dumps({ 'success' : False, 'name' : self.serviceName[0], 'port' : port, 'error' : str(results).replace('\n', '<br />') }))
-        request.finish()
-    
 
-class StopService(resource.Resource):
-    def __init__(self, app):
-        self.app = app  
+    def render_POST( self, request ):
+        ms = MultiService( self.app )
+        config = ConfigManager()
+        self.serviceName = request.args.get( 'name', None )
+        for srv in IServiceCollection( self.app ):
+            if not srv.running and srv.name == self.serviceName[0]:
+                start = defer.maybeDeferred( srv.startService )
+                self.srv = srv
+
+        if start != None:
+            start.addCallback( self._success, request )
+            start.addErrback( self._fail, self.srv, request )
+
+            return server.NOT_DONE_YET
+
+        port = ms.get_service( self.serviceName[0] ).get_port() if ms.get_service( self.serviceName[0] ) != None else cfg['Project']['app_port']
+        return json.dumps( { 'success' : True, 'name' : self.serviceName[0], 'port' : port } )
+
+    def _success( self, results, request ):
+        ms = MultiService( self.app )
+        port = ms.get_service( self.serviceName[0] ).get_port() if ms.get_service( self.serviceName[0] ) != None else cfg['Project']['app_port']
+        request.write( json.dumps( { 'success' : True, 'name' : self.serviceName[0], 'port' : port } ) )
+        request.finish()
+
+    def _fail( self, results, srv, request ):
+        srv.stopService()
+        ms = MultiService( self.app )
+        port = ms.get_service( self.serviceName[0] ).get_port() if ms.get_service( self.serviceName[0] ) != None else cfg['Project']['app_port']
+        request.write( json.dumps( { 'success' : False, 'name' : self.serviceName[0], 'port' : port, 'error' : str( results ).replace( '\n', '<br />' ) } ) )
+        request.finish()
+
+
+class StopService( resource.Resource ):
+    def __init__( self, app ):
+        self.app = app
         self.serviceName = None
         self.srv = None
-        
-    def render_POST(self, request):        
-        self.serviceName = request.args.get('name', None)        
-        for srv in IServiceCollection(self.app):            
+
+    def render_POST( self, request ):
+        self.serviceName = request.args.get( 'name', None )
+        for srv in IServiceCollection( self.app ):
             if srv.running and srv.name == self.serviceName[0]:
                 self.srv = srv
-                stop = defer.maybeDeferred(srv.stopService)
-        
+                stop = defer.maybeDeferred( srv.stopService )
+
         if stop != None:
-            stop.addCallback(self._success, request)
-            stop.addErrback(self._fail, self.srv, request)
-            
+            stop.addCallback( self._success, request )
+            stop.addErrback( self._fail, self.srv, request )
+
             return server.NOT_DONE_YET
-        
-        return json.dumps({ 'success' : True, 'name' : self.serviceName[0] })
-    
-    def _success(self, results, request):        
-        request.write(json.dumps({ 'success' : True, 'name' : self.serviceName[0] }))
-        request.finish()
-            
-    def _fail(self, results, srv, request):
-        srv.stopService()        
-        request.write(json.dumps({ 'success' : False, 'name' : self.serviceName[0], 'error' : str(results) }))
+
+        return json.dumps( { 'success' : True, 'name' : self.serviceName[0] } )
+
+    def _success( self, results, request ):
+        request.write( json.dumps( { 'success' : True, 'name' : self.serviceName[0] } ) )
         request.finish()
 
-class LoginRequest(resource.Resource):
-    def render_POST(self, request):        
+    def _fail( self, results, srv, request ):
+        srv.stopService()
+        request.write( json.dumps( { 'success' : False, 'name' : self.serviceName[0], 'error' : str( results ) } ) )
+        request.finish()
+
+class LoginRequest( resource.Resource ):
+    def render_POST( self, request ):
         if cfg['Project']['admin'] == request.args['user'][0] and cfg['Project']['password'] == request.args['password'][0]:
             return json.dumps( { 'success': True, 'session': request.getSession().uid } )
-                
-        return json.dumps({ 'success': False })
 
-class LogoutRequest(resource.Resource):
-    def render_POST(self, request):
+        return json.dumps( { 'success': False } )
+
+class LogoutRequest( resource.Resource ):
+    def render_POST( self, request ):
         request.getSession().expire();
         return json.dumps( { 'success': True } )
 
-class ListServices(resource.Resource):
-    def __init__(self,app):
-        self.app = app                
-    
-    def render_GET(self, request):
-                
+class ListServices( resource.Resource ):
+    def __init__( self, app ):
+        self.app = app
+
+    def render_GET( self, request ):
+
         _sys_services = []
-        ms = MultiService(self.app)
+        ms = MultiService( self.app )
         desc = act = ''
-        for srv in IServiceCollection(self.app):
+        for srv in IServiceCollection( self.app ):
             if srv.name == "WebAdmin": continue
-            if srv.name == '{0}'.format(cfg['Project']['app_name']+' Application'):
+            if srv.name == '{0}'.format( cfg['Project']['app_name'] + ' Application' ):
                 desc = '''Main web application service.
 
-{0}'''.format(cfg['Project']['app_desc'])
-                act = ms.getStartDate()
-            
-            service = { 'name' : srv.name, 'running' : srv.running, 'description' : desc, 'activation' : act }            
-            _sys_services.append(service)        
-        
+{0}'''.format( cfg['Project']['app_desc'] )
+                act = ms.get_start_date()
+
+            service = { 'name' : srv.name, 'running' : srv.running, 'description' : desc, 'activation' : act }
+            _sys_services.append( service )
+
         for srv in _sys_services:
-            if srv in ms.getServices().keys():
-                srv['description'] = ms.getService(srv).getDescription()
-                srv['activation'] = ms.getService(srv).getActivation()
-        
-        return json.dumps(_sys_services)
-        
-class CheckSession(resource.Resource):
-    def render_GET(self, request):
-        return json.dumps({ 'success' : request.getSession().uid == request.args.get('code') })
+            if srv in ms.get_services().keys():
+                srv['description'] = ms.get_service( srv ).get_description()
+                srv['activation'] = ms.get_service( srv ).get_activation()
+
+        return json.dumps( _sys_services )
+
+class CheckSession( resource.Resource ):
+    def render_GET( self, request ):
+        return json.dumps( { 'success' : request.getSession().uid == request.args.get( 'code' ) } )

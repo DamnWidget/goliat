@@ -89,29 +89,29 @@ distro_utils = {
     }
 }
     
-def tacFile(options):
+def tac_file(options):
     """Generates the Twisted tac file from temnplate"""
     mgr = TemplateManager()
-    t = mgr.getSysDomain().get_template('tpl/tac.evoque')
+    t = mgr.get_sys_domain().get_template('tpl/tac.evoque')
     return t.evoque(
             app_name=options['app_name'],
             app_config=options['app_config']
     )
 
-def mainJsFile(options):
+def main_js_file(options):
     """Generates the Goliat main application JavaScript file from template"""
     mgr = TemplateManager()
-    t = mgr.getSysDomain().get_template('tpl/mainJs.evoque')
+    t = mgr.get_sys_domain().get_template('tpl/mainJs.evoque')
     return t.evoque(
             app_name=options['app_name'].replace(' ', ''),
             app_version=options['app_version'],
             app_layout='Goliat.layout.'+''.join([p.capitalize() for p in options['app_layout'].split('_')])            
     )
 
-def projectFile(options):
+def project_file(options):
     """Generates the Goliat project file from template"""
     mgr = TemplateManager()
-    t = mgr.getSysDomain().get_template('tpl/project.evoque')
+    t = mgr.get_sys_domain().get_template('tpl/project.evoque')
     return t.evoque(
             goliat_ver=options['goliat_ver'],
             project_ver=options['app_version'],            
@@ -121,10 +121,10 @@ def projectFile(options):
             app_port=options['app_port']          
     )
 
-def initFile(installPath, options):
+def init_file(installPath, options):
     """Return the correct Init file for the current distribution."""
     mgr = TemplateManager()
-    t = mgr.getSysDomain().get_template('rc.scripts/{0}.evoque'.format( distro ))
+    t = mgr.get_sys_domain().get_template('rc.scripts/{0}.evoque'.format( distro ))
     return t.evoque(
              app_name=options['app_name'],
              app_desc=options['app_desc'],
@@ -133,13 +133,13 @@ def initFile(installPath, options):
              app_share=installPath['share']
     )     
 
-def schemaFile():
+def schema_file():
     """Generates the Goliat database schema file template"""
     mgr = TemplateManager()
-    t = mgr.getSysDomain().get_template('tpl/schema.evoque')
+    t = mgr.get_sys_domain().get_template('tpl/schema.evoque')
     return t.evoque()
 
-def rcUpdate(app_name, add='add'):
+def rc_update(app_name, add='add'):
     """Enable or diable a distro System V init script"""
     if distro == 'generic':
         return (False, 'Your distribution {0} is not supported by Goliat. A generic System V init script has been created on /etc/init.d you will add it to your runlevel manually.'.format( real_distro ))
@@ -149,5 +149,5 @@ def rcUpdate(app_name, add='add'):
     except OSError:
         return add(False, 'Failed to use {0} on {1} system. Seems like the command doesn\'t exists'.format(distro_utils[distro]['init_update'][add].substitute(app_name=app_name), distro))
 
-def isSupported(distro):
+def is_supported(distro):
     return distro in supported_distros    
