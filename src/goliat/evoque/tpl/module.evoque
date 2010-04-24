@@ -59,3 +59,7 @@ class ${module_name}(resource.Resource):
     def render_POST(self, request):
         """This method will be overriden"""
         return 'Not implemented yet.'
+    
+    def get_register_path(self):
+        """Returns the module resource registration path."""
+        return ${module_register_path}

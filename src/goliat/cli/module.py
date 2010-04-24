@@ -81,6 +81,9 @@ class CmdGenerateModule(Command):
 
     def perform(self, args):
         module_name, opts=self.parse_args(args)
+        if not len(module_name):
+            print self.long_help()
+            sys.exit(-1)
         try:
             _schema=Schema('config/schema.yaml')
             _schema.fix_tables()
@@ -90,6 +93,10 @@ class CmdGenerateModule(Command):
         _module_model_import=''
         _module_database=''
         _module_model_init=''
+        if opts.get('path')==None:
+            _module_register_path='"{0}"'.format(module_name.lower())
+        else:
+            _module_register_path='"{0}"'.format(opts['path'])
         if opts.get('model')!=None:
             if not check_model(opts['model']):
                 print red(\
@@ -103,7 +110,7 @@ class CmdGenerateModule(Command):
                 opts['model'], _schema.find_table(opts['model']))
             _module_model_import='from application.model.{0} import {1}' \
             .format(gen._generate_model_name(opts['model']),
-                gen._generateModelName(opts['model']))
+                gen._generate_model_name(opts['model']))
             _module_database='_db = Database().get_database()'
             _module_model_init='_store = Store(_db)'
 
@@ -111,12 +118,13 @@ class CmdGenerateModule(Command):
         mgr=TemplateManager()
         t=mgr.get_sys_domain().get_template('tpl/module.evoque')
         module=t.evoque(
-            module_file="application/{0}.py".format(module_name),
+            module_file="application/{0}".format(module_name),
             module_creation_date=datetime.now(),
             module_name=module_name,
             module_model_import=_module_model_import,
             module_database=_module_database,
-            module_model_init=_module_model_init
+            module_model_init=_module_model_init,
+            module_register_path=_module_register_path
         )
         if opts['dump']:
             if opts.get('model')!=None:
@@ -134,20 +142,19 @@ class CmdGenerateModule(Command):
         print bold('Module created successfully.')
 
     def short_help(self):
-        return green("<local-opts> - generate a new Goliat module " \
-            "(generate --help for detailed help)")
+        return green("<local-opts> ")+"- generate a new Goliat module " \
+            "(generate --help for detailed help)"
 
     def long_help(self):
-        return bold("Crate a new Goliat module.\n")+\
-            "\n"+\
-            bold("Syntax:\n")+\
+        return "Crate a new Goliat module.\n\n" \
+            "Syntax:\n" \
             " "+green("generate-model <local-opts> <module-name>\n")+\
-            " "+yellow("-m, --model      ")+green("   - model based on\n")+\
-            " "+yellow("-d, --dump       ")+green("   - dump to standard " \
-            "output\n")+\
-            " "+yellow("-l, --list       ")+green("   - show a list of " \
-            "available model at current schema\n")+\
-            " "+yellow("--verbose        ")+green("   - run in verbose mode\n")
+            " "+yellow("-m, --model      ")+"   - model based on\n" \
+            " "+yellow("-m, --path       ")+"   - register path\n" \
+            " "+yellow("-d, --dump       ")+"   - dump to standard output\n" \
+            " "+yellow("-l, --list       ")+"   - show a list of " \
+            "available model at current schema\n" \
+            " "+yellow("--verbose        ")+"   - run in verbose mode\n"
 
 
 _known_commands={
@@ -184,13 +191,13 @@ def print_usage():
     """Print full usage information for this tool"""
     short_cmds=build_reverse_map(_short_commands)
 
-    print bold('Usage: goliat module command <local opts>\n')+\
-    bold('where command(short) is one of\n')
+    print 'Usage: goliat module command <local opts>\n' \
+    'where command(short) is one of\n'
     keys=_known_commands.keys()
     keys.sort()
     for x in keys:
-        print ' '+yellow(x)+bold('(')+turquoise(short_cmds[x])+bold(') ')+\
-        green(_known_commands[x].short_help())
+        print ' '+x+'('+green(short_cmds[x])+') '+\
+        _known_commands[x].short_help()
 
 def print_version():
     """Print the version of this tool"""

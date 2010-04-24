@@ -31,7 +31,7 @@ Created on 03/04/2010 23:01:34
 '''
 from __future__ import print_function
 import sys
-from goliat.cli.utils.output import bold, create_color_func
+from goliat.cli.utils.output import *
 class Command(object):
     """Abstract class for all Goliat commands
     
@@ -58,59 +58,66 @@ class Command(object):
         pass
 
 def build_reverse_map(m):
-    r = {}
+    r={}
     for x in m.keys():
-        r[m[x]] = x
+        r[m[x]]=x
     return r
 
 def userquery(prompt):
     """
     Taken from Gentoo _emerge.userquery and adapted to Goliat. 
     """
-    responses = ["Yes", "No"]
-    colours = [
+    responses=["Yes", "No"]
+    colours=[
         create_color_func('green'),
         create_color_func('red')
     ]
     colours=(colours*len(responses))[:len(responses)]
     print('\n'+bold(prompt), end=' ')
     try:
-        while True:            
-            response=raw_input("["+"/".join([colours[i](responses[i]) for i in range(len(responses))])+"] ")
+        while True:
+            response=raw_input("["+"/".join([colours[i](responses[i]) \
+                for i in range(len(responses))])+"] ")
             if response:
                 for key in responses:
                     # An empty response will match the
                     # first value in responses.
                     if response.upper()==key[:len(response)].upper():
                         return key
-            print("Sorry, response '%s' not understood.".format( response ), end=' ')                
+            print("Sorry, response '%s' not understood.".format(response),
+                  end=' ')
     except (EOFError, KeyboardInterrupt):
         print('Interrupted.')
         sys.exit(1)
-     
+
 def userchoice(prompt, choices, help):
     """
     Choices menu for user input.
     
-    The user get a menu with help content for choices index followed by a numeric index value.
-    The user just choose a numeric index for his choice and this choice is returned.
+    The user get a menu with help content for choices index followed
+    by a numeric index value.
+    The user just choose a numeric index for his choice and this
+    choice is returned.
     """
-    colours = [
+    colours=[
         create_color_func('green')
     ]
     print('\n'+bold(prompt), end='\n')
     try:
         while True:
             for choice in choices:
-                print(colours[0](help[choices.index(choice)].ljust(30))+" ["+bold(str(choices.index(choice)))+"]")
-            response=raw_input("["+"/".join([str(choices.index(choices[i])) for i in range(len(choices))])+"] ")
+                print(colours[0](help[choices.index(choice)].ljust(30))+\
+                    " ["+bold(str(choices.index(choice)))+"]")
+            response=raw_input("["+"/".join([str(choices.index(choices[i])) \
+                for i in range(len(choices))])+"] ")
             if response:
                 for key in choices:
                     # An empty response will match the
                     # first value in responses.
                     if response==str(choices.index(key))[:len(response)]:
                         return key
-            print("Sorry, response '{0}' not understood.".format( response ), end='\n')
+            print("Sorry, response '{0}' not understood.".format(response),
+                  end='\n')
             print('\n'+bold(prompt), end='\n')
     except (EOFError, KeyboardInterrupt):
         print('Interrupted.')
@@ -124,8 +131,7 @@ def userinput(prompt):
     try:
         response=raw_input('$ ')
         if response:
-            return response 
+            return response
     except (EOFError, KeyboardInterrupt):
         print('Interrupted.')
         sys.exit(1)
-        

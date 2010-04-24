@@ -195,7 +195,7 @@ class ResourcesLoader(object):
             if script==False:
                 pattern=re.compile('[^_?]\.py$', re.IGNORECASE)
             else:
-                re.compile('\.js$', re.IGNORECASE)
+                pattern=re.compile('\.js$', re.IGNORECASE)
             files=filter(pattern.search, files)
             return files
         except OSError:

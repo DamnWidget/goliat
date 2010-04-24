@@ -20,7 +20,7 @@
 ##
 try:
     import goliat as goliat
-    from goliat.cli import Command, build_reverse_map
+    from goliat.cli import Command
     from goliat.cli.utils.output import *
     import goliat.cli.project as project
     import goliat.cli.database as database
@@ -50,7 +50,7 @@ class CmdProject(Command):
             sys.exit(-1) 
     
     def short_help(self):
-        return green(" <local-opts> - manage goliat projects (use goliat project --help for details)\n")
+        return green(" <local-opts>") + " - manager goliat projects (use goliat project --help for details)"        
 
 class CmdDatabase(Command):
     """Goliat Database Command"""
@@ -70,7 +70,7 @@ class CmdDatabase(Command):
         cmd.perform(local_opts)         
     
     def short_help(self):
-        return green(" <local-opts> - generate goliat projects tables (use goliat database --help for details)\n")
+        return green(" <local-opts>") + " - generate goliat projects tables (use goliat database --help for details)"        
 
 class CmdModel(Command):
     """Goliat Model Command"""
@@ -90,7 +90,7 @@ class CmdModel(Command):
         cmd.perform(local_opts)
     
     def short_help(self):
-        return green(" <local-opts> - generate goliat model (use goliat model --help for details)\n") 
+        return green(" <local-opts>") + " - generate goliat model (use goliat model --help for details)"         
 
 class CmdModule(Command):
     """Goliat Module Command"""
@@ -110,7 +110,7 @@ class CmdModule(Command):
         cmd.perform(local_opts)
     
     def short_help(self):
-        return green(" <local-opts> - generate goliat module (use goliat module --help for details)\n")
+        return green(" <local-opts>")+" - generate goliat module (use goliat module --help for details)"        
     
 _known_commands = {
     'project' : CmdProject(),
@@ -122,12 +122,10 @@ _known_commands = {
 def print_usage():
     """Print full usage information for this tool"""    
         
-    print bold('Usage: goliat command <local opts>\n') + \
-    bold('where command is one of\n')
-    keys = _known_commands.keys()
-    keys.sort()
+    print 'Usage: goliat command <local opts>\nwhere command is one of'
+    keys = _known_commands.keys()    
     for x in keys:
-        print ' ' + yellow(x) + green(_known_commands[x].short_help())
+        print ' ' + x + green(_known_commands[x].short_help())
         
 def print_version():
     """Print the version of this tool"""
@@ -176,18 +174,18 @@ def parse_args(args):
 if __name__ == "__main__":
     (cmd, local_opts) = parse_args(sys.argv[1:])
     if cmd:
-        try:            
-            cmd.perform(local_opts)  
-        except KeyError, e:
-            print red("Internal goliat error, terminating")
-            if len(e[0]):
-                print red(str(e))
-        except ValueError, e: 
-            print red("Internal goliat error, terminating")                       
-            if len(e[0]):                     
-                print red(str(e))
-        except KeyboardInterrupt:
-            print blue("Interrupted by user, aborting.")
+        #try:            
+        cmd.perform(local_opts)  
+        #except KeyError, e:
+        #    print red("Internal goliat error, terminating")
+        #    if len(e[0]):
+        #        print red(str(e))
+        #except ValueError, e: 
+        #    print red("Internal goliat error, terminating")                       
+        #    if len(e[0]):                     
+        #        print red(str(e))
+        #except KeyboardInterrupt:
+        #    print blue("Interrupted by user, aborting.")
     else:
         print_usage()
         

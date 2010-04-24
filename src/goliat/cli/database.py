@@ -85,15 +85,14 @@ class CmdCreate(Command):
         print bold('Database created successfully.')
 
     def short_help(self):
-        return green("<local-opts> - create a new Goliat project database "\
-            "(create --help for detailed help)")
+        return green("<local-opts> ")+"- create a new Goliat project database "\
+            "(create --help for detailed help)"
 
     def long_help(self):
-        return bold("Crate a new Goliat project database.")+\
-            "\n"+\
-            bold("Syntax:\n")+\
+        return "Crate a new Goliat project database.\n" \
+            "Syntax:\n" \
             " "+green("create <local-opts> <application-name>\n")+\
-            " "+yellow("--verbose        ")+green("   - run in verbose mode\n")
+            " "+yellow("--verbose        ")+"   - run in verbose mode\n"
 
 
 class CmdSql(Command):
@@ -137,13 +136,12 @@ class CmdSql(Command):
 
 
     def short_help(self):
-        return green("<local-opts> - dump a Goliat project database SQL " \
-            "script to standard output (sql --help for detailed help)")
+        return green("<local-opts> ")+"- dump a Goliat project database SQL " \
+            "script to standard output (sql --help for detailed help)"
 
     def long_help(self):
-        return bold("Dump a Goliat project database to standard output.")+\
-            "\n"+\
-            bold("Syntax:\n")+\
+        return "Dump a Goliat project database to standard output.\n" \
+            "Syntax:\n" \
             " "+green("sql <local-opts> <application-name>\n")
 
 
@@ -162,13 +160,13 @@ def print_usage():
     """Print full usage information for this tool"""
     short_cmds=build_reverse_map(_short_commands)
 
-    print bold('Usage: goliat database command <local opts>\n')+\
-    bold('where command(short) is one of\n')
+    print 'Usage: goliat database command <local opts>\n' \
+    'where command(short) is one of\n'
     keys=_known_commands.keys()
     keys.sort()
     for x in keys:
-        print ' '+yellow(x)+bold('(')+turquoise(short_cmds[x])+bold(') ')+\
-        green(_known_commands[x].short_help())
+        print ' '+x+'('+green(short_cmds[x])+') '+\
+        _known_commands[x].short_help()
 
 def print_version():
     """Print the version of this tool"""

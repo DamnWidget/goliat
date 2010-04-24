@@ -26,7 +26,7 @@ Created on 02/04/2010 17:05:12
 @organization: Open Phoenix IT S.Coop.And
 @author: Oscar Campos
 @contact: oscar.campos@open-phoenix.com
-@summary: The Page object is the main application entry point at Application.
+@summary: The Page object is the main web application entry point.
 @version: 0.1
 '''
 from twisted.web import resource
@@ -109,7 +109,7 @@ class Page(resource.Resource):
         a('        {0}\n'.format(self._header.get_language_content()))
         a('        {0}\n'.format(self._header.get_goliat_content()))
 
-        if self._options and 'media' in self._options['resPath']:
+        if 'resPath' in self._options and 'media' in self._options['resPath']:
             media=self._options['resPath']['media']
         else:
             media='media'

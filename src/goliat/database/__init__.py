@@ -149,6 +149,12 @@ class Database(Borg):
             else:
                 raise ProgrammingError(e[0])
             self._conn.commit()
+        except OperationalError, e:
+            if 'no such table' in e[0]:
+                print 'Drop fail: ', e[0]
+            else:
+                raise OperationalError(e[0])
+            self._conn.commit()
 
         self._conn.execute(create)
         self._conn.commit()
@@ -241,13 +247,18 @@ class Generator(object):
         query+="CREATE TABLE {0}{1}{2}\n" \
         .format(self.get_sql_quotes(), table, self.get_sql_quotes())
         query+="(\n"
+        x=0
         for column in columns:
+            x+=1
             if column in ['_config', '_indexes', '_relation']:
                 continue
             query+="    {0}{1}{2} " \
             .format(self.get_sql_quotes(), column, self.get_sql_quotes())
             query+=self._parse_column(columns[column])
-            query+=',\n'
+            if self._sqlType=='sqlite':
+                query+=',\n' if x<len(columns) else '\n'
+            else:
+                query+=',\n'
 
         # MySQL and PostgreSQL PRIMARY KEYS
         if self._sqlType in ['mysql', 'postgres']:

@@ -121,6 +121,8 @@ class Schema(object):
         for table, cols in self.get_tables().iteritems():
             if self.has_relation(cols):
                 for field, definition in cols['_relation'].iteritems():
+                    if definition['type']!='many2many':
+                        continue
                     if definition.get('foreignKey')!=None:
                         if self.find_table(definition['foreignTable'])!=False:
                             data={

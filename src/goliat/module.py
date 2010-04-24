@@ -32,7 +32,7 @@ Created on 02/04/2010 23:33:11
 class Module(object):
     """Base class for modules.
     
-    Every module will declare his url_path and name.
+    Every module will declare his url_path.
     """
     _url_path=None
     _object=None

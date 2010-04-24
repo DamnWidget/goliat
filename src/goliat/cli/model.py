@@ -109,19 +109,17 @@ class CmdGenerate(Command):
         print bold('Model created successfully.')
 
     def short_help(self):
-        return green("<local-opts> - generate a new Goliat model " \
-            "(generate-model --help for detailed help)")
+        return green("<local-opts> ")+"- generate a new Goliat model " \
+            "(generate-model --help for detailed help)"
 
     def long_help(self):
-        return bold("Crate a new Goliat model.")+\
-            "\n"+\
-            bold("Syntax:\n")+\
+        return "Crate a new Goliat model.\n" \
+            "Syntax:\n" \
             " "+green("generate-model <local-opts> <model-name>\n")+\
-            " "+yellow("-d, --dump       ")+green("   - dump to standard " \
-            "output\n")+\
-            " "+yellow("-l, --list       ")+green("   - show a list of " \
-            "available model at current schema\n")+\
-            " "+yellow("--verbose        ")+green("   - run in verbose mode\n")
+            " "+yellow("-d, --dump       ")+"   - dump to standard output\n" \
+            " "+yellow("-l, --list       ")+"   - show a list of " \
+            "available model at current schema\n" \
+            " "+yellow("--verbose        ")+"   - run in verbose mode\n"
 
 
 class CmdGenerateAll(Command):
@@ -165,7 +163,7 @@ class CmdGenerateAll(Command):
         gen=Generator(opts['verbose'])
         for model_name in _schema.get_tables_list():
             print '\n'+bold('Generating {0} model...'.format(model_name))
-            templates=gen.create(model_name, _schema.find_table(model_name))
+            templates=gen.create_b(model_name, _schema.find_table(model_name))
             if opts['dump']:
                 print '\napplication/model/base/{0}Base.py'.format(
                     templates['base'][0])
@@ -185,17 +183,15 @@ class CmdGenerateAll(Command):
             print bold('Model {0} created successfully.'.format(model_name))
 
     def short_help(self):
-        return green("<local-opts> - generate all Goliat models following " \
-            "the schema.yaml file (generate --help for detailed help)")
+        return green("<local-opts> ")+"- generate all Goliat models following" \
+            " the schema.yaml file (generate --help for detailed help)"
 
     def long_help(self):
-        return bold("Crate a full schema Goliat model.")+\
-            "\n"+\
-            bold("Syntax:\n")+\
+        return "Crate a full schema Goliat model.\n" \
+            "Syntax:\n" \
             " "+green("generate-model <local-opts>\n")+\
-            " "+yellow("-d, --dump       ")+green("   - dump to standard " \
-            "output\n")+\
-            " "+yellow("--verbose        ")+green("   - run in verbose mode\n")
+            " "+yellow("-d, --dump       ")+"   - dump to standard output\n" \
+            " "+yellow("--verbose        ")+"   - run in verbose mode\n"
 
 _known_commands={
     'generate-model'    : CmdGenerate(),
@@ -232,13 +228,13 @@ def print_usage():
     """Print full usage information for this tool"""
     short_cmds=build_reverse_map(_short_commands)
 
-    print bold('Usage: goliat model command <local opts>\n')+\
-    bold('where command(short) is one of\n')
+    print 'Usage: goliat model command <local opts>\n' \
+    'where command(short) is one of\n'
     keys=_known_commands.keys()
     keys.sort()
     for x in keys:
-        print ' '+yellow(x)+bold('(')+turquoise(short_cmds[x])+bold(') ')+\
-        green(_known_commands[x].short_help())
+        print ' '+x+'('+green(short_cmds[x])+') '+\
+        _known_commands[x].short_help()
 
 def print_version():
     """Print the version of this tool"""

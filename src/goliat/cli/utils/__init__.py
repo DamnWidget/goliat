@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 ##
-# $id Goliat/src/goliat/cli/utils/__init__.py created on 05/04/2010 01:05:02 by damnwidget $
+# $id goliat/cli/utils/__init__.py created on 05/04/2010 01:05:02 by damnwidget $
 '''
 Created on 05/04/2010 01:05:02
 

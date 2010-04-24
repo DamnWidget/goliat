@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 ##
-# $id Goliat/src/goliat/utils/linux.py created on 04/04/2010 01:54:45 by damnwidget
+# $id goliat/utils/linux.py created on 04/04/2010 01:54:45 by damnwidget
 '''
 Created on 04/04/2010 01:54:45
 
@@ -31,44 +31,45 @@ Created on 04/04/2010 01:54:45
 '''
 import platform
 from subprocess import Popen, PIPE
-from string import Template 
+from string import Template
+
 from goliat.template import TemplateManager
 
-debian_based = [ 'ubuntu', 'max', 'guadalinex', 'linex', 'knoppix' ]
-redhat_based = [ 'fedora', 'centos' ]
-suse_based = [ 'openSuSE' ]
-gentoo_based = [ 'sabanyon' ]
+debian_based=[ 'ubuntu', 'max', 'guadalinex', 'linex', 'knoppix' ]
+redhat_based=[ 'fedora', 'centos' ]
+suse_based=[ 'openSuSE' ]
+gentoo_based=[ 'sabanyon' ]
 
-supported_distros = [ 'gentoo', 'debian', 'redhat', 'fedora' ]
+supported_distros=[ 'gentoo', 'debian', 'redhat', 'fedora' ]
 
 try:
-    distro = platform.linux_distribution()[0].split(' ')[0].lower()
+    distro=platform.linux_distribution()[0].split(' ')[0].lower()
 except:
-    distro = platform.dist()[0].split(' ')[0].lower()
+    distro=platform.dist()[0].split(' ')[0].lower()
 
-real_distro = distro
+real_distro=distro
 
-if real_distro not in supported_distros: distro = 'generic'
-if real_distro in debian_based: distro = 'debian'
-if real_distro in redhat_based: distro = 'redhat'
-if real_distro in suse_based: distro = 'suse'
-if real_distro in gentoo_based: distro = 'gentoo'
+if real_distro not in supported_distros: distro='generic'
+if real_distro in debian_based: distro='debian'
+if real_distro in redhat_based: distro='redhat'
+if real_distro in suse_based: distro='suse'
+if real_distro in gentoo_based: distro='gentoo'
 
 
-distro_utils = {
+distro_utils={
     'debian' :  {
         'init_script' : 'rc.scripts/debian.evoque',
-        'init_update' : { 
+        'init_update' : {
             'add' : Template('update-rc.d ${app_name} defaults'),
             'del' : Template('update-rc.d -f ${app_name} remove defaults')
-        }   
+        }
     },
     'gentoo' : {
         'init_script' : 'rc.scripts/gentoo.evoque',
         'init_update' : {
             'add' : Template('rc-config --add ${app_name} default'),
             'del' : Template('rc-config --del ${app_name} default')
-        }                
+        }
     },
     'redhat' : {
         'init_script' : 'rc.scripts/fedora.evoque',
@@ -85,14 +86,14 @@ distro_utils = {
         }
     },
     'generic' : {
-        'init_script' : 'rc.scripts/generic.evoque'        
+        'init_script' : 'rc.scripts/generic.evoque'
     }
 }
-    
+
 def tac_file(options):
     """Generates the Twisted tac file from temnplate"""
-    mgr = TemplateManager()
-    t = mgr.get_sys_domain().get_template('tpl/tac.evoque')
+    mgr=TemplateManager()
+    t=mgr.get_sys_domain().get_template('tpl/tac.evoque')
     return t.evoque(
             app_name=options['app_name'],
             app_config=options['app_config']
@@ -100,54 +101,66 @@ def tac_file(options):
 
 def main_js_file(options):
     """Generates the Goliat main application JavaScript file from template"""
-    mgr = TemplateManager()
-    t = mgr.get_sys_domain().get_template('tpl/mainJs.evoque')
+    mgr=TemplateManager()
+    t=mgr.get_sys_domain().get_template('tpl/mainJs.evoque')
     return t.evoque(
             app_name=options['app_name'].replace(' ', ''),
             app_version=options['app_version'],
-            app_layout='Goliat.layout.'+''.join([p.capitalize() for p in options['app_layout'].split('_')])            
+            app_layout='Goliat.layout.'+''.join([p.capitalize() \
+                for p in options['app_layout'].split('_')])
     )
 
 def project_file(options):
     """Generates the Goliat project file from template"""
-    mgr = TemplateManager()
-    t = mgr.get_sys_domain().get_template('tpl/project.evoque')
+    mgr=TemplateManager()
+    t=mgr.get_sys_domain().get_template('tpl/project.evoque')
     return t.evoque(
             goliat_ver=options['goliat_ver'],
-            project_ver=options['app_version'],            
+            project_ver=options['app_version'],
             app_name=options['app_name'],
             app_desc=options['app_desc'],
-            app_layout=options['app_layout'],  
-            app_port=options['app_port']          
+            app_layout=options['app_layout'],
+            app_port=options['app_port']
     )
 
 def init_file(installPath, options):
     """Return the correct Init file for the current distribution."""
-    mgr = TemplateManager()
-    t = mgr.get_sys_domain().get_template('rc.scripts/{0}.evoque'.format( distro ))
+    mgr=TemplateManager()
+    t=mgr.get_sys_domain().get_template('rc.scripts/{0}.evoque'.format(distro))
     return t.evoque(
              app_name=options['app_name'],
              app_desc=options['app_desc'],
              app_file=options['app_file'],
              app_log=options['app_log'],
              app_share=installPath['share']
-    )     
+    )
 
 def schema_file():
     """Generates the Goliat database schema file template"""
-    mgr = TemplateManager()
-    t = mgr.get_sys_domain().get_template('tpl/schema.evoque')
+    mgr=TemplateManager()
+    t=mgr.get_sys_domain().get_template('tpl/schema.evoque')
     return t.evoque()
 
 def rc_update(app_name, add='add'):
     """Enable or diable a distro System V init script"""
-    if distro == 'generic':
-        return (False, 'Your distribution {0} is not supported by Goliat. A generic System V init script has been created on /etc/init.d you will add it to your runlevel manually.'.format( real_distro ))
+    if distro=='generic':
+        return (
+            False,
+            'Your distribution {0} is not supported by Goliat. ' \
+            'A generic System V init script has been created on ' \
+            '/etc/init.d you will add it to your runlevel manually.'.format(
+                real_distro))
     try:
-        p = Popen(distro_utils[distro]['init_update'][add].substitute(app_name=app_name).split(' '), stdout=PIPE, stderr=PIPE)
+        p=Popen(distro_utils[distro]['init_update'][add].substitute(
+                app_name=app_name).split(' '), stdout=PIPE, stderr=PIPE)
         return (True, p.communicate())
     except OSError:
-        return add(False, 'Failed to use {0} on {1} system. Seems like the command doesn\'t exists'.format(distro_utils[distro]['init_update'][add].substitute(app_name=app_name), distro))
+        return add(
+            False,
+            'Failed to use {0} on {1} system. Seems like the command doesn\'t'\
+            ' exists'.format(
+            distro_utils[distro]['init_update'][add].substitute(
+                                                app_name=app_name), distro))
 
 def is_supported(distro):
-    return distro in supported_distros    
+    return distro in supported_distros

@@ -201,6 +201,8 @@ class Generator(object):
             if not self._analyze(relation):
                 raise SchemaException('%s table has an invalid _relation ' \
                     'section, please fix it!!!'%(table))
+            if relation['type']!='many2many':
+                continue   # Not a m2m relationship
 
             t=self._mgr.get_sys_domain().get_template(\
                 'tpl/modelrelation.evoque')
