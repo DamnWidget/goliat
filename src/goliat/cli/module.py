@@ -97,12 +97,17 @@ class CmdGenerateModule(Command):
         _module_model_import=''
         _module_database=''
         _module_model_init=''
-        if cfg.get_config('project')['Project']['tos']:
+        if cfg.get_config('project')['Project']['tos'] \
+        and opts.get('model')!=None:
             _module_store_import='from storm.twisted.store import ' \
             'DeferredStore as Store'
             _module_init_code='self.store.start()'
         else:
-            _module_store_import='from storm.twisted.store import Store'
+            if opts.get('model')!=None:
+                _module_store_import='from storm.twisted.store import Store'
+            else:
+                _module_store_import=''
+
             _module_init_code='pass'
         if opts.get('path')==None:
             _module_register_path='"{0}"'.format(module_name.lower())
