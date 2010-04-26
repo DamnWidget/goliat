@@ -30,10 +30,14 @@ Created on 16/04/2010 20:22:44
 @version: 0.1
 '''
 from datetime import datetime
+import sys
+import os
+import fnmatch
 
 from goliat.database.schema import Schema, SchemaException
 from goliat.template import TemplateManager
 from goliat.cli.utils.output import *
+from goliat.utils import config
 
 
 _yaml_to_storm={
@@ -114,6 +118,14 @@ class Generator(object):
         _attributes=[]
         _relations=[]
         _model_primary_keys=self._check_composed_keys(columns)
+        cfg=self._look_at_cur_path()
+        if cfg==None:
+            sys.exit(-1)
+        if cfg.get_config('project')['Project']['tos']:
+            _model_reference_import='from storm.twisted.wrapper ' \
+                'import DeferredReference, DeferredReferenceSet'
+        else:
+            _model_reference_import=''
 
         for col in columns:
             if col in [ '_config', '_indexes', '_relation' ]: continue
@@ -127,9 +139,13 @@ class Generator(object):
         if relation!=None:
             for field, rel in relation.iteritems():
                 if rel['type']=='one2one':
+                    if cfg.get_config('project')['Project']['tos']:
+                        _reference='DeferredReference'
+                    else:
+                        _reference='Reference'
                     _attributes.append(('{0}_id'.format(field), 'Int()'))
-                    _attributes.append((field, 'Reference({0}_id, "{1}.{2}"' \
-                        .format(field, self._generate_model_name(\
+                    _attributes.append((field, '{0}({1}_id, "{2}.{3}")' \
+                        .format(_reference, field, self._generate_model_name(\
                         rel['foreignTable']), rel['foreignKey'])))
                     _relations.append(('application.model.base.{0}Base' \
                         .format(self._generate_model_name(
@@ -137,8 +153,13 @@ class Generator(object):
                             '{0}Base'.format(self._generate_model_name(
                                 rel['foreignTable']))))
                 elif rel['type']=='many2one':
+                    if cfg.get_config('project')['Project']['tos']:
+                        _reference='DeferredReferenceSet'
+                    else:
+                        _reference='ReferenceSet'
                     _attributes.append(('{0}'.format(field,
-                    'ReferenceSet("{0}.{1}", "{2}.{3})'.format(
+                    '{0}("{1}.{2}", "{3}.{4})'.format(
+                        _reference,
                         self._generate_model_name(table),
                         rel['localKey'], self._generate_model_name(
                             rel['foreignTable']), rel['foreignKey']))))
@@ -147,7 +168,11 @@ class Generator(object):
                         '{0}Base'.format(self._generate_model_name(
                             rel['foreignTable']))))
                 elif rel['type']=='many2many':
-                    reference='ReferenceSet('
+                    if cfg.get_config('project')['Project']['tos']:
+                        _reference='DeferredReferenceSet'
+                    else:
+                        _reference='ReferenceSet'
+                    reference=_reference+'('
                     _new_keys=[]
                     for key in rel['keys']:
                         if type(key)==str:
@@ -189,7 +214,8 @@ class Generator(object):
             model_table='{0}'.format(table),
             model_primary_keys=_model_primary_keys,
             attributes=_attributes,
-            relations=_relations
+            relations=_relations,
+            model_reference_import=_model_reference_import
         ))
 
     def generate_many_2_many(self, table, columns):
@@ -299,3 +325,17 @@ class Generator(object):
             else:
                 return '{0}(value={1}, allow_none={2})' \
             .format(tr(col.get('type')), _default_value, _allow_none)
+
+    def _look_at_cur_path(self):
+        files=[ f for f in os.listdir('.') if fnmatch.fnmatch(f, '*.cfg') ]
+        match=False
+        cfg=config.ConfigManager()
+        for file in files:
+            if cfg.load_config('project', file):
+                match=True
+                break;
+        if match:
+            return cfg
+        else:
+            print red('No Goliat Project files found.')
+            return None

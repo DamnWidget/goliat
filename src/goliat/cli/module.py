@@ -31,12 +31,15 @@ Created on 19/04/2010 15:05:00
 '''
 from datetime import datetime
 import sys
+import os
+import fnmatch
 
 from goliat.cli import Command, build_reverse_map
 from goliat.cli.utils.output import *
 from goliat.model import Generator
 from goliat.database.schema import Schema
 from goliat.template import TemplateManager
+from goliat.utils import config
 
 _version=('Model', '0.1.0')
 
@@ -80,6 +83,7 @@ class CmdGenerateModule(Command):
         return (module_name, opts)
 
     def perform(self, args):
+        cfg=self._look_at_cur_path()
         module_name, opts=self.parse_args(args)
         if not len(module_name):
             print self.long_help()
@@ -93,6 +97,13 @@ class CmdGenerateModule(Command):
         _module_model_import=''
         _module_database=''
         _module_model_init=''
+        if cfg.get_config('project')['Project']['tos']:
+            _module_store_import='from storm.twisted.store import ' \
+            'DeferredStore as Store'
+            _module_init_code='self.store.start()'
+        else:
+            _module_store_import='from storm.twisted.store import Store'
+            _module_init_code='pass'
         if opts.get('path')==None:
             _module_register_path='"{0}"'.format(module_name.lower())
         else:
@@ -112,7 +123,7 @@ class CmdGenerateModule(Command):
             .format(gen._generate_model_name(opts['model']),
                 gen._generate_model_name(opts['model']))
             _module_database='_db = Database().get_database()'
-            _module_model_init='_store = Store(_db)'
+            _module_model_init='store = Store(_db)'
 
         print '\n'+bold('Generating {0} module...'.format(module_name))
         mgr=TemplateManager()
@@ -124,7 +135,9 @@ class CmdGenerateModule(Command):
             module_model_import=_module_model_import,
             module_database=_module_database,
             module_model_init=_module_model_init,
-            module_register_path=_module_register_path
+            module_register_path=_module_register_path,
+            module_init_code=_module_init_code,
+            module_store_import=_module_store_import
         )
         if opts['dump']:
             if opts.get('model')!=None:
@@ -155,6 +168,20 @@ class CmdGenerateModule(Command):
             " "+yellow("-l, --list       ")+"   - show a list of " \
             "available model at current schema\n" \
             " "+yellow("--verbose        ")+"   - run in verbose mode\n"
+
+    def _look_at_cur_path(self):
+        files=[ f for f in os.listdir('.') if fnmatch.fnmatch(f, '*.cfg') ]
+        match=False
+        cfg=config.ConfigManager()
+        for file in files:
+            if cfg.load_config('project', file):
+                match=True
+                break;
+        if match:
+            return cfg
+        else:
+            print red('No Goliat Project files found.')
+            return None
 
 
 _known_commands={

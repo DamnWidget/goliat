@@ -32,6 +32,8 @@ Created on ${model_creation_date}
 from storm.base import Storm
 from storm.locals import *
 from storm import Undef
+${model_reference_import}
+
 $for{i, (module, object) in enumerate(relations)}
 from ${module} import ${object}
 $rof

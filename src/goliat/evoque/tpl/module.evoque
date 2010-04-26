@@ -30,34 +30,32 @@ Created on ${module_creation_date}
 @version: 0.1
 '''
 from twisted.web import resource
+${module_store_import}
+import json
+
 from goliat.database import Database
 ${module_model_import}
-ToS = False
-try:
-    from storm.twisted.store import DeferredStore as Store
-    ToS = True
-except ImportError:
-    from storm.store import Store
+
 
 ${module_database}
 
 class ${module_name}(resource.Resource):
-    """This class inherits from twsited.web.resource.Resource class"""
+    """${module_name} class:"""
     ${module_model_init}
     
     def __init__(self):
-        """Consructor:
+        """Constructor:
         
-        ADD HERE YOUR INITIALIZATION CODE
+        ADD YOUR INITIALIZATION CODE HERE
         """
-        pass
+        ${module_init_code}
     
     def render_GET(self, request):
-        """This method will be overriden"""
+        """Process GET Request."""
         return 'Not implemented yet.'
     
     def render_POST(self, request):
-        """This method will be overriden"""
+        """Process POST Request."""
         return 'Not implemented yet.'
     
     def get_register_path(self):

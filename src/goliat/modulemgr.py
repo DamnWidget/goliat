@@ -29,6 +29,8 @@ Created on 03/04/2010 00:13:39
 @summary: Modules Manager
 @version: 0.1
 '''
+from datetime import datetime
+
 class ModuleManager(object):
     """The module manager keeps a pool of active modules."""
 
@@ -42,6 +44,10 @@ class ModuleManager(object):
         """Add a new module to the pool."""
         self._modules.append(module)
         module.load()
+        now=datetime.now()
+        print '{0} [-] Module {1} registered'.format(
+            now.strftime("%Y-%m-%d %H:%M:%S+0")+str(now.microsecond)[:3],
+            module.get_module())
 
     def lenght(self):
         """Returns the module pool lenght."""

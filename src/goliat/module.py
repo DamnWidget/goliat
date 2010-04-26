@@ -58,9 +58,9 @@ class Module(object):
             return
 
         _module_name="application.{0}".format(self._name)
-        _obj_list=[self._name.capitalize()]
+        _obj_list=[self._name]
         _temp_module=__import__(_module_name, globals(), locals(), _obj_list)
-        # We need an instance, not a class
+        # We need an instance, not a class        
         self._object=getattr(_temp_module, _obj_list[0])()
         self._url_path=self._object.get_register_path()
         self._loaded=True

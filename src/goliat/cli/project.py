@@ -325,7 +325,7 @@ class CmdConfigure(Command):
                 sys.exit(0)
             self._config_project('project', cfg, opts)
         else:
-            print "Soy una rumbeiraaaaa ", project
+            pass
 
 
     def _config_project(self, project, cfg, opts):
