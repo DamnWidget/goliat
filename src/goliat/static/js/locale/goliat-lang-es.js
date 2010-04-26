@@ -24,7 +24,8 @@ if(Goliat.StompClient) {
     Goliat.StompClient.prototype.onopenMessage = 'La conexión con el Transporte Stomp se ha realizado correctamente.';
     Goliat.StompClient.prototype.oncloseMessage = 'La conexión con el Transporte Stomp se ha perdido.<br />La conexión va a reiniciarse.';
     Goliat.StompClient.prototype.onerrorMessage = 'El servicio Stomp recibió un error:<br />';
-    Goliat.StompCLient.prototype.onerrorframeMessage = 'El servicio Stomp recibió un error:<br />';     
+    Goliat.StompClient.prototype.onerrorframeMessage = 'El servicio Stomp recibió un error:<br />';
+    Goliat.StompClient.prototype.onconnecterrorMessage = 'El Cliente Stomp ha intentado conectarse, sin embargo, parece que el servicio no esta bién configurado.';     
 }
 
 if(Goliat.util.Logger) {

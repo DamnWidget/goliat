@@ -29,14 +29,17 @@ Created on 10/04/2010 13:16:47
 @summary:
 @version: 0.1
 '''
-from goliat.utils.borg import Borg
-from goliat.utils.config import ConfigManager
+import os
+import re
+import goliat
+import json
 from twisted.application import internet
 from twisted.application.service import IServiceCollection
 from twisted.internet import defer
 from twisted.web import resource, server, static, http
-from twisted.python import log
-import os, re, goliat, json
+
+from goliat.utils.borg import Borg
+from goliat.utils.config import ConfigManager
 
 config=ConfigManager()
 cfg=config.get_config('Goliat')
@@ -134,7 +137,7 @@ class Service(object):
         if self._loaded: return
 
         _serviceName="services.{0}".format(self._name)
-        _objList=[self._name.capitalize()]
+        _objList=[self._name]
         _tempModule=__import__(_serviceName, globals(), locals(), _objList)
         # We need an instance, not a class
         self._object=getattr(_tempModule, _objList[0])()

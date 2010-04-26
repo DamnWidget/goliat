@@ -27,7 +27,7 @@ Ext.ns('Goliat.layout');
  * @constructor 
  * @params {Object} config The config Object 
  */
-Goliat.MainWindowLayout = Ext.extend(Object, {
+Goliat.layout.MainWindowLayout = Ext.extend(Object, {
     type: 'goliat-layout',
     items: [],
     
@@ -36,6 +36,16 @@ Goliat.MainWindowLayout = Ext.extend(Object, {
     },
     
     setup: function() {
-        this.items = [];
+        centerPanel = new Ext.Panel({
+            layout          : 'fit',
+            itemId          : 'centerPanel',
+            region          : 'center',
+            plain           : true,
+            enableTabScroll : true,
+            style           : 'padding: 0px;',
+            items           : []
+        });
+        
+        this.items = [ centerPanel ];
     }    
 });

@@ -311,7 +311,7 @@ class CmdConfigure(Command):
             print self.long_help()
             sys.exit(1)
         if need_show:
-            self._showProject(project)
+            self._show_project(project)
             sys.exit(0)
 
         return (project, opts)
@@ -325,8 +325,8 @@ class CmdConfigure(Command):
                 sys.exit(0)
             self._config_project('project', cfg, opts)
         else:
-            pass
-
+            print red('Not implemented yet.')
+            sys.exit(-1)
 
     def _config_project(self, project, cfg, opts):
         project_file=cfg.get_config(project)['file']
@@ -437,12 +437,12 @@ class CmdConfigure(Command):
             cfg=self._look_at_cur_path()
             if cfg==None:
                 sys.exit(0)
-            self._printProject(cfg.get_config('project'))
+            self._print_project(cfg.get_config('project'))
         else:
             cfg=self._lookAtSystem(project)
             if cfg==None:
                 sys.exit(0)
-            self._printProject(cfg.get_config(project))
+            self._print_project(cfg.get_config(project))
 
 
     def _look_at_cur_path(self):

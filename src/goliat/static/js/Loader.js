@@ -67,8 +67,8 @@ Goliat.Loader = Ext.extend(Ext.util.Observable, {
         'ThreeColumnsF'     : '/goliat/js/layout/ThreeColumnsFLayout',
         'ThreeColumnsH'     : '/goliat/js/layout/ThreeColumnsHLayout',
         'ThreeColumnsFh'    : '/goliat/js/layout/ThreeColumnsFhLayout',
-        'MainWindow'        : '/goliat/js/layout/MainWindowLayout.js',
-        'MainWindowMenu'    : '/goliat/js/layout/MainWindowMenu.js'        
+        'MainWindow'        : '/goliat/js/layout/MainWindowLayout',
+        'MainWindowMenu'    : '/goliat/js/layout/MainWindowMenu'        
     },
     
     loadComponents: function() {

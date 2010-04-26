@@ -23,7 +23,7 @@
  * @class StompClient
  * @extends Ext.Component
  *
- * @author Oscar Campos Ruiz <oscar.campos@open-phoenix.com
+ * @author Oscar Campos Ruiz <oscar.campos@open-phoenix.com>
  * @version 0.1
  */
 
@@ -133,6 +133,12 @@ Ext.extend(Goliat.StompClient, Ext.util.Observable, {
      * The text displayed at stomp frame error message box.
      */
     onerrroframeMessage: 'Stompservice received an error:<br />',    
+    
+    /**
+     * @cfg {String} onconnecterrorMessage
+     * The text displayed at stomp connect error message box
+     */
+    onconnecterrorMessage: 'The Stomp Client tried to connect, but seems like the service is not configured.',
         
     /**
      * Return the Orbited.TCPSocket object being used by this StompClient
@@ -196,7 +202,7 @@ Ext.extend(Goliat.StompClient, Ext.util.Observable, {
      */
     stompConnect: function() {
         if(!this.stomp.ready) {
-            Goliat.Msg.error("El Cliente Stomp ha intentado conectarse, sin embargo, parece que el servicio no esta bién configurado.");            
+            Goliat.Msg.error(this.onconnecterrorMessage);                        
             return;
         }
         
