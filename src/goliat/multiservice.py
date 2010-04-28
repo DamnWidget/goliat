@@ -117,7 +117,7 @@ class MultiService(Borg):
         web_admin_root.putChild('check_sess', CheckSession())
         webAdminService=internet.TCPServer(cfg['Project']['admin_port'],
             server.Site(web_admin_root))
-        webAdminService.set_name("WebAdmin")
+        webAdminService.setName("WebAdmin")
         webAdminService.setServiceParent(self._application)
 
 

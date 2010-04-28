@@ -22,8 +22,10 @@ import os, sys
 
 sys.path.insert(0, './src')
 
-import goliat
-import goliat.cli.utils.linux as linux
+try:
+    import goliat.cli.utils.linux as linux
+except:
+    pass
 from goliat.cli import userquery 
 
 static_types = [
@@ -87,31 +89,17 @@ def main(args):
             prompt = 'Goliat uses evoque as template engine.\n\n' + \
             'Would you like to install evoque now?'
             if userquery(prompt) == "Yes":
-                from subprocess import Popen, PIPE
-                p = Popen('easy_install evoque')
-                print '\nInstalling evoque.\n'
-                ret = p.communicate()
-                if len(ret[1]):
-                    print ret[1]
-                    print '\nQuitting.'
-                    sys.exit()
-                print ret[0]
-                print '\nContinue.\n'
+                from setuptools.command.easy_install import main
+		main(['evoque'])
+		print '\nContinue.\n'
         try:
             import qpy
         except ImportError:
             prompt = 'Goliat uses qpy with evoque.\n\n' + \
             'Would you like to install qpy now?'
             if userquery(prompt) == "Yes":
-                from subprocess import Popen, PIPE
-                p = Popen('easy_install qpy')
-                print '\nInstalling qpy.\n'
-                ret = p.communicate()
-                if len(ret[1]):
-                    print ret[1]
-                    print '\nQuitting.'
-                    sys.exit()
-                print ret[0]
+		from setuptools.command.easy_install import main
+		main(['qpy'])
                 print '\nContinue.\n'
     
     def get_package_data():
@@ -137,7 +125,7 @@ def main(args):
     
     setuptools.setup(
         name="Goliat",
-        version='0.1.0',
+        version='0.1.1',
         description="Goliat Web Applications Framework.",
         author="Open Phoenix IT S.Coop.And",
         author_email="goliat@open-phoenix.com",
