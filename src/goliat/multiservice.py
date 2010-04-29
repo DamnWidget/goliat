@@ -80,7 +80,7 @@ class MultiService(Borg):
             """Explores the module path directory and returns 
             a tuple with filenames."""
             try:
-                files=os.listdir('application')
+                files=os.listdir('services')
                 pattern=re.compile('[^_?]\.py$', re.IGNORECASE)
                 files=filter(pattern.search, files)
                 return files
