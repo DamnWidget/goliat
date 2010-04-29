@@ -95,20 +95,10 @@ class CmdGenerateModule(Command):
             print red('The schema is not defined.')
             sys.exit(-1)
         _module_model_import=''
-        _module_database=''
-        _module_model_init=''
-        if cfg.get_config('project')['Project']['tos'] \
-        and opts.get('model')!=None:
-            _module_store_import='from storm.twisted.store import ' \
-            'DeferredStore as Store'
-            _module_init_code='self.store.start()'
-        else:
-            if opts.get('model')!=None:
-                _module_store_import='from storm.twisted.store import Store'
-            else:
-                _module_store_import=''
+        _module_get_schema_model=''
+        _module_render_get_code="return json.dumps({'success' : False, " \
+            "'error' : 'Not implemented yet.'})"
 
-            _module_init_code='pass'
         if opts.get('path')==None:
             _module_register_path='"{0}"'.format(module_name.lower())
         else:
@@ -127,8 +117,25 @@ class CmdGenerateModule(Command):
             _module_model_import='from application.model.{0} import {1}' \
             .format(gen._generate_model_name(opts['model']),
                 gen._generate_model_name(opts['model']))
-            _module_database='_db = Database().get_database()'
-            _module_model_init='store = Store(_db)'
+            _module_get_schema_model='''def get_schema_model(self): 
+        """Return the schema model %s architecture.""" 
+        model_schema = %s.get_model_info() 
+        if model_schema == None: 
+            return json.dumps({
+                "success" : False,
+                "error" : "Unable to fetch a schema for model %s"
+            })
+                
+        return json.dumps({
+            "success" : True,
+            "model" : model_schema
+        })'''%(gen._generate_model_name(opts['model']),
+            gen._generate_model_name(opts['model']),
+            opts['model'])
+            _module_render_get_code='''_act = request.args.get('act')
+        if 'getSchemaModel' in _act:            
+            return self.get_schema_model()
+            '''
 
         print '\n'+bold('Generating {0} module...'.format(module_name))
         mgr=TemplateManager()
@@ -136,13 +143,11 @@ class CmdGenerateModule(Command):
         module=t.evoque(
             module_file="application/{0}".format(module_name),
             module_creation_date=datetime.now(),
+            module_render_get_code=_module_render_get_code,
             module_name=module_name,
             module_model_import=_module_model_import,
-            module_database=_module_database,
-            module_model_init=_module_model_init,
             module_register_path=_module_register_path,
-            module_init_code=_module_init_code,
-            module_store_import=_module_store_import
+            module_get_schema_model=_module_get_schema_model
         )
         if opts['dump']:
             if opts.get('model')!=None:
@@ -179,7 +184,7 @@ class CmdGenerateModule(Command):
         match=False
         cfg=config.ConfigManager()
         for file in files:
-            if cfg.load_config('project', file):
+            if cfg.load_config('project', file, True):
                 match=True
                 break;
         if match:

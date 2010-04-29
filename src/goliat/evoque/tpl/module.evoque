@@ -30,34 +30,31 @@ Created on ${module_creation_date}
 @version: 0.1
 '''
 from twisted.web import resource
-${module_store_import}
 import json
 
-from goliat.database import Database
 ${module_model_import}
-
-
-${module_database}
 
 class ${module_name}(resource.Resource):
     """${module_name} class:"""
-    ${module_model_init}
+    
     
     def __init__(self):
         """Constructor:
         
         ADD YOUR INITIALIZATION CODE HERE
         """
-        ${module_init_code}
+        pass
     
     def render_GET(self, request):
         """Process GET Request."""
-        return 'Not implemented yet.'
+        ${module_render_get_code}        
     
     def render_POST(self, request):
         """Process POST Request."""
-        return 'Not implemented yet.'
+        return json.dumps({'success' : False, 'error' : 'Not implemented yet.'})
     
     def get_register_path(self):
         """Returns the module resource registration path."""
         return ${module_register_path}
+    
+    ${module_get_schema_model}

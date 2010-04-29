@@ -104,6 +104,51 @@ class Schema(object):
                 return column
         return False
 
+    def find_reverse_reference(self, table_name):
+        """Find a reverse many2many reference."""
+        for table, column in self.get_tables().iteritems():
+            if table_name==table:
+                continue
+            if self.has_relation(self.find_table(table)):
+                for field, rel in column['_relation'].iteritems():
+                    if rel['type']!='many2many':
+                        continue
+
+                    if rel.get('reverseId')!=None:
+                        if rel['foreignTable']==table_name:
+                            return {
+                                'field': rel['reverseId'],
+                                'type' : 'many2many',
+                                'foreignTable' : table,
+                                'foreignKey' : rel['localKey'],
+                                'localKey' : rel['foreignKey'],
+                                'keys' : [ rel['keys'][1], rel['keys'][0] ]
+                            }
+        return None
+
+    def get_model_schema(self, table):
+        """Return the model schema definition for JavaScript use."""
+        tdata=self.find_table(table)
+        if not tdata:
+            return None
+
+        model_schema=[]
+        for field, data in tdata.iteritems():
+            if field=='_relation':
+                for rel_field, rel_data in data.iteritems():
+                    model_schema.append({
+                        'name'  : rel_field,
+                        'config': rel_data
+                    })
+            else:
+                model_schema.append({
+                    'name'    : field,
+                    'config'  : data
+                })
+
+        return model_schema;
+
+
     def get_tables_list(self):
         """Return a list of tables"""
         return self._schema['database']['tables'].keys()

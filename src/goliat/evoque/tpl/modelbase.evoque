@@ -32,11 +32,15 @@ Created on ${model_creation_date}
 from storm.base import Storm
 from storm.locals import *
 from storm import Undef
-${model_reference_import}
+${model_store_import}
 
+from goliat.database import Database
+${model_reference_import}
 $for{i, (module, object) in enumerate(relations)}
 from ${module} import ${object}
 $rof
+
+_schema = Database().get_schema()
 
 class ${model_name}Base(Storm):
     __storm_table__ = "${model_table}"
@@ -44,11 +48,17 @@ class ${model_name}Base(Storm):
     $for{i, (prop, type) in enumerate(attributes)}
     ${prop} = ${type}
     $rof    
+    store = Store(Database().get_database())
     
     def __init__(self):
         """Storm object representation of SQL table ${model_table}
         
         This method will be overriden by ${model_name} class
         """
-        pass
-         
+        ${model_init_code}         
+
+    @staticmethod
+    def get_model_info():
+        """Returns a dict containing the model scheme information."""
+        return _schema.get_model_schema('${model_table}')            
+    

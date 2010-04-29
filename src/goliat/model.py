@@ -124,8 +124,13 @@ class Generator(object):
         if cfg.get_config('project')['Project']['tos']:
             _model_reference_import='from storm.twisted.wrapper ' \
                 'import DeferredReference, DeferredReferenceSet'
+            _model_store_import='from storm.twisted.store import ' \
+                'DeferredStore as Store'
+            _model_init_code='self.store.start()'
         else:
             _model_reference_import=''
+            _model_store_import='from storm.store import Store'
+            _model_init_code='pass'
 
         for col in columns:
             if col in [ '_config', '_indexes', '_relation' ]: continue
@@ -173,26 +178,7 @@ class Generator(object):
                     else:
                         _reference='ReferenceSet'
                     reference=_reference+'('
-                    _new_keys=[]
-                    for key in rel['keys']:
-                        if type(key)==str:
-                            _new_keys.append(key)
-                        elif type(key)==dict:
-                            _new_keys.append(key.keys()[0])
-
-                    reference+='"{0}.{1}", '.format(
-                        self._generate_model_name(table), rel['localKey'])
-                    reference+='"{0}.{1}", ' \
-                    .format(self._generate_model_name(table)+\
-                            self._generate_model_name(rel['foreignTable']),
-                            _new_keys[0])
-                    reference+='"{0}.{1}", ' \
-                    .format(self._generate_model_name(table)+\
-                            self._generate_model_name(rel['foreignTable']),
-                            _new_keys[1])
-                    reference+='"{0}.{1}"' \
-                    .format(self._generate_model_name(rel['foreignTable']),
-                            rel['foreignKey'])
+                    reference+=self._parse_relation(rel, table)
                     reference+=')'
                     _attributes.append(('{0}'.format(field), reference))
                     _relations.append(('application.model.base.{0}Base' \
@@ -207,6 +193,23 @@ class Generator(object):
                         self._generate_model_name(rel['foreignTable'])
                     ))
 
+        reverse=self._schema.find_reverse_reference(table)
+        if reverse!=None:
+            reverse_reference='DeferredReferenceSet(' \
+            if cfg.get_config('project')['Project']['tos'] \
+            else 'ReferenceSet('
+            reverse_reference+=self._parse_relation(reverse, table, True)
+            reverse_reference+=')'
+            _attributes.append(('{0}'.format(reverse['field']),
+                reverse_reference))
+            _relations.append((
+                'application.model.relation.{0}'.format(
+                    self._generate_model_name(reverse['foreignTable'])+\
+                    self._generate_model_name(table)),
+                self._generate_model_name(reverse['foreignTable'])+\
+                self._generate_model_name(table)
+            ))
+
         return (model_name, t.evoque(
             model_name=model_name,
             model_creation_date=datetime.now(),
@@ -215,8 +218,42 @@ class Generator(object):
             model_primary_keys=_model_primary_keys,
             attributes=_attributes,
             relations=_relations,
-            model_reference_import=_model_reference_import
+            model_reference_import=_model_reference_import,
+            model_init_code=_model_init_code,
+            model_store_import=_model_store_import
         ))
+
+    def _parse_relation(self, rel, table, reverse=False):
+        """Parses a model table relation."""
+        _new_keys=[]
+        for key in rel['keys']:
+            if type(key)==str:
+                _new_keys.append(key)
+            elif type(key)==dict:
+                _new_keys.append(key.keys()[0])
+
+        if not reverse:
+            ret='"{0}.{1}", '.format(self._generate_model_name(table),
+                rel['localKey'])
+            ret+='"{0}.{1}", '.format(self._generate_model_name(table)+\
+                self._generate_model_name(rel['foreignTable']), _new_keys[0])
+            ret+='"{0}.{1}", '.format(self._generate_model_name(table)+\
+                self._generate_model_name(rel['foreignTable']), _new_keys[1])
+            ret+='"{0}.{1}"'.format(self._generate_model_name(rel['foreignTable']),
+                rel['foreignKey'])
+        else:
+            ret='"{0}.{1}", '.format(self._generate_model_name(table),
+                rel['localKey'])
+            ret+='"{0}.{1}", '.format(self._generate_model_name(
+                rel['foreignTable'])+
+                self._generate_model_name(table), _new_keys[0])
+            ret+='"{0}.{1}", '.format(self._generate_model_name(
+                rel['foreignTable'])+\
+                self._generate_model_name(table), _new_keys[1])
+            ret+='"{0}.{1}"'.format(self._generate_model_name(rel['foreignTable']),
+                rel['foreignKey'])
+
+        return ret
 
     def generate_many_2_many(self, table, columns):
         if columns.get('_relation')==None:
@@ -331,7 +368,7 @@ class Generator(object):
         match=False
         cfg=config.ConfigManager()
         for file in files:
-            if cfg.load_config('project', file):
+            if cfg.load_config('project', file, True):
                 match=True
                 break;
         if match:
