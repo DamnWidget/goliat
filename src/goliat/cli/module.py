@@ -141,7 +141,7 @@ class CmdGenerateModule(Command):
         mgr=TemplateManager()
         t=mgr.get_sys_domain().get_template('tpl/module.evoque')
         module=t.evoque(
-            module_file="application/{0}".format(module_name),
+            module_file="application/controller/{0}".format(module_name),
             module_creation_date=datetime.now(),
             module_render_get_code=_module_render_get_code,
             module_name=module_name,
@@ -153,12 +153,12 @@ class CmdGenerateModule(Command):
             if opts.get('model')!=None:
                 print '\napplication/model/{0}.py'.format(tmodel['work'][0])
                 print tmodel['work'][1]
-            print '\napplication/{0}.py'.format(module_name)
+            print '\napplication/controller/{0}.py'.format(module_name)
             print  module
         else :
             if opts.get('model')!=None:
                 gen.write_model(tmodel['work'][0], tmodel['work'][1])
-            fp=file('application/{0}.py'.format(module_name), 'w')
+            fp=file('application/controller/{0}.py'.format(module_name), 'w')
             fp.write(module.encode('utf8'))
             fp.close()
 
