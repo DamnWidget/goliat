@@ -191,8 +191,9 @@ class ResourcesLoader(object):
     def _explore_application(self, script=False):
         """Explores the module path directory and returns a filenames tuple."""
         try:
-            files=os.listdir('application/controller')
+            files=os.listdir('application/view')
             if script==False:
+                files=os.listdir('application/controller')
                 pattern=re.compile('[^_?]\.py$', re.IGNORECASE)
             else:
                 pattern=re.compile('\.js$', re.IGNORECASE)
