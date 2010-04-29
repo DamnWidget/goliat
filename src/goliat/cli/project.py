@@ -165,77 +165,118 @@ class CmdCreate(Command):
 
             os.mkdir(os.getcwd()+'/'+project_dir)
             # Cd to the new created directory
-            if pr._verbose: print bold('Entering {0} dir.'.format(os.getcwd()+\
+            if pr._verbose:
+                print bold('Entering {0} dir.'.format(os.getcwd()+\
                 '/'+project_dir))
             os.chdir(project_dir)
+
             # Write tac_file template
-            if pr._verbose: print bold('Writing {0} Twisted tac file.'.format(
-                pr.get_name()))
-            fp=open(pr.get_name().lower().replace(' ', '_')+'.tac', 'w')
-            fp.write(pr.get_template('tac'))
-            fp.close()
-            # Create init.d directory and wirte init script on it
-            if pr._verbose: print bold('Creating init.d directory.')
-            os.mkdir('init.d')
-            if pr._verbose: print bold('Writing {0} System V init script on ' \
-                'local init.d dir.'.format(
-                    pr.get_name().lower().replace(' ', '_')))
-            fp=open('init.d/'+pr.get_name().lower().replace(' ', '_'), 'w')
-            fp.write(pr.get_template('service'))
-            fp.close()
-            if pr.verbose: print bold('Creating config directory.')
-            os.makedirs('config')
-            if pr.verbose: print bold('Writing schema file.')
-            fp=open('config/schema.yaml', 'w')
-            fp.write(pr.get_template('schema'))
-            fp.close()
+            if pr._verbose:
+                print bold('Writing {0} Twisted tac file.'.format(
+                    pr.get_name()))
+            self._create_tac_file(pr)
+            if pr.verbose:
+                print bold('Creating config directory.\nWriting schema file.')
+            self._create_config_directory(pr)
+
             # Create application needed directories
-            if pr._verbose: print bold('Creating application directory.\n' \
-                    'Creating model directory.\nCreating scripts directory.')
-            os.makedirs('application/model/base')
-            os.makedirs('application/model/relation')
-            os.makedirs('application/scripts')
-            if pr._verbose: print bold('Creating web directory.\n' \
-                    'Creating web/js directory.')
-            os.makedirs('web/js')
-            if pr._verbose: print bold('Creating web/media directory.')
-            os.mkdir('web/media')
-            if pr._verbose: print bold('Creating web/css directory.')
-            os.mkdir('web/css')
-            if pr._verbose: print bold('Creating services directory.')
-            os.mkdir('services')
-            fp=open('services/__init__.py', 'w')
-            fp.write('# Services for Multi Service purposes will be added to' \
-                     ' this directory')
-            fp.close()
-            # Write the main UI JavaScript file
-            if pr._verbose: print bold('Writing web/js/main.js UI file.')
-            fp=open('web/js/main.js', 'w')
-            fp.write(pr.get_template('mainJs'))
-            fp.close()
+            if pr._verbose:
+                print bold('Creating application directory.\n' \
+                    'Creating model directory.\nCreating controller ' \
+                    'directory.\nCreating view directory.')
+            self._create_application_directory()
+            self._create_model_directories()
+            self._create_controller_directory()
+            self._create_view_directory()
+            if pr._verbose:
+                print bold('Creating web directory.\n' \
+                    'Creating web/js directory.\n' \
+                    'Creating web/media directory\n.' \
+                    'Creating web/css directory.\n' \
+                    'Creating services directory.' \
+                    'Writing web/js/main.js UI file.'
+                )
+            self._create_web_directories(pr)
+            self._create_services_directory()
+
             # Write the project config file
             if pr._verbose: print bold('Writing {0} project file.'.format(
                     pr.get_name().lower().replace(' ', '_')+'.cfg'))
-            fp=open(pr.get_name().lower().replace(' ', '_')+'.cfg', 'w')
-            fp.write(pr.get_template('project'))
-            fp.close()
-            fp=open('application/model/__init__.py', 'w')
-            fp.write('# Modules should be located on this directory')
-            fp.close()
-            fp=open('application/__init__.py', 'w')
-            fp.write('# Goliat will place here the generated models.')
-            fp.close()
-            fp=open('application/model/base/__init__.py', 'w')
-            fp.write('# Goliat will place here the generated base models.')
-            fp.close()
-            fp=open('application/model/relation/__init__.py', 'w')
-            fp.write('# Goliat will place here the generated relation models.')
-            fp.close()
+            self._create_config_file(pr)
+
             print bold('Project Generated!')
             self._configure(pr)
         except OSError, e:
             print red(str(e))
             sys.exit(-1)
+
+    def _create_config_file(self, pr):
+        """Create the project config file."""
+        fp=open(pr.get_name().lower().replace(' ', '_')+'.cfg', 'w')
+        fp.write(pr.get_template('project'))
+        fp.close()
+
+    def _create_tac_file(self, pr):
+        """Create the tac file."""
+        fp=open(pr.get_name().lower().replace(' ', '_')+'.tac', 'w')
+        fp.write(pr.get_template('tac'))
+        fp.close()
+
+    def _create_config_directory(self, pr):
+        """Create the config directory."""
+        os.makedirs('config')
+        fp=open('config/schema.yaml', 'w')
+        fp.write(pr.get_template('schema'))
+        fp.close()
+
+    def _create_application_directory(self):
+        """Create the services directory."""
+        os.mkdir('application')
+        fp=open('application/__init__.py', 'w')
+        fp.write('# Application Package')
+        fp.close()
+
+    def _create_services_directory(self):
+        """Create the services directory."""
+        os.mkdir('services')
+        fp=open('services/__init__.py', 'w')
+        fp.write('# Services for Multi Service purposes will be added to' \
+            ' this directory')
+        fp.close()
+
+    def _create_view_directory(self):
+        """Create the view directory."""
+        os.makedirs('application/view')
+
+    def _create_controller_directory(self):
+        """Create the controller directory."""
+        os.makedirs('application/controller')
+        fp=open('application/controller/__init__.py', 'w')
+        fp.write('# Goliat will place here the generated modules.')
+        fp.close()
+
+    def _create_model_directories(self):
+        """Create the model directories."""
+        os.makedirs('application/model/base')
+        os.makedirs('application/model/relation')
+        fp=open('application/model/__init__.py', 'w')
+        fp.write('# Modules should be located on this directory')
+        fp.close()
+        fp=open('application/model/base/__init__.py', 'w')
+        fp.write('# Goliat will place here the generated base models.')
+        fp.close()
+        fp=open('application/model/relation/__init__.py', 'w')
+        fp.write('# Goliat will place here the generated relation models.')
+        fp.close()
+
+    def _create_web_directories(self, pr):
+        """Create the web directories."""
+        os.makedirs('web/js')
+        os.makedirs('web/css')
+        os.makedirs('web/media')
+        fp=open('web/js/main.js', 'w')
+        fp.write(pr.get_template('mainJs'))
+        fp.close()
 
     def _configure(self, pr):
         cfg=CmdConfigure()
