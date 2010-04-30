@@ -57,7 +57,7 @@ class Module(object):
         if self._loaded:
             return
 
-        _module_name="application.{0}".format(self._name)
+        _module_name="application.controller.{0}".format(self._name)
         _obj_list=[self._name]
         _temp_module=__import__(_module_name, globals(), locals(), _obj_list)
         # We need an instance, not a class        

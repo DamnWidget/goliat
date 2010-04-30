@@ -41,7 +41,7 @@ from goliat.database.schema import Schema
 from goliat.template import TemplateManager
 from goliat.utils import config
 
-_version=('Model', '0.1.0')
+_version=('Module', '0.1.0')
 
 class CmdGenerateModule(Command):
     """Create a new Goliat model"""
@@ -133,7 +133,7 @@ class CmdGenerateModule(Command):
             gen._generate_model_name(opts['model']),
             opts['model'])
             _module_render_get_code='''_act = request.args.get('act')
-        if 'getSchemaModel' in _act:            
+        if _act != None and 'getSchemaModel' in _act:            
             return self.get_schema_model()
             '''
 

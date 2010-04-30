@@ -21,7 +21,7 @@
 
 /**
  * @class StompClient
- * @extends Ext.Component
+ * @extends Ext.util.Observable
  *
  * @author Oscar Campos Ruiz <oscar.campos@open-phoenix.com>
  * @version 0.1

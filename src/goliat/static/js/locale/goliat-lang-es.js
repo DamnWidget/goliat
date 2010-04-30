@@ -48,3 +48,7 @@ if(Goliat.SidePanel) {
 if(Goliat.TabPanel) {
     Goliat.TabPanel.prototype.messages.tabAlreadyAdded = 'El panel componente {0} con tipo {1} ya existe en el panel. Saltando...';
 }
+
+if(Goliat.Many2onePanel) {
+    Goliat.ModelStore.prototype.messages.transactionError = 'Error en la transmisión de datos';
+}
