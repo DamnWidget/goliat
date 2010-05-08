@@ -29,7 +29,8 @@ Created on 13/04/2010 15:54:26
 @summary:
 @version: 0.1
 '''
-import os, yaml
+import os
+import yaml
 
 class SchemaException(Exception):
     pass
@@ -96,11 +97,10 @@ class Schema(object):
         """Sets column attributes values"""
         self._schema['database']['tables'][table][column]=data
 
-    def find_table(self, name):
+    def find_table(self, name, ordered=False):
         """Find a table on schema and return it"""
         for table, column in self.get_tables().iteritems():
-            if name==table or column.get('_config')!=None and column['_config']\
-            .get('modName')!=None and column['_config']['modName']==name:
+            if name==table:
                 return column
         return False
 
@@ -126,24 +126,46 @@ class Schema(object):
                             }
         return None
 
-    def get_model_schema(self, table):
-        """Return the model schema definition for JavaScript use."""
+    def get_model_parent(self, table):
+        """Return the model parent for the given table."""
         tdata=self.find_table(table)
         if not tdata:
             return None
 
+        return tdata.get('parent')
+
+    def get_model_view(self, table):
+        """Return the model view configuration."""
+        tdata=self.find_table(table)
+        if not tdata:
+            return None
+
+        return tdata.get('_order')
+
+    def get_model_schema(self, table):
+        """Return the model schema definition for JavaScript use."""
+        tdata=self.find_table(table)
+        otdata=self.reorder_table_fields(tdata)
+        if not tdata:
+            return None
+
         model_schema=[]
+
+        for field, data in otdata:
+            model_schema.append({
+                'name'   : field,
+                'config' : data
+            })
+
         for field, data in tdata.iteritems():
-            if field=='_relation':
-                for rel_field, rel_data in data.iteritems():
-                    model_schema.append({
-                        'name'  : rel_field,
-                        'config': rel_data
-                    })
-            else:
+            if field!='_relation':
+                continue
+
+            for rel_field, rel_data in data.iteritems():
                 model_schema.append({
-                    'name'    : field,
-                    'config'  : data
+                    'name'      : rel_field,
+                    'config'    : rel_data,
+                    'relation'  : True
                 })
 
         return model_schema;
@@ -182,7 +204,7 @@ class Schema(object):
     def fix_tables(self):
         """Fix tables for empty types"""
         if self._fixed:
-            return
+            return (True, '')
         if not len(self.get_tables()):
             return (False, 'The data tables are empty.')
 
@@ -190,7 +212,8 @@ class Schema(object):
             pKey=False
 
             for column, properties in columns.iteritems():
-                if column in ['_config', '_relation', '_indexes']:
+                if column in ['_config', '_relation', '_indexes',
+                    '_order', '_parent']:
                     continue
                 # Fix the '~' columns at Yaml definition
                 if properties is None:
@@ -243,8 +266,23 @@ class Schema(object):
 
         return (True, '')
 
+    def is_fixed(self):
+        """Returns true if the database tables are fixed, elsewhere returns
+        false.
+        """
+        return self._fixed
+
+    def reorder_table_fields(self, table):
+        """Returns a list with ordered fields for a given table."""
+        newtable=list()
+        for o in table['_order']['fieldsOrder']:
+            for k, v in table.items():
+                if k==o:
+                    newtable.append((k, v))
+
+        return newtable
+
     def _load_schema(self):
         """Loads a schema from file"""
         stream=file(self._schema_file, 'r')
         self._schema=yaml.load(stream)
-

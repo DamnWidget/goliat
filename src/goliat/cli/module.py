@@ -98,6 +98,8 @@ class CmdGenerateModule(Command):
         _module_get_schema_model=''
         _module_render_get_code="return json.dumps({'success' : False, " \
             "'error' : 'Not implemented yet.'})"
+        _module_render_post_code="return json.dumps({'success' : False, " \
+            "'msg' : 'Not implemented yet.'})"
 
         if opts.get('path')==None:
             _module_register_path='"{0}"'.format(module_name.lower())
@@ -113,29 +115,58 @@ class CmdGenerateModule(Command):
                 sys.exit(0)
             gen=Generator(opts['verbose'])
             tmodel=gen.create_m(\
-                opts['model'], _schema.find_table(opts['model']))
+                opts['model'], _schema.find_table(opts['model']),
+                _module_register_path)
+
             _module_model_import='from application.model.{0} import {1}' \
             .format(gen._generate_model_name(opts['model']),
                 gen._generate_model_name(opts['model']))
             _module_get_schema_model='''def get_schema_model(self): 
         """Return the schema model %s architecture.""" 
-        model_schema = %s.get_model_info() 
+        model_schema, model_view = %s.get_model_info() 
         if model_schema == None: 
             return json.dumps({
                 "success" : False,
                 "error" : "Unable to fetch a schema for model %s"
-            })
+            })        
                 
         return json.dumps({
             "success" : True,
-            "model" : model_schema
+            "model" : model_schema,
+            "view" : model_view
         })'''%(gen._generate_model_name(opts['model']),
             gen._generate_model_name(opts['model']),
             opts['model'])
             _module_render_get_code='''_act = request.args.get('act')
         if _act != None and 'getSchemaModel' in _act:            
             return self.get_schema_model()
-            '''
+        elif _act != None and 'view' in _act:
+            %s.view(self)
+            return server.NOT_DONE_YET
+        elif _act != None and 'get' in _act:
+            %s.get(self)
+            return server.NOT_DONE_YET
+        else:
+            return json.dumps(
+                {'success' : False, 'error' : 'Not implemented yet.'})
+            '''%(gen._generate_model_name(opts['model']),
+                 gen._generate_model_name(opts['model']))
+            _module_render_post_code='''_act = request.args.get('act')
+        if _act != None and 'create' in _act:
+            %s.create(self)
+            return server.NOT_DONE_YET
+        elif _act != None and 'update' in _act:
+            %s.update(self)
+            return server.NOT_DONE_YET
+        elif _act != None and 'destroy' in _act:
+            %s.destroy(self)
+            return server.NOT_DONE_YET
+        else:
+            return json.dumps(
+                {'success' : False, 'error' : 'Not implemented yet.'})
+            '''%(gen._generate_model_name(opts['model']),
+                gen._generate_model_name(opts['model']),
+                gen._generate_model_name(opts['model']))
 
         print '\n'+bold('Generating {0} module...'.format(module_name))
         mgr=TemplateManager()
@@ -144,6 +175,7 @@ class CmdGenerateModule(Command):
             module_file="application/controller/{0}".format(module_name),
             module_creation_date=datetime.now(),
             module_render_get_code=_module_render_get_code,
+            module_render_post_code=_module_render_post_code,
             module_name=module_name,
             module_model_import=_module_model_import,
             module_register_path=_module_register_path,

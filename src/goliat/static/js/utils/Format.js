@@ -38,8 +38,42 @@ Goliat.util.Format = function() {
             } else {
                 return '<img class="icon_off" src="/extjs/resources/images/default/s.gif" title="Down" style="margin: -1px 4px -1px 0; width: 16px; height: 16px; vertical-align: middle;" />';
             }
+        },
+        
+        /**
+         * Return a checkbox for true or false state.
+         * @param {Object} value
+         */
+        boolCheck: function(value) {
+            if(value) {
+                return '<input type="checkbox" value="true" checked="checked" />';
+            } else {
+                return '<input type="checkbox" value="false" />';
+            }
+        },
+        
+        /**
+         * Return a formated EURO currency for the given amount.
+         * @param {Object} value
+         */
+        eurMoney: function(v) {
+            v = (Math.round((v-0)*100))/100;
+            v = (v == Math.floor(v)) ? v + ".00" : ((v*10 == Math.floor(v*10)) ? v + "0" : v);
+            v = String(v);
+            var ps = v.split('.'),
+                whole = ps[0],
+                sub = ps[1] ? '.'+ ps[1] : '.00',
+                r = /(\d+)(\d{3})/;
+            while (r.test(whole)) {
+                whole = whole.replace(r, '$1' + ',' + '$2');
+            }
+            v = whole + sub;
+            if(v.charAt(0) == '-'){
+                return '-' + v.substr(1) + "€";
+            }
+            return v + "€";
         }        
     };
 }();
 
-Ext.util.Format.boolImage = Goliat.util.Format.boolImage;
+Ext.apply(Ext.util.Format, Goliat.util.Format);

@@ -33,9 +33,19 @@ Goliat.base.FormPanel = Ext.extend(Ext.form.FormPanel, {
         config = config || {};
         Ext.applyIf(config, {
             trackResetOnLoad : true
-        });
+        });        
         
         Goliat.base.FormPanel.superclass.constructor.call(this, config);
+        
+        if (this.record) {            
+            this.on({
+                scope  : this,
+                render : {
+                    single : true,
+                    fn     : this.loadFormAfterRender
+                }
+            });
+        }
     },
     
     getValues : function() {
@@ -71,5 +81,41 @@ Goliat.base.FormPanel = Ext.extend(Ext.form.FormPanel, {
     
     setValues : function(o) {
         return this.getForm().setValues(o || {});
+    },
+    
+    get: function(o) {
+        if(!o.url) {
+            return { 'success' : false, 'error' : 'No url setted.' }
+        }        
+        Ext.Ajax.request({
+            method  : 'GET',
+            url     : o.url,
+            params  : { act : 'get', id : o.id },
+            scope   : this,
+            callback: function(options, success, request) {
+                try {
+                    var response = eval("(" + request.responseText + ")"); 
+                } catch(e) {}
+                if(!response) {
+                    Goliat.Msg.error(this.messages.transactionError, this);
+                }
+                else if(response.success === false) {
+                    Goliat.Msg.error(response.error, this);
+                }
+                else if(o.callback) {
+                    o.callback.call(this, response);                    
+                }
+            }
+        });        
+    },
+    
+    loadFormAfterRender: function() {        
+        this.get({
+            url     : this.url,
+            id      : this.record.get('id'),
+            callback: function(response) {                             
+                this.loadData(response.data);
+            }     
+        });
     }
 }); 

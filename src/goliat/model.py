@@ -97,16 +97,17 @@ class Generator(object):
 
         return templates
 
-    def create_m(self, table, columns):
+    def create_m(self, table, columns, path):
         return {
-            'work'  : self.generate_model(table, columns)
+            'work'  : self.generate_model(table, columns, path)
         }
 
-    def generate_model(self, table, columns):
+    def generate_model(self, table, columns, path):
         t=self._mgr.get_sys_domain().get_template('tpl/model.evoque')
         model_name=self._generate_model_name(table)
         return (model_name, t.evoque(
             model_name=model_name,
+            module_register_path=path,
             model_creation_date=datetime.now(),
             model_file='application/model/{0}'.format(model_name),
         ))
@@ -118,37 +119,26 @@ class Generator(object):
         _attributes=[]
         _relations=[]
         _model_primary_keys=self._check_composed_keys(columns)
-        cfg=self._look_at_cur_path()
+        cfg=config.ConfigManager().look_at_cur_path()
         if cfg==None:
+            print red('No goliat configuration file found.')
             sys.exit(-1)
-        if cfg.get_config('project')['Project']['tos']:
-            _model_reference_import='from storm.twisted.wrapper ' \
-                'import DeferredReference, DeferredReferenceSet'
-            _model_store_import='from storm.twisted.store import ' \
-                'DeferredStore as Store'
-            _model_init_code='self.store.start()'
-        else:
-            _model_reference_import=''
-            _model_store_import='from storm.store import Store'
-            _model_init_code='pass'
-
-        for col in columns:
-            if col in [ '_config', '_indexes', '_relation' ]: continue
-            attr_name=col
+        for col in self._schema.reorder_table_fields(
+                self._schema.find_table(table)):
+            if col[0] in [ '_config', '_indexes', '_relation',
+                '_order', '_parent' ]:
+                continue
+            attr_name=col[0]
             if len(_model_primary_keys):
-                attr_type=self._parse_column(columns[col], True)
+                attr_type=self._parse_column(col[1], True)
             else:
-                attr_type=self._parse_column(columns[col])
+                attr_type=self._parse_column(col[1])
 
             _attributes.append((attr_name, attr_type))
         if relation!=None:
             for field, rel in relation.iteritems():
                 if rel['type']=='one2one':
-                    if cfg.get_config('project')['Project']['tos']:
-                        _reference='DeferredReference'
-                    else:
-                        _reference='Reference'
-                    _attributes.append(('{0}_id'.format(field), 'Int()'))
+                    _reference='Reference'
                     _attributes.append((field, '{0}({1}_id, "{2}.{3}")' \
                         .format(_reference, field, self._generate_model_name(\
                         rel['foreignTable']), rel['foreignKey'])))
@@ -158,10 +148,7 @@ class Generator(object):
                             '{0}Base'.format(self._generate_model_name(
                                 rel['foreignTable']))))
                 elif rel['type']=='many2one':
-                    if cfg.get_config('project')['Project']['tos']:
-                        _reference='DeferredReferenceSet'
-                    else:
-                        _reference='ReferenceSet'
+                    _reference='ReferenceSet'
                     _attributes.append(('{0}'.format(field,
                     '{0}("{1}.{2}", "{3}.{4})'.format(
                         _reference,
@@ -173,18 +160,15 @@ class Generator(object):
                         '{0}Base'.format(self._generate_model_name(
                             rel['foreignTable']))))
                 elif rel['type']=='many2many':
-                    if cfg.get_config('project')['Project']['tos']:
-                        _reference='DeferredReferenceSet'
-                    else:
-                        _reference='ReferenceSet'
+                    _reference='ReferenceSet'
                     reference=_reference+'('
                     reference+=self._parse_relation(rel, table)
                     reference+=')'
                     _attributes.append(('{0}'.format(field), reference))
-                    _relations.append(('application.model.base.{0}Base' \
-                    .format(self._generate_model_name(rel['foreignTable'])),
-                        '{0}Base'.format(self._generate_model_name(
-                            rel['foreignTable']))))
+                    #_relations.append(('application.model.base.{0}Base' \
+                    #.format(self._generate_model_name(rel['foreignTable'])),
+                    #    '{0}Base'.format(self._generate_model_name(
+                    #        rel['foreignTable']))))
                     _relations.append((
                         'application.model.relation.{0}'.format(
                             self._generate_model_name(table)+\
@@ -195,9 +179,7 @@ class Generator(object):
 
         reverse=self._schema.find_reverse_reference(table)
         if reverse!=None:
-            reverse_reference='DeferredReferenceSet(' \
-            if cfg.get_config('project')['Project']['tos'] \
-            else 'ReferenceSet('
+            reverse_reference='ReferenceSet('
             reverse_reference+=self._parse_relation(reverse, table, True)
             reverse_reference+=')'
             _attributes.append(('{0}'.format(reverse['field']),
@@ -217,43 +199,8 @@ class Generator(object):
             model_table='{0}'.format(table),
             model_primary_keys=_model_primary_keys,
             attributes=_attributes,
-            relations=_relations,
-            model_reference_import=_model_reference_import,
-            model_init_code=_model_init_code,
-            model_store_import=_model_store_import
+            relations=_relations
         ))
-
-    def _parse_relation(self, rel, table, reverse=False):
-        """Parses a model table relation."""
-        _new_keys=[]
-        for key in rel['keys']:
-            if type(key)==str:
-                _new_keys.append(key)
-            elif type(key)==dict:
-                _new_keys.append(key.keys()[0])
-
-        if not reverse:
-            ret='"{0}.{1}", '.format(self._generate_model_name(table),
-                rel['localKey'])
-            ret+='"{0}.{1}", '.format(self._generate_model_name(table)+\
-                self._generate_model_name(rel['foreignTable']), _new_keys[0])
-            ret+='"{0}.{1}", '.format(self._generate_model_name(table)+\
-                self._generate_model_name(rel['foreignTable']), _new_keys[1])
-            ret+='"{0}.{1}"'.format(self._generate_model_name(rel['foreignTable']),
-                rel['foreignKey'])
-        else:
-            ret='"{0}.{1}", '.format(self._generate_model_name(table),
-                rel['localKey'])
-            ret+='"{0}.{1}", '.format(self._generate_model_name(
-                rel['foreignTable'])+
-                self._generate_model_name(table), _new_keys[0])
-            ret+='"{0}.{1}", '.format(self._generate_model_name(
-                rel['foreignTable'])+\
-                self._generate_model_name(table), _new_keys[1])
-            ret+='"{0}.{1}"'.format(self._generate_model_name(rel['foreignTable']),
-                rel['foreignKey'])
-
-        return ret
 
     def generate_many_2_many(self, table, columns):
         if columns.get('_relation')==None:
@@ -298,6 +245,21 @@ class Generator(object):
 
         return models
 
+    def write_base_model(self, mod_name, tpl):
+        fp=file('application/model/base/{0}Base.py'.format(mod_name), 'w')
+        fp.write(tpl.encode('utf8'))
+        fp.close()
+
+    def write_model(self, mod_name, tpl):
+        fp=file('application/model/{0}.py'.format(mod_name), 'w')
+        fp.write(tpl.encode('utf8'))
+        fp.close()
+
+    def write_relation(self, mod_name, tpl):
+        fp=file('application/model/relation/{0}.py'.format(mod_name), 'w')
+        fp.write(tpl.encode('utf8'))
+        fp.close()
+
     def _generate_model_name(self, table):
         return ''.join([ word.capitalize() for word in table.split('_') ])
 
@@ -319,22 +281,7 @@ class Generator(object):
             elif type(key)==dict: _new_keys.append(key.keys()[0])
 
         return '__storm_primary__ = '+','.join([ '"'+k+'"' \
-                                                for k in _new_keys ])
-
-    def write_base_model(self, mod_name, tpl):
-        fp=file('application/model/base/{0}Base.py'.format(mod_name), 'w')
-        fp.write(tpl.encode('utf8'))
-        fp.close()
-
-    def write_model(self, mod_name, tpl):
-        fp=file('application/model/{0}.py'.format(mod_name), 'w')
-        fp.write(tpl.encode('utf8'))
-        fp.close()
-
-    def write_relation(self, mod_name, tpl):
-        fp=file('application/model/relation/{0}.py'.format(mod_name), 'w')
-        fp.write(tpl.encode('utf8'))
-        fp.close()
+                for k in _new_keys ])
 
     def _analyze(self, config):
         """Analyzes a table _config section"""
@@ -363,16 +310,36 @@ class Generator(object):
                 return '{0}(value={1}, allow_none={2})' \
             .format(tr(col.get('type')), _default_value, _allow_none)
 
-    def _look_at_cur_path(self):
-        files=[ f for f in os.listdir('.') if fnmatch.fnmatch(f, '*.cfg') ]
-        match=False
-        cfg=config.ConfigManager()
-        for file in files:
-            if cfg.load_config('project', file, True):
-                match=True
-                break;
-        if match:
-            return cfg
+    def _parse_relation(self, rel, table, reverse=False):
+        """Parses a model table relation."""
+        _new_keys=[]
+        for key in rel['keys']:
+            if type(key)==str:
+                _new_keys.append(key)
+            elif type(key)==dict:
+                _new_keys.append(key.keys()[0])
+
+        if not reverse:
+            ret='"{0}.{1}", '.format(self._generate_model_name(table),
+                rel['localKey'])
+            ret+='"{0}.{1}", '.format(self._generate_model_name(table)+\
+                self._generate_model_name(rel['foreignTable']), _new_keys[0])
+            ret+='"{0}.{1}", '.format(self._generate_model_name(table)+\
+                self._generate_model_name(rel['foreignTable']), _new_keys[1])
+            ret+='"{0}.{1}"'.format(self._generate_model_name(rel['foreignTable']),
+                rel['foreignKey'])
         else:
-            print red('No Goliat Project files found.')
-            return None
+            ret='"{0}.{1}", '.format(self._generate_model_name(table),
+                rel['localKey'])
+            ret+='"{0}.{1}", '.format(self._generate_model_name(
+                rel['foreignTable'])+
+                self._generate_model_name(table), _new_keys[0])
+            ret+='"{0}.{1}", '.format(self._generate_model_name(
+                rel['foreignTable'])+\
+                self._generate_model_name(table), _new_keys[1])
+            ret+='"{0}.{1}"'.format(self._generate_model_name(rel['foreignTable']),
+                rel['foreignKey'])
+
+        return ret
+
+

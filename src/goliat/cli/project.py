@@ -458,7 +458,7 @@ class CmdConfigure(Command):
         # Summary
         print bold('\nThose are your options:')
         for k, v in current.iteritems():
-            print brown(k.ljust(20))+': '+green('( ')+str(v)+green(' )')
+            print brown(k.ljust(20))+': '+green('( ')+str(v).decode('utf8')+green(' )')
 
         if userquery('Would you like to write the Project File and perform ' \
             'the needed changes to the application templates?')=="Yes":

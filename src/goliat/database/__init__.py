@@ -88,8 +88,8 @@ _type_properties={
         'list'          : 'ARRAY[]'
     },
     'mysql' : {
-        'bool'          : 'TINYINT(1)',
-        'boolean'       : 'TINYINT(1)',
+        'bool'          : 'TINYINT',
+        'boolean'       : 'TINYINT',
         'integer'       : 'INT',
         'smallint'      : 'SMALLINT',
         'longint'       : 'BIGINT',
@@ -130,6 +130,11 @@ class Database(Borg):
     def get_database(self):
         return self._db
 
+    def get_schema(self):
+        if not self._schema.is_fixed():
+            self._schema.fix_tables()
+        return self._schema
+
     def connect(self):
         if self._conn==None:
             self._conn=self._db.connect()
@@ -169,10 +174,6 @@ class Database(Borg):
                 raise ProgrammingError(e[0])
             self._conn.commit()
         self._conn.commit()
-
-    def get_schema(self):
-        return self._schema
-
 
 class Generator(object):
     def __init__(self, verbose):
@@ -221,7 +222,7 @@ class Generator(object):
                 for field in relation['fields']:
                     for fname, fvalue in field.iteritems():
                         cols[fname]=fvalue
-            self._createTable(table, cols)
+            self._createTable(table, cols, True)
 
     def get_database(self):
         return self._tables
@@ -234,7 +235,7 @@ class Generator(object):
         if self._sqlType=='mysql': return "`"
         else: return ""
 
-    def _createTable(self, table, columns):
+    def _createTable(self, table, columns, relation=False):
         query="DROP TABLE "
         if self._sqlType=='postgres':
             query+="{0}{1}{2} CASCADE;\n\n" \
@@ -248,17 +249,30 @@ class Generator(object):
         .format(self.get_sql_quotes(), table, self.get_sql_quotes())
         query+="(\n"
         x=0
-        for column in columns:
-            x+=1
-            if column in ['_config', '_indexes', '_relation']:
-                continue
-            query+="    {0}{1}{2} " \
-            .format(self.get_sql_quotes(), column, self.get_sql_quotes())
-            query+=self._parse_column(columns[column])
-            if self._sqlType=='sqlite':
-                query+=',\n' if x<len(columns) else '\n'
-            else:
-                query+=',\n'
+        if not relation:
+            for column in Database().get_schema().reorder_table_fields(
+                Database().get_schema().find_table(table)):
+                x+=1
+                query+="    {0}{1}{2} " \
+                .format(self.get_sql_quotes(), column[0], self.get_sql_quotes())
+                query+=self._parse_column(column[1])
+                if self._sqlType=='sqlite':
+                    query+=',\n' if x<len(columns) else '\n'
+                else:
+                    query+=',\n'
+        else:
+            for column in columns:
+                x+=1
+                if column in ['_config', '_indexes', '_relation',
+                    '_parent', '_view']:
+                    continue
+                query+="    {0}{1}{2} " \
+                .format(self.get_sql_quotes(), column, self.get_sql_quotes())
+                query+=self._parse_column(columns[column])
+                if self._sqlType=='sqlite':
+                    query+=',\n' if x<len(columns) else '\n'
+                else:
+                    query+=',\n'
 
         # MySQL and PostgreSQL PRIMARY KEYS
         if self._sqlType in ['mysql', 'postgres']:
@@ -289,7 +303,11 @@ class Generator(object):
             size=''
             if data.get('size')!=None:
                 if self._sqlType!='sqlite':
-                    size='({0}) '.format(data['size'])
+                    if self._sqlType=='postgres':
+                        if _type not in ['SMALLINT', 'INT', 'BIGINT']:
+                            size='({0}) '.format(data['size'])
+                    else:
+                        size='({0}) '.format(data['size'])
             if data.get('primaryKey')!=None:
                 if self._sqlType=='postgres':
                     if _type in ['SMALLINT', 'INT']:

@@ -33,3 +33,7 @@
 .icon_information { background-image: url(../../media/crystal-theme/16x16/actions/info.png) !important; } 
 .icon_confirm { background-image: url(../../media/crystal-theme/16x16/actions/help.png) !important; }
 .icon_error { background-image: url(../../media/crystal-theme/16x16/actions/agt_action_fail.png) !important; }
+.icon_edit_add { background-image: url(../../media/crystal-theme/16x16/actions/edit_add.png) !important; }
+.icon_edit_edit { background-image: url(../../media/crystal-theme/16x16/actions/edit.png) !important; }
+.icon_grid { background-image: url(../../media/crystal-theme/16x16/actions/journal.png) !important; }
+

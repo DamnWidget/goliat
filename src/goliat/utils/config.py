@@ -29,11 +29,13 @@ Created on 05/04/2010 05:39:33
 @summary:
 @version: 0.1
 '''
+import os
+import fnmatch
 from ConfigParser import SafeConfigParser, RawConfigParser, \
     MissingSectionHeaderError
 from goliat.utils.borg import Borg
 from goliat.utils.apply import Apply
-import os
+
 
 class ConfigManagerException(Exception):
     pass
@@ -118,6 +120,18 @@ class ConfigManager(Borg):
                                 rp.getfloat(s, o)
                         except ValueError:
                             self._config_files[config_name][s][o]=rp.get(s, o)
+
+    def look_at_cur_path(self):
+        files=[ f for f in os.listdir('.') if fnmatch.fnmatch(f, '*.cfg') ]
+        match=False
+        for file in files:
+            if self.load_config('project', file, True):
+                match=True
+                break;
+        if match:
+            return self
+        else:
+            return None
 
     @staticmethod
     def write_config(config):

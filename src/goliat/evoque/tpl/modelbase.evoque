@@ -29,25 +29,26 @@ Created on ${model_creation_date}
 @summary: ${model_name}Base Model Base Class
 @version: 0.1
 '''
+import json
 from storm.base import Storm
 from storm.locals import *
 from storm import Undef
-${model_store_import}
 
+from goliat.database.Store import Store
+from goliat.database.reference import Reference, ReferenceSet
 from goliat.database import Database
-${model_reference_import}
+from goliat.database.model import Model
 $for{i, (module, object) in enumerate(relations)}
 from ${module} import ${object}
 $rof
-
-_schema = Database().get_schema()
 
 class ${model_name}Base(Storm):
     __storm_table__ = "${model_table}"
     ${model_primary_keys}
     $for{i, (prop, type) in enumerate(attributes)}
     ${prop} = ${type}
-    $rof    
+    $rof
+    
     store = Store(Database().get_database())
     
     def __init__(self):
@@ -55,10 +56,83 @@ class ${model_name}Base(Storm):
         
         This method will be overriden by ${model_name} class
         """
-        ${model_init_code}         
+        pass         
 
     @staticmethod
     def get_model_info():
         """Returns a dict containing the model scheme information."""
-        return _schema.get_model_schema('${model_table}')            
+        return Model().get_model_info(${model_name}Base)
+
+    @staticmethod
+    def view(controller):
+        """Returns a list of every row at model."""
+        return Model().view(${model_name}Base, controller)     
+    
+    @staticmethod
+    def create(controller):
+        """Create a new ${model_name}Base object and returns it."""
+        data = controller._request.args.get('data')
+        if data == None:
+            controller._sendback({'success' : False, 'error' : 'No data received from UI.'})            
+        else:            
+            object = json.loads(data[0])
+            result, msg = Model().isValidObject(object, ${model_name}Base)
+            if not result:
+                controller._sendback({'success' : False, 'error' : msg})
+                return
+            
+            obj = ${model_name}Base()            
+            return Model().create(Model().generate_object(obj, object), ${model_name}Base, controller)
+    
+    @staticmethod
+    def update(controller):
+        """Update an object."""
+        data = controller._request.args.get('data')        
+        if data == None:
+            controller._sendback({'success' : False, 'error' : 'No data received from UI.'})            
+        else:
+            object = json.loads(data[0])
+            result, msg = Model().is_valid_object(object, ${model_name}Base)
+            if not result:
+                controller._sendback({'success' : False, 'error' : msg})                
+                return            
+            
+            return Model().update(object, ${model_name}Base, controller)
+    
+    @staticmethod
+    def destroy(controller):
+        """Destroy an object."""
+        id = controller._request.args.get('id')
+        if id == None:
+            controller._sendback({'success' : False, 'error' : 'No data received from UI.'})
+        else:            
+            return Model().destroy(int(id[0]), ${model_name}Base, controller)
+
+    @staticmethod
+    def get(controller):
+        """Get a row."""
+        id = controller._request.args.get('id')
+        if id == None:
+            controller._sendback({'success' : False, 'error' : 'No data received from UI.'})
+        else:
+            if controller._request.args.get('ref') != None:
+                model = '{0}Base'.format(controller._request.args.get('ref')[0].capitalize())
+                model = eval(model)
+                return Model().get(int(id[0]), model, controller)            
+            else:            
+                return Model().get(int(id[0]), ${model_name}Base, controller)
+
+    @staticmethod
+    def search(controller):
+        """Perform a very basic search."""
+        data = controller._request.args.get('data')
+        if data == None:
+            controller._sendback({'success' : False, 'error' : 'No data received from UI.'})            
+        else:
+            args = json.loads(data[0])
+            c = ''
+            for rec in args:
+                for k, v in rec.iteritems():
+                    c += '{0} == {1},'.format("EmployeeBase."+k, v)
+            return Model().search(${model_name}Base, controller, eval(c))
     

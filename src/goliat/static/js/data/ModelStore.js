@@ -35,14 +35,20 @@ Goliat.ModelStore = function(options) {
     /**
      * Options
      * @property
-     */
-    this.options = options || {}
+     */    
+    Ext.apply(this, options);
     
     /**
      * The Model Schema
      * @property
      */
-    this.modelSchema = [];  
+    this.modelSchema = [];   
+    
+    /**
+     * The loaded check
+     * @property
+     */
+    this.loaded = false; 
     
     this.addEvents(
         /**
@@ -62,24 +68,34 @@ Goliat.ModelStore = function(options) {
     
     // Call the superclass constructor
     Goliat.ModelStore.superclass.constructor.call(this, options);
+    
+    // Auto Load 
+    if(this.autoLoad) {        
+        this.load.defer(10, this);        
+    }    
 };
 
 Ext.extend(Goliat.ModelStore, Ext.util.Observable, {
     messages : { 
-        transactionError    : "Error with data transaction."
+        transactionError    : "Error with data transaction.",
+        True                : "True",
+        False               : "False",
+        yes                 : 'Yes',
+        no                  : 'No'
     },
     
-    getModelSchema: function() {
-        return this.modelSchema;
-    },
+    writer  : new Ext.data.JsonWriter({
+        encode          : true,
+        writeAllFields  : false
+    }),
     
     load: function() {
-        if(!this.options.url) {
+        if(!this.url) {
             return { 'success' : false, 'error' : 'No url setted.' }
         }
         Ext.Ajax.request({
             method  : 'GET',
-            url     : this.options.url,
+            url     : this.url,
             params  : { 'act' : 'getSchemaModel' },
             scope   : this,
             callback: function(options, success, request) {
@@ -94,7 +110,33 @@ Ext.extend(Goliat.ModelStore, Ext.util.Observable, {
                 }
                 else {
                     this.modelSchema = response.model;
-                    this.fireEvent('onload', this);
+                    this.loaded = true;
+                    this.lookup = {}
+                    for(c in this.modelSchema) {
+                        if(c == "remove")
+                            continue;
+                        this.lookup[this.modelSchema[c].name] = this.modelSchema[c];
+                    }
+                                                        
+                    if(!this.store) {                     
+                        this.store  = new Ext.data.JsonStore({                          
+                            id      : this.url.replace(/\//g, ''),
+                            proxy   : new Ext.data.HttpProxy({
+                                        api : {
+                                            read    : { url: this.url+'?act=view', method: 'GET' },
+                                            create  : { url: this.url+'?act=create', method: 'POST' },
+                                            update  : { url: this.url+'?act=update', method: 'POST' },
+                                            destroy : { url: this.url+'?act=delete', method: 'POST' }
+                                        }
+                            }),
+                            writer  : this.writer,
+                            fields  : this.getFields(),
+                            sortInfo: { field: 'id', direction: 'ASC' },
+                            autoSave: true
+                        });
+                        this.store.load();                        
+                    }                    
+                    this.fireEvent('onload', this);                    
                 }
             }
         });            
@@ -110,11 +152,232 @@ Ext.extend(Goliat.ModelStore, Ext.util.Observable, {
     },
     
     setUrl: function(url) {
-        this.options.url = url;
+        this.url = url;
     },
     
     getModelSchema: function() {
         return this.modelSchema;
+    },
+    
+    getFieldById: function(id) {
+        return this.lookup[id];
+    },
+    
+    hasRelation: function(id) {        
+        for(var i = 0; i < this.modelSchema.length; i++) {            
+            if(this.modelSchema[i].relation !== true)
+                continue;
+            
+            if(!this.modelSchema[i].config.localKey)
+                localKey = this.modelSchema[i].config.foreignTable+'_'+this.modelSchema[i].config.foreignKey;
+            else
+                localKey = this.modelSchema[i].config.localKey;
+            
+            if(id == localKey)
+                return this.modelSchema[i].name;
+        }
+        
+        return false;
+    },
+    
+    getIndexById: function(id) {
+        for(c in this.modelSchema) {
+            if(c == "remove")
+                continue;
+            if(this.modelSchema[c].name == id) {
+                return c;
+            }
+        }
+        return -1;
+    },
+    
+    moveField: function(oldIndex, newIndex) {        
+        var f = this.modelSchema[oldIndex];
+        this.modelSchema.splice(oldIndex, 1);
+        this.modelSchema.splice(newIndex, 0, f);
+    },
+    
+    getFields: function() {
+        fields = [];        
+        for(c in this.modelSchema) {
+            if(c == "remove")
+                continue;            
+            fields.push(this.modelSchema[c].name);
+        }        
+        
+        return fields;
+    },
+    
+    parseFormModel: function() {
+        fields_model = Array();        
+        for(obj in this.modelSchema) {
+            if(!isNaN(obj)) {
+                field_data = {};
+                if (this.modelSchema[obj].relation === true) {                    
+                    continue;
+                } else {
+                    field_data.fieldLabel = Ext.util.Format.capitalize(this.modelSchema[obj].name.replace(/_/g, ' '));
+                    field_data.name = this.modelSchema[obj].name;
+                    field_data.anchor = '-10';
+                    (this.modelSchema[obj].required) ? field_data.allowBlank = false : field_data.allowBlank = true;
+                    (Ext.isDefined(this.modelSchema[obj].config.size)) ? field_data.maxLength = this.modelSchema[obj].config.size : 50;
+                    switch(this.parseType(this.modelSchema[obj])) {
+                        case 'string':
+                            if(Ext.isDefined(this.modelSchema[obj].config.size) && this.modelSchema[obj].config.size <= 100)
+                                field_data.xtype = 'textfield';
+                            else if(Ext.isDefined(this.modelSchema[obj].config.size) && this.modelSchema[obj].config.size > 100)
+                                field_data.xtype = 'textarea';
+                            else
+                                field_data.xtype = 'textfield';
+                            break;
+                        case 'number':                       
+                            field_data.xtype = 'numberfield';
+                            break;     
+                        case 'real':
+                            field_data.xtype = 'numberfield';
+                            field_data.allowDecimals = true;
+                            field_data.decimalPrecision = 2;  
+                            break;
+                        case 'boolean':
+                            field_data.xtype = 'radiogroup';
+                            field_data.columns = 'auto';
+                            field_data.items = [
+                                {
+                                    inputValue  : '0',
+                                    boxLabel    : this.messages['yes']
+                                },
+                                {
+                                    inputValue  : '1',
+                                    boxLabel    : this.messages['no']
+                                }
+                            ];
+                            break;                            
+                        case 'date':
+                        case 'datetime':
+                            field_data.xtype = 'datefield';
+                            break;
+                        case 'time':
+                            field_data.xtype = 'timefield';
+                            break;                        
+                        case 'list':
+                            field_data.xtype = 'multiselect';
+                            break;
+                        default:
+                            field_data.xtype = 'textfield';                        
+                    }
+                    if(this.modelSchema[obj].config.primaryKey)
+                        field_data.xtype = 'hidden';    
+                    
+                    fields_model.push(field_data);   
+                }
+            }
+        }
+        
+        return fields_model;
+    },
+    
+    parseColumnModel: function() {        
+        columns_model = Array();
+        for (obj in this.modelSchema) {
+            if(!isNaN(obj)) {
+                column_data = {};                
+                if (this.modelSchema[obj].relation === true)
+                    continue;                    
+                   
+                column_data.header = Ext.util.Format.capitalize(this.modelSchema[obj].name.replace(/_/g, ' '));
+                column_data.dataIndex = this.modelSchema[obj].name;
+                (this.modelSchema[obj].size) ? column_data.width = this.modelSchema[obj].size : 80;
+                column_data.sortable = true; 
+                column_data.id = this.modelSchema[obj].name;
+                column_data.sqlType = this.parseType(this.modelSchema[obj]);
+                switch(this.parseType(this.modelSchema[obj])) {
+                    case 'string':                        
+                        column_data.xtype = 'gridcolumn';
+                        break;
+                    case 'number':
+                        column_data.xtype = 'numbercolumn';
+                        column_data.format = '0';
+                        break;
+                    case 'real':
+                        column_data.xtype = 'numbercolumn';
+                        column_data.format = '0.00';
+                        break;
+                    case 'boolean':
+                        if(this.boolImage) { column_data.xtype = 'booleanimagecolumn'; } 
+                        else if(this.boolCheck) { column_data.xtype = 'booleancheckcolumn'; } 
+                        else { column_data.xtype = 'booleancolumn'; }
+                        break;
+                    case 'date':
+                    case 'time':
+                    case 'datetime':
+                        column_data.xtype = 'datecolumn';
+                        break;
+                    case 'list':
+                        column_data.xtype = 'arraycolumn';
+                        break;
+                    default:
+                        column_data.xtype = 'gridcolumn';
+                        break;
+                }                
+                if(this.modelSchema[obj].config.primaryKey)
+                    column_data.primary = true;
+                else
+                    column_data.primary = false;                
+                columns_model.push(column_data);
+            }
+        }
+        
+        return columns_model;    
+    },
+    
+    parseType: function(o) {        
+        type = null;
+        switch (o.config.type.toLowerCase()) {
+            case 'varchar':  
+            case 'longvarchar':
+            case 'unicode':
+            case 'rawstr':
+            case 'any':            
+                type = 'string';
+                break
+            case 'integer':            
+            case 'smallint':
+            case 'longint':
+            case 'serial':
+            case 'bigserial':
+                type = 'number';
+                break;
+            case 'real':
+            case 'float':
+            case 'double':
+            case 'decimal':            
+                type = 'real'
+                break;
+            case 'bool':
+            case 'boolean':
+                type = 'boolean';
+                break;
+            case 'date':
+                type = 'date';
+                break;
+            case 'time':
+                type = 'time';
+                break;
+            case 'timestamp':
+                type = 'datetime';
+                break;
+            case 'timedelta':
+                type = 'time';
+                break;
+            case 'list':
+                type = 'array';
+                break;
+            default:
+                type = 'string';
+                break;            
+        }
+        
+        return type;
     }
 });
 

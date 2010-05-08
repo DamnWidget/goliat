@@ -17,27 +17,35 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 ##
-# $$id ${model_file}.py created on ${model_creation_date} by Goliat $$
+# $id goliat/database/Store.py created on 06/05/2010 18:40:10 by damnwidget $
 '''
-Created on ${model_creation_date}
+Created on 06/05/2010 18:40:10
 
 @license: GPLv2
 @copyright: © 2010 Open Phoenix IT SCA
 @organization: Open Phoenix IT S.Coop.And
-@author: Goliat
-@contact: goliat@open-phoenix.com
-@summary: ${model_name} Model
+@author: Oscar Campos
+@contact: oscar.campos@open-phoenix.com
+@summary: Wrapper class above Store and DeferredStore to offer an abstraction
+over storm Stores using twisted or not.
 @version: 0.1
 '''
-from storm.variables import *
-from application.model.base.${model_name}Base import ${model_name}Base
+from storm.store import Store as StormStore
+from storm.twisted.store import DeferredStore
+from goliat.utils import config
 
-class ${model_name}(${model_name}Base):
-    """This class inherits from ${model_name}Base class"""
-    
-    def __init__(self):
-        """Consructor:
-        
-        ADD HERE YOUR INITIALIZATION CODE
-        """
-        ${model_name}Base.__init__(self)            
+_cfg=config.ConfigManager().look_at_cur_path()
+
+if _cfg.get_config('project')['Project']['tos']:
+    class Store(DeferredStore):
+        """DeferredStore Wrapper Goliat Class."""
+
+        def __init__(self, database):
+            DeferredStore.__init__(self, database)
+            self.start()
+else:
+    class Store(StormStore):
+        """Store Wrapper Goliat Class."""
+
+        def __init__(self, database):
+            StormStore.__init__(self, database)

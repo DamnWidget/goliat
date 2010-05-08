@@ -17,27 +17,35 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 ##
-# $$id ${model_file}.py created on ${model_creation_date} by Goliat $$
+# $id goliat/database/reference.py created on 07/05/2010 13:42:47 by damnwidget $
 '''
-Created on ${model_creation_date}
+Created on 07/05/2010 13:42:47
 
 @license: GPLv2
 @copyright: © 2010 Open Phoenix IT SCA
 @organization: Open Phoenix IT S.Coop.And
-@author: Goliat
-@contact: goliat@open-phoenix.com
-@summary: ${model_name} Model
+@author: damnwidget
+@contact: oscar.campos@open-phoenix.com
+@summary: Abstraction over Reference and DeferredReference
 @version: 0.1
 '''
-from storm.variables import *
-from application.model.base.${model_name}Base import ${model_name}Base
+from storm.references import Reference as StormReference
+from storm.references import ReferenceSet as StormReferenceSet
+from storm.twisted.wrapper import DeferredReference, DeferredReferenceSet
 
-class ${model_name}(${model_name}Base):
-    """This class inherits from ${model_name}Base class"""
-    
-    def __init__(self):
-        """Consructor:
-        
-        ADD HERE YOUR INITIALIZATION CODE
-        """
-        ${model_name}Base.__init__(self)            
+from goliat.utils import config
+
+_cfg=config.ConfigManager().look_at_cur_path()
+
+if _cfg.get_config('project')['Project']['tos']:
+    class Reference(DeferredReference):
+        pass
+
+    class ReferenceSet(DeferredReferenceSet):
+        pass
+else:
+    class Reference(StormReference):
+        pass
+
+    class ReferenceSet(StormReferenceSet):
+        pass
