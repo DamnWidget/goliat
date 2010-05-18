@@ -1,12 +1,19 @@
 # Install the Linux Epoll Reactor
 from twisted.internet import epollreactor
 epollreactor.install()
-        
+
+from twisted.cred.portal import Portal
+from twisted.cred import checkers
+from twisted.application import internet, service
+from twisted.web import server
+
 from goliat.webserver import page
 from goliat.utils.config import ConfigManager
 from goliat.database import Database
-from twisted.application import internet, service
-from twisted.web import server
+from goliat.session import GoliatSession, SessionManager
+from goliat.auth import DBCredentialsChecker, SessionCookieCredentialsChecker
+from goliat.auth.realm import GoliatRealm
+
         
 application = service.Application('${app_name}')
 
@@ -21,6 +28,7 @@ try:
     database = Database()    
 except TypeError:
     print 'WARNING: Your database schema is not initialized.'
+    print 'You will not be able to use Goliat Databse Authentication.'
 
 # Check for Orbited 
 if cfg['Project']['orbited']:
@@ -56,7 +64,25 @@ if cfg['Project']['orbited']:
     stompserv.setName('StompService')
     stompserv.setServiceParent(application)
 
-goliat_app_site = server.Site(page)
+# Create the Twisted Portal using the GoliatRealm
+portal = Portal(GoliatRealm(page))
+# If the initialized database is a valid database register chedential checkers
+# at Portal
+if database.is_valid():
+    portal.registerChecker(DBCredentialsChecker())
+    portal.registerChecker(SessionCookieCredentialsChecker())
+
+# If the anonymous application navigation is configured, just add the checker
+if cfg['Project']['allow_anonymous']:
+    portal.registerChecker(checkers.AllowAnonymousAccess())
+
+# Initialize the Goliat Auth Wrapper SessionManager
+root = SessionManager(portal)
+
+goliat_app_site = server.Site(root)
+# Use GoliatSession as the session factory
+goliat_app_site.sessionFactory = GoliatSession
+
 httpserver = internet.TCPServer(cfg['Project']['app_port'], goliat_app_site)
 httpserver.setName('${app_name} Application')
 httpserver.setServiceParent(application)

@@ -36,7 +36,7 @@ from storm.exceptions import OperationalError
 from storm.uri import URI
 
 from goliat.utils.borg import Borg
-from goliat.database.schema import Schema
+from goliat.database.schema import Schema, SchemaException
 from goliat.cli.utils.output import *
 
 
@@ -125,7 +125,15 @@ class Database(Borg):
         super(Database, self).__init__()
 
         self._schema=Schema('config/schema.yaml')
-        self._db=create_database(self._schema.get_properties()['uri'])
+        try:
+            self._db=create_database(self._schema.get_properties()['uri'])
+            self._initialized=True
+        except KeyError:
+            self._initialized=False
+            raise DatabaseException("Database schema is not defined")
+
+    def is_valid(self):
+        return self._initialized
 
     def get_database(self):
         return self._db
@@ -134,6 +142,11 @@ class Database(Borg):
         if not self._schema.is_fixed():
             self._schema.fix_tables()
         return self._schema
+
+    def get_connection(self):
+        if self._conn==None:
+            self.connect()
+        return self._conn
 
     def connect(self):
         if self._conn==None:
@@ -209,8 +222,13 @@ class Generator(object):
                         uri.database, uri.username, uri.password))
         self._sqlType=uri.scheme
 
-        for table, columns in db.get_schema().get_tables().iteritems():
-            self._createTable(table, columns)
+        try:
+            for table, columns in db.get_schema().get_tables().iteritems():
+                self._createTable(table, columns)
+        except SchemaException:
+            print 'WARNING: No tables are defined in your schema\n'+\
+                'Only Goliat Users table will be generated.'
+
 
         for relation in db.get_schema().many2many():
             table=relation['table']
@@ -223,6 +241,10 @@ class Generator(object):
                     for fname, fvalue in field.iteritems():
                         cols[fname]=fvalue
             self._createTable(table, cols, True)
+
+        # Goliat User Table
+        from goliat.session.user import user_sql_data
+        self._createTable(user_sql_data.keys()[0], user_sql_data.values()[0])
 
     def get_database(self):
         return self._tables

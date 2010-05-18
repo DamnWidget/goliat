@@ -1,0 +1,11 @@
+goliat_user:
+    id:               { type: integer, primaryKey: true, autoIncrement: true, required: true }
+    username:         { type: varchar, size: '50', required: true }
+    password:         { type: varchar, size: '50', required: true }
+    groups:           { type: varchar }    
+    created_on:       { type: timestamp }
+    last_login:       { type: timestamp }
+    is_active:        { type: boolean, default: true }
+    superuser:        { type: boolean, default: false }
+    _order:
+        fieldsOrder:  [ id, username, password, groups, created_on, last_login, is_active, superuser ]

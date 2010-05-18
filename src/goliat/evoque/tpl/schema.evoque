@@ -45,6 +45,8 @@
 #       name:            { type: varchar, size: '50', required: true }
 #       surname:         { type: varchar, size: '100', required: true }
 #       age:             { type: smallint, size: '2' }
+#       _order:
+#         fieldsOrder:   [ id, name, surname, age ]
 #     # We can also use extended syntax as follow
 #     employee:
 #       id:
@@ -53,6 +55,8 @@
 #         autoIncrement: true
 #         required:      true        
 #       company_id:      { type: integer, required: true }
+#       _order:
+#         fieldsOrder:   [ id, company_id ]
 #     # We can mix extended and reduced syntax at same table if we want as follow
 #     company:
 #       id:              { type: integer, primaryKey: true, autoIncrement: true, required: true }
@@ -61,13 +65,20 @@
 #         size:          '100'
 #         required:      true
 #       vat:             { type: varchar, size: '12', required: true }
+#       _order:
+#         fieldsOrder:   [ id, name, vat ]
 #     title:
 #       id:              ~
 #       name:            { type: varchar, size: '50', required: true }
+#       _order:
+#         fieldsOrder:   [ id, name ]
 #
 # The uri will be a valid Storm database URI
 # You can use the '~' with id attributes, Goliat will add the correct options for the 
-# selected schema for Primary Keys identificators 
+# selected schema for Primary Keys identificators
+# The _order and fieldsOrder data is neccesary to tell Goliat in what order will
+# push fields on database tables and the order that them will be shown on UI
+# grids and forms.  
 # _relation attribute in tables is used to define complex table relationships
 #
 # To define one2one relation we can do it as follows

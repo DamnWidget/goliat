@@ -12,5 +12,6 @@ app_name=${app_name}
 app_desc=${app_desc}
 app_layout=${app_layout}
 app_port=${app_port}
+allow_anonymous=True
 
 ; EOF

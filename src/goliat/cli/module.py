@@ -92,8 +92,9 @@ class CmdGenerateModule(Command):
             _schema=Schema('config/schema.yaml')
             _schema.fix_tables()
         except TypeError:
-            print red('The schema is not defined.')
-            sys.exit(-1)
+            if opts.get('model')!=None:
+                print red('The schema is not defined.')
+                sys.exit(-1)
         _module_model_import=''
         _module_get_schema_model=''
         _module_render_get_code="return json.dumps({'success' : False, " \

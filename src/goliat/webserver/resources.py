@@ -44,14 +44,16 @@ class ResourcesLoader(object):
     _modules=None
     _modules_loaded=False
     _scripts=[]
+    _styles=[]
     _app_path='application'
-    _script_path='scripts'
+    _script_path='view'
     _options=dict()
 
     def __init__(self, root, options=dict()):
         self._root=root
         self._options=options
         self._load_scripts()
+        self._load_styles()
 
     def setup(self, module_manager):
         """Setup the loader and load the Goliat Application files"""
@@ -104,6 +106,12 @@ class ResourcesLoader(object):
         self._root.add_style(
             '<link rel="stylesheet" href="/goliat/resources/css/{0}.css" ' \
             'type="text/css" />'.format(self._options['goliatTheme']))
+
+        # Application UI
+        for ui_style in self._styles:
+            self._root.add_style(
+                '<link rel="stylesheet" href="css/{0}" ' \
+                'type="text/css" />'.format(ui_style))
 
         # ===========================
         # JavaScript
@@ -185,18 +193,26 @@ class ResourcesLoader(object):
 
     def _load_scripts(self):
         """Load scripts and fill scripts application list."""
-        for file_name in self._explore_application(True):
+        for file_name in self._explore_application('script'):
             self._scripts.append(file_name)
 
-    def _explore_application(self, script=False):
+    def _load_styles(self):
+        """Load styles and fill styles application list."""
+        for file_name in self._explore_application('style'):
+            self._styles.append(file_name)
+
+    def _explore_application(self, type='module'):
         """Explores the module path directory and returns a filenames tuple."""
         try:
             files=os.listdir('application/view')
-            if script==False:
+            if type=='module':
                 files=os.listdir('application/controller')
                 pattern=re.compile('[^_?]\.py$', re.IGNORECASE)
-            else:
+            elif type=='script':
                 pattern=re.compile('\.js$', re.IGNORECASE)
+            elif type=='style':
+                files=os.listdir('web/css')
+                pattern=re.compile('\.css$', re.IGNORECASE)
             files=filter(pattern.search, files)
             return files
         except OSError:

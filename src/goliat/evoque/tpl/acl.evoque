@@ -1,0 +1,47 @@
+##
+# Goliat: The Twisted and ExtJS Web Framework
+# Copyright (C) 2010 Open Phoenix IT
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+#
+#
+#-------------------------------------------------------------------------------
+#-- Access Control List definition file
+#-------------------------------------------------------------------------------
+#
+# Define an Acl is very simple, you will define role names, and then add
+# controllers to those roles with the desired privileges on them.
+# Roles can be inherited from another ones.
+#
+# Example
+#
+# roles:
+#   anonymous:
+#     forum:            [ read ]
+#     news:             [ read ]
+#   authed:
+#     inherit:          [ anonymous ]
+#     forum:            [ write ]
+#   admin:
+#     inherit:          [ authed ]
+#     forum:            [ delete ]
+#     news:             [ write, delete, archive ]
+#
+# Privileges can be any one you need for your application, the ones exposed in
+# the above example are just example data, you can use any tag you want for them
+#
+# For a more detailed information about Acl's and Sessions in Goliat, refer to
+# the Goliat Project page: http://goliat.open-phoenix.com
+#

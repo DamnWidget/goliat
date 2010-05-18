@@ -99,6 +99,9 @@ class Schema(object):
 
     def find_table(self, name, ordered=False):
         """Find a table on schema and return it"""
+        if name=='goliat_user':
+            from goliat.session.user import user_sql_data
+            return user_sql_data.values()[0]
         for table, column in self.get_tables().iteritems():
             if name==table:
                 return column
