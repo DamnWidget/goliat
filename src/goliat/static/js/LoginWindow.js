@@ -53,6 +53,12 @@ Goliat.UserLoginWindow = Ext.extend(Ext.Window, {
             items       : this.buildForm()
         });
         
+        if(!this.bodyStyle) {
+            Ext.apply(this, { 
+                bodyStyle: "background: url(/goliat/resources/media/login.png) no-repeat; padding: 260px 0 0 174px;" 
+            })
+        }
+        
         Goliat.UserLoginWindow.superclass.initComponent.call(this);
     },
     
