@@ -38,8 +38,10 @@ from twisted.web.resource import IResource, ErrorPage
 from twisted.python.components import proxyForInterface
 from twisted.web.server import Session
 from twisted.web import util
+from twisted.python.filepath import FilePath
 
 from goliat.auth import SessionCookie, ISessionCookie
+from goliat.auth.login import Login
 
 class GoliatSession(Session):
     """Goliat users session."""
@@ -64,15 +66,20 @@ class UnauthorizezResource(object):
 
     def render(self, request):
         """
-        Send JSON login request to GoliatJS.
+        Create a custom or generic Login/Access to the Application.
         """
-        import json
-        return json.dumps({
-            'success' : False,
-            'code'    : 'UNAUTHORIZED',
-            'error'   : 'You will be logged in for get access to this resource.'
-        })
+        file=FilePath('custom/unauthorized.py')
+        if file.exists() and file.isfile() or file.islink():
+            # Custom form is provided
+            from custom.login import CustomLogin
+            root=IResource(CustomLogin())
+        else:
+            from goliat.auth.login import Login
+            from goliat.utils.config import ConfigManager
+            root=IResource(Login(
+                ConfigManager().get_config('Goliat')['Project']))
 
+        return root.render(request)
 
     def getChildWithDefault(self, path, request):
         """
