@@ -38,6 +38,7 @@ from twisted.python import components
 from twisted.cred.checkers import ICredentialsChecker
 from twisted.web.resource import IResource
 from twisted.internet import defer
+from storm.store import Store
 
 from goliat.database import Database
 
@@ -67,9 +68,7 @@ class DBCredentialsChecker(object):
 
     def __init__(self):
         self.credentialInterfaces=(IUsernamePassword, IUsernameHashedPassword)
-        self.conn=Database().get_connection()
-        self.query=\
-            "SELECT id, username, password FROM \"goliat_user\" WHERE username='{0}'"
+        self.store=Store(Database().get_database())
 
     def requestAvatarId(self, credentials):
         """
@@ -82,19 +81,21 @@ class DBCredentialsChecker(object):
                 break
         else:
             raise error.UnhandledCredentials()
-        # Ask the database for the username and password
-        result=self.conn.execute(self.query.format(credentials.username))
-        result=result.get_all()
+        from goliat.session.user import UserData
+        # Ask the database for the username and password        
+        result=self.store.find(
+            UserData, UserData.username==unicode(credentials.username)).one()
         # Authenticate the user
         return self._auth(result, credentials)
 
     def _auth(self, result, credentials):
-        if len(result)==0:
+        if result==None:
             # Username not found in db            
             return defer.fail(
                 error.UnauthorizedLogin('Username or Password mismatch'))
         else:
-            id, username, password=result[0]
+            id=result.id
+            password=result.password
 
         if IUsernameHashedPassword.providedBy(credentials):
             if credentials.checkPassword(password):

@@ -64,6 +64,7 @@ Goliat.Loader = Ext.extend(Ext.util.Observable, {
         'TabPanel'          : '/goliat/js/TabPanel',        
         'StompClient'       : '/goliat/js/StompClient',
         'EditorWindow'      : '/goliat/js/EditorWindow',
+        'LoginWindow'       : '/goliat/js/LoginWindow',
         'ModelStore'        : '/goliat/js/data/ModelStore',
         'TwoColumns'        : '/goliat/js/layout/TwoColumnsLayout',
         'TwoColumnsF'       : '/goliat/js/layout/TwoColumnsFLayout',

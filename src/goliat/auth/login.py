@@ -79,7 +79,7 @@ class Login(resource.Resource):
             }
             #login-form {
                 padding: 20px;
-                background-color: #f6f6b6;
+                background-color: #ffc9a5;
                 border: solid 2px #000000;
                 -moz-border-radius: 10px;  
                 -webkit-border-radius: 10px;
