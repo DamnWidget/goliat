@@ -86,7 +86,7 @@ Goliat.UserLoginWindow = Ext.extend(Ext.Window, {
             items       : [
                 {
                     fieldLabel  : 'User',
-                    name        : 'user'
+                    name        : 'username'
                 },
                 {
                     inputType   : 'password',
