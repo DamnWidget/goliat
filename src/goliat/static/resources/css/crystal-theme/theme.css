@@ -1,0 +1,33 @@
+/*
+
+  Goliat: The Twisted and ExtJS Web Framework
+  Copyright (C) 2010  Open Phoenix IT
+
+  This program is free software; you can redistribute it and/or
+  modify it under the terms of the GNU General Public License
+  as published by the Free Software Foundation; either version 2
+  of the License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+*/
+
+.taskbar_item { padding: 2px 5px; font: 11px tahoma; cursor: pointer; -moz-user-select: none; }
+.taskbar_item img { margin: -1px 4px -1px 0; width: 16px; height: 16px; vertical-align: middle; }
+.x-goliat-display .x-form-item { overflow: hidden; line-height: 12px; }
+.x-goliat-display label.x-form-item-label { color: #806624; padding-rigth: 5px; text-align: right; font-size: 11px; font-weight: bold; padding: 0; }
+.x-goliat-display .x-form-element { color: #404040; font-family: verdana; font-size: 11px; }
+.x-goliat-display textarea.x-goliat-display-textarea { background: none; border: none; }
+.x-goliat-display .x-goliat-display-background-border textarea.x-goliat-display-textarea { background: none; border: 1px solid #f9d798; -moz-border-radius: 8px; -webkit-border-radius: 8px; -khtml-border-radius: 8px; }
+.x-goliat-display .x-goliat-display-background-solid { border: 1px solid #f9d798; background-color: #f9d798; -moz-border-radius: 8px; -webkit-border-radius: 8px; -khtml-border-radius: 8px; padding-left: 2px; }
+.x-goliat-display .x-goliat-display-background-border { border: 1px solid #f9d798; -moz-border-radius: 8px; -webkit-border-radius: 8px; -khtml-border-radius: 8px; }
+.x-goliat-display .x-goliat-display-declaration { color: #ffffff; font-size: 12px; font-weight: bold; }
+.x-goliat-display .x-goliat-display-header { color: #000000; font-size: 10px; font-weight: bold; }
+.x-goliat-display .x-goliat-display-background-declaration { position: absolute; left: 5px; bottom: 6px; }

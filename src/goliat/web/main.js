@@ -49,7 +49,8 @@ GoliatServiceAdmin.workspace = function(){
             return new ServiceAdmin.window.UserLoginWindow({
                 title       : 'Login to Goliat Services Admin',
                 scope       : this,
-                handler     : this.onLogin
+                handler     : this.onLogin,
+                method      : 'GET'
             });
         },
         

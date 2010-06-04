@@ -39,6 +39,7 @@ Goliat.layout.TwoColumnsHLayout = Ext.extend(Object, {
         sidePanel = new Goliat.SidePanel({
             itemId          : 'sidePanel',
             region          : 'west',
+            layout          : 'fit',
             width           : 208,
             split           : true,    
             minSize         : 208,

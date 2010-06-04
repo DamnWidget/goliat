@@ -42,18 +42,17 @@ Goliat.MessageBox = function() {
         shim: true,
         bodyStyle: "padding: 8px;",
         buttonAlign: "center",
-    };
-    
-    informationText = 'Information';
-    confirmText = 'Confirmation';
-    errorText = 'Error';
-    acceptText = 'Accept';
-    yesText = 'Yes';
-    noText = 'No';
+    };    
     
     var dialog = false;
     
-    return {        
+    return {
+        informationText : 'Information',
+        confirmText     : 'Confirmation',
+        errorText       : 'Error',
+        acceptText      : 'Accept',
+        yesText         : 'Yes',
+        noText          : 'No',      
         
         show: function(options) {                        
             Ext.apply(opts, options);                        
@@ -69,8 +68,8 @@ Goliat.MessageBox = function() {
             this.show({
                 html    : msg,
                 iconCls : "icon_information",
-                title   : informationText,
-                buttons : [ new Ext.Button({ minWidth: 80, iconCls : "icon_accept", text    : acceptText, scope   : this, handler : function() { dialog.close(); } }) ]
+                title   : this.informationText,
+                buttons : [ new Ext.Button({ minWidth: 80, iconCls : "icon_accept", text    : this.acceptText, scope   : this, handler : function() { dialog.close(); } }) ]
             });
             return this;
         },
@@ -79,12 +78,12 @@ Goliat.MessageBox = function() {
             this.show({
                 html    : msg,
                 iconCls : "icon_confirm",
-                title   : confirmText,
+                title   : this.confirmText,
                 buttons : [
                     new Ext.Button({
                         minWidth: 80,
                         iconCls: "icon_accept",
-                        text: yesText,
+                        text: this.yesText,
                         scope: this,
                         handler: function() {
                             dialog.close();
@@ -94,7 +93,7 @@ Goliat.MessageBox = function() {
                     new Ext.Button({
                         minWidth: 80,
                         iconCls: "icon_cancel",
-                        text: noText,
+                        text: this.noText,
                         scope: this,
                         handler: function() {
                             dialog.close();
@@ -110,8 +109,8 @@ Goliat.MessageBox = function() {
             this.show({
                 html    : msg,
                 iconCls : "icon_error",
-                title   : errorText,
-                buttons : [ new Ext.Button({ minWidth: 80, iconCls : "icon_accept", text    : acceptText, scope   : this,
+                title   : this.errorText,
+                buttons : [ new Ext.Button({ minWidth: 80, iconCls : "icon_accept", text    : this.acceptText, scope   : this,
                     handler : function() {
                         dialog.close();
                         if (callback) callback.call(scope || window, "ok");
@@ -119,14 +118,8 @@ Goliat.MessageBox = function() {
                 })]
             });
             return this;
-        },
+        }       
         
-        informationText: 'Information',
-        acceptText: 'Accept',
-        confirmText: 'Confirmation',
-        errorText: 'Error',
-        yesText: 'Yes',
-        noText: 'No'
     };    
 }();
 

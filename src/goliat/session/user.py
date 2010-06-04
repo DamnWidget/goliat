@@ -169,6 +169,8 @@ class UserProfileProxy(object):
                 getattr(_temp_module, self.user_profile_class)):
                 self.user_profile=\
                     getattr(_temp_module, self.user_profile_class)()
+                self._raw_module=getattr(_temp_module,
+                    self.user_profile_class)
             else:
                 err_msg='{0} does not implement IUserProfile Interface'.format(
                     self.user_profile_class)
@@ -181,10 +183,10 @@ class UserProfileProxy(object):
     def load(self, userid):
         """Loads the user profile."""
         if self.user_profile:
-            find_str='.user_id == {0}'.format(userid)
+            #find_str='.user_id == {0}'.format(userid)
             self.user_profile=self.store.find(
-                eval(self.user_profile_class),
-                eval(self.user_profile_class+find_str)).one()
+                self._raw_module,
+                self._raw_module.user_id==userid).one()
 
     def save(self):
         """Saves the user profile."""
@@ -220,6 +222,7 @@ class User(object):
     def load(self, uid):
         """Loads the uid user from the database."""
         self.userdata.load(uid)
+        self.userprofile.load(uid)
         self.groups=self.userdata.groups.split(',')
 
     def save(self):
@@ -301,6 +304,28 @@ class User(object):
         Returns true if the user is active.
         """
         return self.userdata.is_active
+
+    def __rpr__(self):
+        """
+        Representation of a user.
+        """
+        repr=dict()
+        repr['sid']=self.session.uid
+        repr['uid']=self.get_uid()
+        repr['name']=self.get_name()
+        repr['groups']=self.get_groups()
+        if self.get_creation_date()!=None:
+            repr['creation_date']=self.get_creation_date().isoformat()
+        else:
+            repr['creation_date']=''
+        if self.get_last_login()!=None:
+            repr['last_login']=self.get_last_login().isoformat()
+        else:
+            repr['last_login']=''
+        repr['active']=self.is_active()
+
+        return repr
+
 
 registerAdapter(User, GoliatSession, IUser)
 

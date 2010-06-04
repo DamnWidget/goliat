@@ -86,7 +86,7 @@ class ResourcesLoader(object):
         self._root.putChild('css', static.File('web/css'))
 
         # User paths related
-        for key, value in self._options['respath']:
+        for key, value in self._options['respath'].iteritems():
             if FilePath(value).exists():
                 self._root.putChild(key, static.File(value))
 

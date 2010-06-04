@@ -73,6 +73,7 @@ class Page(resource.Resource):
         self._options['rl']['orbited']=options['orbited']
         self._options['rl']['extjsTheme']=options['ext_theme']
         self._options['rl']['goliatTheme']=options['goliat_theme']
+        self._options['rl']['respath']=eval(options.get('respath', "{}"))
         if len(options['app_desc']):
             self._options['title']=options['app_desc']
         if len(options['meta_description']):

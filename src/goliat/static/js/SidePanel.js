@@ -45,6 +45,53 @@ Goliat.SidePanel = Ext.extend(Ext.Panel, {
     initComponent: function() {        
         this.addEvents( 'log', 'debug', 'warn', 'error' );
         Goliat.SidePanel.superclass.initComponent.call(this, arguments); 
+        
+        if(this.url) {
+            Ext.Ajax.request({
+                url         : this.url,
+                method      : 'GET',                
+                scope       : this,
+                callback    : function(options, success, result) {                    
+                    if(success == true) {                
+                        var jsonData;
+                        try {
+                            jsonData = Ext.decode(result.responseText);
+                        } catch(e) {
+                            Goliat.Msg.error('The returned data is not valid data.', this);
+                        }
+                        if(jsonData.success == true) {                            
+                            for(var i = 0; i < jsonData.items.length; i++) {
+                                tmpitem = jsonData.items[i];                                                                
+                                item = {}                                
+                                item.border = false;
+                                item.hideBorders = true;
+                                item.menuType = tmpitem.menuType;
+                                item.iconCls = tmpitem.iconCls;
+                                item.title = tmpitem.title;
+                                item.items = [];
+                                if (tmpitem.items) {
+                                    for (var x = 0; x < tmpitem.items.length; x++) {
+                                        item.items.push({
+                                            iconCls: tmpitem.items[x].iconCls,
+                                            title: tmpitem.items[x].title,
+                                            xtype: tmpitem.items[x].xtype,
+                                            plugins: eval(tmpitem.items[x].plugins),
+                                        });
+                                    }
+                                }                                
+                                this.addMenu(item);       
+                                                       
+                            }
+                            this.doLayout();
+                        } else {
+                            Goliat.Msg.error(jsonData.error, this);
+                        }
+                    } else {
+                        Goliat.Msg.error('SidePanel Error:',+this.url+' does not returned valid data!', this);                
+                    }                    
+                }
+            })
+        }
     },
     
     addMenu: function(menu) {

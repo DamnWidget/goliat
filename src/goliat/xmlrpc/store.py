@@ -93,7 +93,7 @@ class XMLRPCStore(object):
         return self.error
 
     def __getattr__(self, name):
-        if self.has_errors() or self.is_started()==False:
+        if self.has_errors():
             return None
 
         return self.store.get(name)

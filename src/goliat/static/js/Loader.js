@@ -61,7 +61,8 @@ Goliat.Loader = Ext.extend(Ext.util.Observable, {
         'LogPanel'          : '/goliat/js/LogPanel',
         'MessageBox'        : '/goliat/js/MessageBox',
         'SidePanel'         : '/goliat/js/SidePanel',
-        'TabPanel'          : '/goliat/js/TabPanel',        
+        'TabPanel'          : '/goliat/js/TabPanel', 
+        'base.DetailsPanel' : '/goliat/js/base/DetailsPanel',       
         'StompClient'       : '/goliat/js/StompClient',
         'EditorWindow'      : '/goliat/js/EditorWindow',
         'LoginWindow'       : '/goliat/js/LoginWindow',
@@ -75,7 +76,12 @@ Goliat.Loader = Ext.extend(Ext.util.Observable, {
         'ThreeColumnsH'     : '/goliat/js/layout/ThreeColumnsHLayout',
         'ThreeColumnsFh'    : '/goliat/js/layout/ThreeColumnsFhLayout',
         'MainWindow'        : '/goliat/js/layout/MainWindowLayout',
-        'MainWindowMenu'    : '/goliat/js/layout/MainWindowMenu'        
+        'MainWindowMenu'    : '/goliat/js/layout/MainWindowMenu',
+        'DisplayLayout'     : '/goliat/js/layout/DisplayLayout',
+        'DisplayPanel'      : '/goliat/js/display/DisplayPanel',
+        'DisplayField'      : '/goliat/js/display/DisplayField',
+        'TextArea'          : '/goliat/js/display/TextArea',
+        'data.JsonRequest'  : '/goliat/js/data/JsonRequest',        
     },
     
     loadComponents: function() {

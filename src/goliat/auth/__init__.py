@@ -108,7 +108,12 @@ class DBCredentialsChecker(object):
             m.update(credentials.password)
             #if password==m.hexdigest():
             if password==credentials.password:
-                return defer.succeed(id)
+                from goliat.session.usermanager import UserManager
+                if not UserManager().exists(id):
+                    return defer.succeed(id)
+                else:
+                    return defer.fail(
+                        error.LoginFailed('Already Logged'))
             else:
                 return defer.fail(
                     error.UnauthorizedLogin('Username or Password mismatch'))
