@@ -52,3 +52,9 @@ if(Goliat.TabPanel) {
 if(Goliat.Many2onePanel) {
     Goliat.ModelStore.prototype.messages.transactionError = 'Error en la transmisión de datos';
 }
+
+if(Goliat.UserLoginWindow) {
+    Goliat.UserLoginWindow.prototype.messages.user_login = 'Acceder';
+    Goliat.UserLoginWindow.prototype.messages.user = 'Usuario';
+    Goliat.UserLoginWindow.prototype.messages.password = 'Contraseña';
+}

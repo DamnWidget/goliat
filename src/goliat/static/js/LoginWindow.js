@@ -28,13 +28,11 @@ Ext.ns('Goliat');
  * @constructor
  */
 Goliat.UserLoginWindow = Ext.extend(Ext.Window, {
-    /**
-     * @cfg scope {Object} A reference to the handler scope
-     */
-    
-    /**
-     * @cfg handler {Object} A reference to a method to be called as callback to perform the login  
-     */
+    messages        : {
+        user_login      : 'Login',
+        user            : 'User',
+        password        : 'Password'
+    },
     
     /**
      * @private
@@ -85,12 +83,12 @@ Goliat.UserLoginWindow = Ext.extend(Ext.Window, {
             },
             items       : [
                 {
-                    fieldLabel  : 'User',
+                    fieldLabel  : this.messages.user,
                     name        : 'username'
                 },
                 {
                     inputType   : 'password',
-                    fieldLabel  : 'Password',
+                    fieldLabel  : this.messages.password,
                     name        : 'password'
                 },
                 {
@@ -98,7 +96,7 @@ Goliat.UserLoginWindow = Ext.extend(Ext.Window, {
                     style   : 'margin: 16px 0 0 64px;',
                     iconCls : 'icon_accept',
                     width   : 70,                    
-                    text    : 'Login',
+                    text    : this.messages.user_login,
                     handler : this.handler,
                     scope   : this.scope || this
                 }
