@@ -183,10 +183,11 @@ class UserProfileProxy(object):
     def load(self, userid):
         """Loads the user profile."""
         if self.user_profile:
-            #find_str='.user_id == {0}'.format(userid)
-            self.user_profile=self.store.find(
+            #find_str='.user_id == {0}'.format(userid)            
+            prf=self.store.find(
                 self._raw_module,
                 self._raw_module.user_id==userid).one()
+            self.user_profile=prf
 
     def save(self):
         """Saves the user profile."""
