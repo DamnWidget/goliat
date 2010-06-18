@@ -50,6 +50,7 @@ Goliat.Loader = Ext.extend(Ext.util.Observable, {
      * @property
      */
     modules : {
+        'ux.RowExpander'    : '/goliat/js/ux/RowExpander',
         'util.Logger'       : '/goliat/js/utils/Logger',
         'util.Format'       : '/goliat/js/utils/Format',
         'util.DomHelper'    : '/goliat/js/utils/DomHelper',

@@ -62,7 +62,7 @@ Goliat.SidePanel = Ext.extend(Ext.Panel, {
                         if(jsonData.success == true) {                            
                             for(var i = 0; i < jsonData.items.length; i++) {
                                 tmpitem = jsonData.items[i];                                                                
-                                item = {}                                
+                                item = {};                                
                                 item.border = false;
                                 item.hideBorders = true;
                                 item.menuType = tmpitem.menuType;
