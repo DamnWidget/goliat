@@ -31,3 +31,14 @@
 .x-goliat-display .x-goliat-display-declaration { color: #ffffff; font-size: 12px; font-weight: bold; }
 .x-goliat-display .x-goliat-display-header { color: #000000; font-size: 10px; font-weight: bold; }
 .x-goliat-display .x-goliat-display-background-declaration { position: absolute; left: 5px; bottom: 6px; }
+
+/*
+ * Wizard extension from MindPatterns
+ * http://www.sencha.com/forum/showthread.php?36627-2.1-Ext.ux.Wiz-a-wizard-component-for-Ext-JS&highlight=Wizard
+ */
+.ext-ux-wiz-Header { background-color:white; border-bottom:1px solid #99BBE8; }
+.ext-ux-wiz-Header-title { font-weight: bold; padding: 4px 0px 0px 4px; }
+.ext-ux-wiz-Header-step { color:#767676; text-align:right; padding:2px 4px 0px 0px; }
+.ext-ux-wiz-Header-stepIndicator-container { float:right; margin-right:6px; margin-top:8px; }
+.ext-ux-wiz-Header-stepIndicator { margin-left:28px; float:left; background-image:url(../../media/ext-ux-wiz-stepIndicator.png); background-position:6px 0px; background-repeat:repeat-x; height:6px; width:6px; }
+.ext-ux-wiz-Header-stepIndicator-active { background-position:0px 0px !important; }

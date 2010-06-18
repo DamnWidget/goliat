@@ -58,3 +58,14 @@ if(Goliat.UserLoginWindow) {
     Goliat.UserLoginWindow.prototype.messages.user = 'Usuario';
     Goliat.UserLoginWindow.prototype.messages.password = 'Contraseña';
 }
+
+if(Ext.ux.Wiz) {
+    Ext.ux.Wiz.prototype.previousButtonText = '&lt; Anterior';
+    Ext.ux.Wiz.prototype.nextButtonText = 'Siguiente &gt;';
+    Ext.ux.Wiz.prototype.cancelButtonText = 'Cancelar';
+    Ext.ux.Wiz.prototype.finishButtonText = 'Finalizar';
+}
+
+if(Ext.ux.Wiz.Header) {
+    Ext.ux.Wiz.Header.prototype.stepText = "Paso {0} de {1}: {2}";
+}
