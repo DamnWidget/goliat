@@ -44,7 +44,7 @@ Goliat.layout.ThreeColumnsLayout = Ext.extend(Object, {
             minSize         : 208,
             maxSize         : 400,                
             bodyStyle       : 'background: #ffffff;',
-            items           : [],                        
+            items           : []                        
         });
         
         sidePanel2 = new Goliat.SidePanel({            
@@ -55,7 +55,7 @@ Goliat.layout.ThreeColumnsLayout = Ext.extend(Object, {
             minSize         : 208,
             maxSize         : 400,                
             bodyStyle       : 'background: #ffffff;',
-            items           : [],                        
+            items           : []                        
         });
         
         centerPanel = new Ext.Panel({

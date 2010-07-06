@@ -19,6 +19,8 @@
 
 */
 
+Ext.ns('Goliat', 'Goliat.util', 'Ext.ux');
+
 if(Goliat.StompClient) {
     Goliat.StompClient.prototype.subscribeError = 'Se ha intentado iniciar el servicio stomp sin definir un canal al que subscribirse.';
     Goliat.StompClient.prototype.onopenMessage = 'La conexión con el Transporte Stomp se ha realizado correctamente.';

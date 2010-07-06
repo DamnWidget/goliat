@@ -31,7 +31,7 @@ Ext.ns('Goliat');
  */
 Goliat.TabPanel = Ext.extend(Ext.TabPanel, {
     messages        : {        
-        tabAlreadyAdded : 'The component panel {0} with type {1} already exists on panel. Skipping...',
+        tabAlreadyAdded : 'The component panel {0} with type {1} already exists on panel. Skipping...'
     },
     
     initComponent: function() {

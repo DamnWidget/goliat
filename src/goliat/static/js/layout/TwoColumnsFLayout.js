@@ -44,7 +44,7 @@ Goliat.layout.TwoColumnsFLayout = Ext.extend(Object, {
             minSize         : 208,
             maxSize         : 400,                
             bodyStyle       : 'background: #ffffff;',
-            items           : [],
+            items           : []
         });
         
         centerPanel = new Ext.Panel({
@@ -61,7 +61,7 @@ Goliat.layout.TwoColumnsFLayout = Ext.extend(Object, {
             itemId          : 'bottomPanel',
             region          : 'south',            
             height          : 100,
-            minSize         : 100,                                                    
+            minSize         : 100                                                    
         });
         
         this.items = [ sidePanel, centerPanel, bottomPanel ];

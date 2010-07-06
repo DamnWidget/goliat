@@ -31,7 +31,7 @@ Goliat.form.RelationField = Ext.extend(Ext.form.TriggerField, {
     messages            : {
         title   : 'Select a {0}',
         cancel  : 'Cancel',
-        select  : 'Select',
+        select  : 'Select'
     },
     
     initComponent: function() {
@@ -77,7 +77,7 @@ Goliat.form.RelationField = Ext.extend(Ext.form.TriggerField, {
                         width   : 120,
                         sortable: true
                     },
-                    columns: this.modelStore.parseColumnModel(),
+                    columns: this.modelStore.parseColumnModel()
                 }),
                 viewConfig  : { forceFit : true },
                 sm          : new Ext.grid.RowSelectionModel({singleSelect:true}),

@@ -54,7 +54,7 @@ Goliat.EditorWindow = Ext.extend(Ext.Window, {
         });
         
         this.addEvents({
-            recordsaved: true,
+            recordsaved: true
         });
         
         Goliat.EditorWindow.superclass.initComponent.call(this);

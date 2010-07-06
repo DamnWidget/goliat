@@ -41,7 +41,7 @@ Goliat.MessageBox = function() {
         footer: true,
         shim: true,
         bodyStyle: "padding: 8px;",
-        buttonAlign: "center",
+        buttonAlign: "center"
     };    
     
     var dialog = false;

@@ -27,6 +27,14 @@ Ext.ns('Goliat');
  * A class to manage application logins
  * @constructor
  */
+Goliat.UserLoginWindow = function(options) {
+    Ext.applyIf(this, options);
+    if(!options.url) {
+        this.url = '/login';
+    }
+    Goliat.UserLoginWindow.superclass.constructor.call(this);   
+};
+
 Goliat.UserLoginWindow = Ext.extend(Ext.Window, {
     messages        : {
         user_login      : 'Login',
@@ -67,7 +75,7 @@ Goliat.UserLoginWindow = Ext.extend(Ext.Window, {
             labelWidth  : 72,            
             border      : false,            
             bodyStyle   : 'background: transparent;',                                    
-            url         : '/login',
+            url         : this.url,
             defaults    : {
                 allowBlank      : false,
                 labelSeparator  : '',

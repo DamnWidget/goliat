@@ -35,7 +35,7 @@ import os
 from goliat._version import version
 from goliat.http import headers
 from goliat.modulemgr import ModuleManager
-from goliat.webserver import resources
+from goliat.webserver import rloader
 
 class Page(resource.Resource):
     """The Goliat Page Object.
@@ -86,7 +86,7 @@ class Page(resource.Resource):
         # Set page description
         self._header.set_description(self._options['description'])
         # Set the ResourcesLoader
-        self._loader=resources.ResourcesLoader(self, self._options['rl'])
+        self._loader=rloader.ResourcesLoader(self, self._options['rl'])
         self._loader.setup(self._mgr)
 
     def getChild(self, path, request):

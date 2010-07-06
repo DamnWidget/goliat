@@ -60,9 +60,9 @@ Goliat.SidePanel = Ext.extend(Ext.Panel, {
                             Goliat.Msg.error('The returned data is not valid data.', this);
                         }
                         if(jsonData.success == true) {                            
-                            for(var i = 0; i < jsonData.items.length; i++) {
+                            for(var i = 0; i < jsonData.items.length; i++) {                                
                                 tmpitem = jsonData.items[i];                                                                
-                                item = {};                                
+                                var item = {};                                
                                 item.border = false;
                                 item.hideBorders = true;
                                 item.menuType = tmpitem.menuType;
@@ -75,7 +75,7 @@ Goliat.SidePanel = Ext.extend(Ext.Panel, {
                                             iconCls: tmpitem.items[x].iconCls,
                                             title: tmpitem.items[x].title,
                                             xtype: tmpitem.items[x].xtype,
-                                            plugins: eval(tmpitem.items[x].plugins),
+                                            plugins: eval(tmpitem.items[x].plugins)
                                         });
                                     }
                                 }                                

@@ -147,3 +147,80 @@ class SessionCookieCredentialsChecker(object):
         else:
             return defer.fail(
                 error.UnauthorizedLogin('Cookie don\'t own an authed session'))
+
+class ICryptoApplet(ICredentials):
+    def check_session(self):
+        """
+        Validate cookie credentials.
+        """
+
+class CryptoApplet:
+    implements(ICryptoApplet)
+    def __init__(self, request):
+        self.request=request
+
+    def check_session(self):
+        return self.request.getSession().is_authed()
+
+    def get_uid(self):
+        return self.request.getSession().uid
+
+class CryptoAppletCredentialsChecker(object):
+    """
+    Checks the credentials of incomming connections against a digital cert.
+    """
+    implements(ICredentialsChecker)
+
+    def __init__(self):
+        self.credentialInterfaces=(ICryptoApplet)
+        self.store=Store(Database().get_database())
+
+    def requestAvatarId(self, credentials):
+        """
+        Authenticate against digital certification.
+        """
+        for interface in self.credentialInterfaces:
+            if interface.providedBy(credentials):
+                break;
+        else:
+            raise error.UnhandledCredentials()
+        from goliat.session.user import UserData
+        # Ask the database for the username        
+        result=self.store.find(
+            UserData, UserData.username==unicode(credentials.nif)).one()
+        # Authenticate the user
+        return self._auth(result, credentials)
+
+    def _auth(self, result, credentials):
+        if result==None:
+            # Username not found in db            
+            return defer.fail(
+                error.UnauthorizedLogin('User does not exists.'))
+        else:
+            id=result.id
+            password=result.password
+
+        if IUsernameHashedPassword.providedBy(credentials):
+            if credentials.checkPassword(password):
+                return defer.succeed(id)
+            else:
+                return defer.fail(
+                    error.UnauthorizedLogin('Username or Password mismatch'))
+        elif IUsernamePassword.providedBy(credentials):
+            m=hashlib.md5()
+            m.update(credentials.password)
+            #if password==m.hexdigest():
+            if password==credentials.password:
+                from goliat.session.usermanager import UserManager
+                if not UserManager().exists(id):
+                    return defer.succeed(id)
+                else:
+                    return defer.fail(
+                        error.LoginFailed('Already Logged'))
+            else:
+                return defer.fail(
+                    error.UnauthorizedLogin('Username or Password mismatch'))
+        else:
+            # Wooops!            
+            return defer.fail(
+                error.UnhandledCredentials('Revise the protocol configuration'))

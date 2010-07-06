@@ -83,7 +83,7 @@ Goliat.Loader = Ext.extend(Ext.util.Observable, {
         'DisplayPanel'      : '/goliat/js/display/DisplayPanel',
         'DisplayField'      : '/goliat/js/display/DisplayField',
         'TextArea'          : '/goliat/js/display/TextArea',
-        'data.JsonRequest'  : '/goliat/js/data/JsonRequest',        
+        'data.JsonRequest'  : '/goliat/js/data/JsonRequest'        
     },
     
     loadComponents: function() {
