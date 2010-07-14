@@ -159,11 +159,6 @@ class ResourcesLoader(object):
                 '<script type="text/javascript" characterSet="utf-8" ' \
                 'src="/goliat/js/goliat-min.js"></script>')
 
-        self._root.add_script(
-            '<script type="text/javascript" characterSet="utf-8" ' \
-            'src="/goliat/js/locale/goliat-lang-{0}.js"></script>'.format(
-                self._options['locale']))
-
         # ===========================
         # Application main
         # (Coded by User)
@@ -189,6 +184,14 @@ class ResourcesLoader(object):
         # Append Resources to the root object        
         for module in module_manager.get_modules():
             self._root.putChild(module.get_url_path(), module.get_module())
+
+        # ===========================
+        # Locales
+        # ===========================
+        self._root.add_script(
+            '<script type="text/javascript" characterSet="utf-8" ' \
+            'src="/goliat/js/locale/goliat-lang-{0}.js"></script>'.format(
+                self._options['locale']))
 
 
     def _load_scripts(self):

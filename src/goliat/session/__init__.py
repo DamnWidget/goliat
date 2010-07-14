@@ -39,6 +39,7 @@ from twisted.python.components import proxyForInterface
 from twisted.web.server import Session
 from twisted.web import util
 from twisted.python.filepath import FilePath
+from twisted.web import http
 
 from goliat.auth import SessionCookie, ISessionCookie
 from goliat.auth.login import Login
@@ -64,7 +65,20 @@ class UnauthorizezResource(object):
     implements(IResource)
     isLeaf=True
 
+    def __init__(self, error):
+        """
+        Initialization.
+        """
+        self._error=error
+        if error=='Username or Password mismatch':
+            self._error_no=http.UNAUTHORIZED
+        elif error=='Already Logged':
+            self._error_no=http.CONFLICT
+
     def render(self, request):
+        return getattr(self, 'render_'+request.method)(request)
+
+    def render_GET(self, request):
         """
         Create a custom or generic Login/Access to the Application.
         """
@@ -79,7 +93,13 @@ class UnauthorizezResource(object):
             root=IResource(Login(
                 ConfigManager().get_config('Goliat')['Project']))
 
+        request.setResponseCode(http.UNAUTHORIZED)
         return root.render(request)
+
+    def render_POST(self, request):
+        import json
+        request.setResponseCode(http.UNAUTHORIZED)
+        return json.dumps({'success' : False, 'message' : self._error , 'error' : self._error_no})
 
     def getChildWithDefault(self, path, request):
         """
@@ -203,7 +223,7 @@ class SessionManager(object):
         error page (for anything else).
         """
         if result.check(error.Unauthorized, error.LoginFailed):
-            return UnauthorizezResource()
+            return UnauthorizezResource(result.getErrorMessage())
         else:
             log.err(
                 result,

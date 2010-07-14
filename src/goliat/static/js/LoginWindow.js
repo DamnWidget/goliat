@@ -27,14 +27,6 @@ Ext.ns('Goliat');
  * A class to manage application logins
  * @constructor
  */
-Goliat.UserLoginWindow = function(options) {
-    Ext.applyIf(this, options);
-    if(!options.url) {
-        this.url = '/login';
-    }
-    Goliat.UserLoginWindow.superclass.constructor.call(this);   
-};
-
 Goliat.UserLoginWindow = Ext.extend(Ext.Window, {
     messages        : {
         user_login      : 'Login',
@@ -65,12 +57,17 @@ Goliat.UserLoginWindow = Ext.extend(Ext.Window, {
             })
         }
         
+        Ext.applyIf(this, {
+            url : '/login'
+        });
+        
         Goliat.UserLoginWindow.superclass.initComponent.call(this);
     },
     
     buildForm : function() {
         return {
             xtype       : 'form',
+            itemId      : 'formPanel',
             defaultType : 'textfield',
             labelWidth  : 72,            
             border      : false,            
@@ -100,7 +97,7 @@ Goliat.UserLoginWindow = Ext.extend(Ext.Window, {
                     name        : 'password'
                 },
                 {
-                    xtype   : 'button',
+                    xtype   : 'button',                    
                     style   : 'margin: 16px 0 0 64px;',
                     iconCls : 'icon_accept',
                     width   : 70,                    

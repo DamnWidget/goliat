@@ -29,3 +29,6 @@ Created on 02/04/2010 19:25:23
 @summary: Goliat Http
 @version: 0.1
 '''
+SESSION_NOT_AUTHED=600
+SESSION_NOT_ACTIVE=601
+SESSION_NOT_VALID=602

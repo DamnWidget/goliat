@@ -50,6 +50,7 @@ Goliat.Loader = Ext.extend(Ext.util.Observable, {
      * @property
      */
     modules : {
+        'session.Session'   : '/goliat/js/session/Session',
         'ux.Wizard'         : '/goliat/js/ux/Wizard',
         'ux.RowExpander'    : '/goliat/js/ux/RowExpander',
         'util.Logger'       : '/goliat/js/utils/Logger',

@@ -19,8 +19,6 @@
 
 */
 
-Ext.ns('Goliat', 'Goliat.util', 'Ext.ux');
-
 if(Goliat.StompClient) {
     Goliat.StompClient.prototype.subscribeError = 'Se ha intentado iniciar el servicio stomp sin definir un canal al que subscribirse.';
     Goliat.StompClient.prototype.onopenMessage = 'La conexión con el Transporte Stomp se ha realizado correctamente.';
@@ -59,6 +57,17 @@ if(Goliat.UserLoginWindow) {
     Goliat.UserLoginWindow.prototype.messages.user_login = 'Acceder';
     Goliat.UserLoginWindow.prototype.messages.user = 'Usuario';
     Goliat.UserLoginWindow.prototype.messages.password = 'Contraseña';
+}
+
+if(Goliat.session.Session) {
+    Goliat.session.Session.prototype.messages.title = 'Autenticación';
+    Goliat.session.Session.prototype.messages.mas = 'Por favor, espere...';
+    Goliat.session.Session.prototype.messages.logout = '¿Está seguro de que quiere cerrar su sesión?';
+    Goliat.session.Session.prototype.messages.mask_logout = 'Desconectando';
+    Goliat.session.Session.prototype.messages.trans_err = 'Transacción web fallida!.';
+    Goliat.session.Session.prototype.messages.invalid = 'Los datos devueltos estan corruptos.';
+    Goliat.session.Session.prototype.messages[401] = 'Nombre de usuario o contraseña incorrectos.';
+    Goliat.session.Session.prototype.messages[409] = 'El usuario ya esta logeado.';  
 }
 
 if(Ext.ux.Wiz) {

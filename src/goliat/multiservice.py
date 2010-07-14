@@ -73,6 +73,7 @@ class MultiService(Borg):
     def register_service(self, name):
         """Register a service"""
         self._serviceObjects[name]=Service(name)
+        self._serviceObjects[name].load()
 
     def register_new_services(self):
         """Register new services found at /services application directory."""
@@ -91,13 +92,15 @@ class MultiService(Borg):
             self.register_service(file)
 
         for name, obj in self._serviceObjects.iteritems():
-            log.msg('Registering service {0} on port {1}...'.format(
-                name, obj.get_port()))
-            self._service[name]=internet.TCPServer(obj.get_port(),
-                obj.getFactory())
-            self._service[name].set_name(name)
+            print 'Registering service {0} on port {1}...'.format(
+                name, obj.get_port())
+            if hasattr(obj, 'get_service'):
+                self._service[name]=obj.get_service().get_service()
+            else:
+                self._service[name]=internet.TCPServer(obj.get_port(),
+                    obj.get_factory())
+            self._service[name].setName(name)
             self._service[name].setServiceParent(self._application)
-            self._service[name].set_description(obj.get_description())
 
     def create_service_admin_page(self):
         """Create the services admin page."""
@@ -130,7 +133,7 @@ class Service(object):
     _loaded=False
 
     def __init__(self, name):
-        super(Service, self).__init__(self)
+        super(Service, self).__init__()
         self._name=name.replace('.py', '')
 
     def load(self):

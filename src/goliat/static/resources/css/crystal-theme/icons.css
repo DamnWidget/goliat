@@ -41,6 +41,7 @@
 .icon_help { background-image: url(../../media/crystal-theme/16x16/actions/help.png) !important; }
 .icon_home { background-image: url(../../media/crystal-theme/16x16/actions/demo.png) !important; }
 .icon_user { background-image: url(../../media/crystal-theme/16x16/actions/identity.png) !important; }
+.icon_cert { background-image: url(../../media/crystal-theme/16x16/mimetypes/encrypted.png) !important; }
 
 /* 32x32 */
 .icon_accept_32 { background-image: url(../../media/crystal-theme/32x32/actions/apply.png) !important; }
