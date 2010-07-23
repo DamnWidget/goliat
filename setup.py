@@ -56,12 +56,12 @@ def main(args):
             'Would you like to install the twisted branch from storm bazaar repository? (recommended)'
             if userquery(prompt)=="Yes":
                 try:
-                    from bzrlib import bzrdir
+                    from bzrlib import bzrdir, errors
                     accelerator_tree, source=bzrdir.BzrDir.open_tree_or_branch('http://bazaar.launchpad.net/~therve/storm/twisted-integration')
                     try:
                         print 'The installation script is donwloading the Bazaar repository...'
                         source.create_checkout('./twisted-storm', None, True, accelerator_tree)
-                    except bzrlib.errors.FileExists:
+                    except errors.FileExists:
                         pass
                     currdir=os.getcwd()
                     os.chdir('twisted-storm')
@@ -94,7 +94,7 @@ def main(args):
             if userquery(prompt)=="Yes":
 
                 currdir=os.getcwd()
-                os.chdir('twisted-storm')
+                os.chdir('evoque-0.4')
                 from subprocess import Popen, PIPE
                 p=Popen('python2.6 setup.py {0}'.format(args[0]).split(' '), stdout=PIPE, stderr=PIPE)
                 print '\n{0}ing Goliat Evoque\n'.format(args[0].capitalize())
