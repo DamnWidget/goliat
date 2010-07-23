@@ -30,6 +30,7 @@ Created on 06/05/2010 19:15:14
 @version: 0.1
 '''
 from storm.exceptions import ProgrammingError
+from twisted.internet import defer
 from goliat.utils.borg import Borg
 from goliat.database import Database
 from goliat.utils import config
@@ -48,24 +49,49 @@ class Model(Borg):
         return (self._schema.get_model_schema(model.__storm_table__),
                 self._schema.get_model_view(model.__storm_table__))
 
-    def view(self, model, controller):
+    def view(self, model):
         """Perform read CRUD action."""
-        def cb_find(results):
-            return results.all().addCallback(cb_sendback)
 
-        def cb_sendback(results):
-            ret=list()
+        def cb_find(results):
+            return results.all().addCallback(cb_order)
+
+        def cb_order(results):
+            ret=[]
             for row in results:
                 ret.append(self._parse_result_with_schema(row,
                     self.get_model_info(model)[0]))
-            controller._sendback(ret)
+            return ret
 
         if _cfg.get_config('Goliat')['Project']['tos']:
             return model.store.find(model).addCallback(cb_find)
         else:
-            return cb_sendback(model.store.find(model))
+            result=cb_order(model.store.find(model))
+            return defer.succeed(result)
 
-    def get(self, id, model, controller):
+    def get(self, id, model):
+        """Perform read CRUD action."""
+
+        def cb_order(result):
+            if not result:
+                return {
+                    'success' : False,
+                    'message' : 'ID {0} doesn\'t exists on {1} table'.format(
+                    id, model.__storm_table__)
+                }
+            data=self._parse_result_with_schema(result,
+                self.get_model_info(model)[0])
+            return {'success' : True, 'data' : data}
+
+        if id=='url':
+            return {'success' : True, 'data' : { 'url' : model.get_register_url() }}
+
+        if _cfg.get_config('Goliat')['Project']['tos']:
+            return model.store.get(model, id).addCallback(cb_order)
+        else:
+            result=cb_order(model.store.get(model, id))
+            return defer.succeed(result)
+
+    def get2(self, id, model, controller):
         """Perform read CRUD action."""
         def cb_sendback(result):
             if result==None:
@@ -219,7 +245,7 @@ class Model(Borg):
         """Parses the row result using the model schema."""
         ret=dict()
         for field in schema:
-            if field.get('relation')!=None:
+            if field.get('relation'):
                 continue
             ret[field['name']]=row.__getattribute__(field['name'])
 

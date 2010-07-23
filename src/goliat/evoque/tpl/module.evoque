@@ -29,12 +29,15 @@ Created on ${module_creation_date}
 @summary: ${module_name} Module
 @version: 0.1
 '''
-from twisted.web import resource, server
+from twisted.web import server
 import json
 
+from goliat.webserver import gresource
+from goliat.session.user import IUser, UserData
+from goliat import http
 ${module_model_import}
 
-class ${module_name}(resource.Resource):
+class ${module_name}(gresource.GResource):
     """${module_name} class:"""
     
     
@@ -43,7 +46,7 @@ class ${module_name}(resource.Resource):
         
         ADD YOUR INITIALIZATION CODE HERE
         """
-        resource.Resource.__init__(self)
+        gresource.GResource.__init__(self)
     
     def render_GET(self, request):
         """Process GET Request."""
@@ -60,14 +63,4 @@ class ${module_name}(resource.Resource):
         return ${module_register_path}
     
     ${module_get_schema_model}
-    
-    def _sendback(self, result):
-        """Return back the processed request to the UI.
-        
-        This method is called by callbacks to return back results to the
-        browser.
-        """
-        self._request.write(json.dumps(result))
-        self._request.finish()
-        self._request = None 
         

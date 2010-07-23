@@ -1,0 +1,35 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+  <title>${title}</title>
+</head>
+<body>
+$evoque{header.html}
+ 
+$begin{greeting}<p>Hello, ${you}!</p>$end{greeting}
+
+$evoque{#greeting, you=user}
+$evoque{#greeting, you="me"}
+$evoque{#greeting, you="world"}
+
+<h2>Loop</h2>
+$if{items}
+    <ul>
+    $for{idx, item in enumerate(items)}
+        #[ 
+          An alternative to the expression below could also be an inlined
+          if statement (that many templating systems are unable to do), such as:
+              $if{idx+1==len(items)} class="last"$fi 
+          but it evaluates a little slower 
+        ]#
+        <li${idx+1==len(items) and " class='last'" or ""}>${item}</li>
+    $rof
+    </ul>
+$fi
+
+$evoque{footer.html}
+$test{ title='Just a test', user='joe', items=['a', '<b/>', 'c'] }
+</body>
+</html>

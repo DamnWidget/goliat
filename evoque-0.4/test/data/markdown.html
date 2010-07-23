@@ -1,0 +1,10 @@
+$begin{my-markdown-template}
+### From a markdown template!
+
+- item one 
+- item two ${param}
+$end{my-markdown-template}
+\
+<div class="markdown-output">
+$evoque{#my-markdown-template, filters=[markdown], param="<xml/>"}\
+</div>

@@ -1,0 +1,34 @@
+$prefer{ raw=False, quoting="xml" }
+$begin{snapshot}
+$begin{table_row}
+    $for{ col in row }
+        <td>${col}</td>
+    $else
+        <td class="empty" colspan="7">empty row</td>
+    $rof
+$end{table_row}
+
+<table>
+    $for{ i, row in enumerate(table) }
+        <tr$if{ i%2 } class="odd"$fi> #[ styled blueish ]#
+            $evoque{#table_row}
+        </tr>
+    $rof
+</table>
+
+$evoque{table_legend, collection="tech_docs"}
+$evoque{data_disclaimer}
+
+$test{ table=[("a","b",3.0,"d","<escape-me/>","i","j")] }
+$end{snapshot}
+
+$evoque{#snapshot, raw=True, quoting="str" }
+
+$begin{snapshot_xml}
+$evoque{#snapshot, raw=True}
+$end{snapshot_xml}
+
+$begin{preferences}
+$prefer{ raw=True, data=dict(what="template"), quoting="str", filters=[upper] }
+should refresh [quoting: None or !="str"] when ${what} is loaded
+$end{preferences}\

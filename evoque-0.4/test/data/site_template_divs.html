@@ -1,0 +1,13 @@
+$begin{header}site-div: <h1>${title}</h1>$end{header}
+$begin{content}site-div: ${message}$end{content}
+$begin{footer}site-div: ${footer}$end{footer}
+<html>
+<head><title>site-div: ${title}</title></head>
+<body>
+    <div class="layout">
+        <div class="header">$evoque{#header}</div>
+        <div class="content">$evoque{#content}</div>
+        <div class="footer">$evoque{#footer}</div>
+    </div>
+</body>
+</html>

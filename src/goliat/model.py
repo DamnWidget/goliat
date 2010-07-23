@@ -149,8 +149,8 @@ class Generator(object):
                                 rel['foreignTable']))))
                 elif rel['type']=='many2one':
                     _reference='ReferenceSet'
-                    _attributes.append(('{0}'.format(field,
-                    '{0}("{1}.{2}", "{3}.{4})'.format(
+                    _attributes.append((field, '{0}'.format(
+                        '{0}("{1}.{2}", "{3}.{4}")'.format(
                         _reference,
                         self._generate_model_name(table),
                         rel['localKey'], self._generate_model_name(

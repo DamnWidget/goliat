@@ -1,0 +1,28 @@
+#[  Attempt to subversively build string expressions ]#
+
+#[
+    Explicitly written target expression: ().__class__.mro()[1].__subclasses__()
+]#  ${().__class__.mro()[1].__subclasses__()}
+#[
+    Subversive variation: "()."+"_"*2+"class"+"_"*2+".mro()[1]."+"_"*2+"subclasses"+"_"*2+"()"
+    evaluates (to just the str!): 
+]#  ${"()."+"_"*2+"class"+"_"*2+".mro()[1]."+"_"*2+"subclasses"+"_"*2+"()"}
+#[
+    Attempt to "set" same subsersively built expr to a loop variable 
+    and then "evaluate" that variable:
+    Note: evoque does not explicitly allow arbitrary setting of variables, 
+    except loop variables (within for loops).
+]#
+$for{expr in [
+    str("()."+"_"*2+"class"+"_"*2+".mro()[1]."+"_"*2+"subclasses"+"_"*2+"()")
+]}
+#[ 
+    evaluates (to just the str!): 
+]#  ${expr}
+#[ 
+    attempt eval(...) 
+]#  ${eval(expr)}
+#[ 
+    attempt to set a new template from_string 
+]#  ${% evoque("test", src="$${"+expr+"}", from_string=True) %}
+$rof

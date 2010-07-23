@@ -1,0 +1,16 @@
+$overlay{name=dyn_name, src=dyn_src, collection=dyn_collection, space=dyn_space }
+$prefer{ 
+    data=dict(
+        # overlay(name, src, collection, space)
+        dyn_name="overlay_naming_base.html",
+        dyn_src=None,
+        dyn_collection=None,
+        dyn_space="positive"
+    ) 
+}
+$test{ dummy=None }#[ specify a dummy param to workaround parse error when
+                       doing an "empty" test that uses the default data ]#
+$test{ dyn_name="SITE-TEMPLATE", dyn_src="overlay_naming_base.html" }
+$test{ dyn_collection="" }
+$test{ dyn_collection=None }
+$test{ dyn_space="negative" }

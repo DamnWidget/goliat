@@ -1,0 +1,12 @@
+$overlay{base.html}
+$begin{content}
+<h1>${title}</h1>
+<div style="margin:1em; padding:1em; border:1px solid gray;">
+<dl>
+  $for{ key, value in items }
+    <dt>${key}</dt>
+    <dd style="white-space:pre">${pformat(value)}</dd>
+  $rof
+</dl>
+</div>
+$end{content}

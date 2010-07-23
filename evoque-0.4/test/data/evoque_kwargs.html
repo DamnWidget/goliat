@@ -1,0 +1,29 @@
+$prefer{ 
+    data=dict(
+        # evoque(name, src, collection, raw, quoting, input_encoding, filters, **kw)
+        dyn_name="#label",
+        dyn_src=None,
+        dyn_collection=None,
+        dyn_raw=None,
+        dyn_quoting=None,
+        #dyn_input_encoding=None,
+        #dyn_filters=None,
+        
+        title="TITLE", 
+        param="PARAM"
+    ) 
+}
+$begin{label}<h1>${title}</h1><p>some ${param} text</p>$end{label}
+\
+$evoque{name=dyn_name, src=dyn_src, collection=dyn_collection, 
+    raw=dyn_raw, quoting=dyn_quoting }
+\
+$test{ dyn_name="#label"}
+$test{ dyn_name="DYNAMIC", dyn_src="#label" }
+$test{ dyn_src="evoque_kwargs.html#label" }
+$test{ dyn_collection="" }
+$test{ dyn_collection=None }
+$test{ dyn_raw=True }
+$test{ dyn_raw=False }
+$test{ dyn_quoting="str" }
+$test{ dyn_quoting="xml" }

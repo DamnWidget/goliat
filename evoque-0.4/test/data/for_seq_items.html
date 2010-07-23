@@ -1,0 +1,8 @@
+$prefer{% data={"items":[("Apples", 7), (789, 9), ("Blue", 17)]} %}
+$if{items}
+<ul>
+    $for{i, (item, code) in enumerate(items)}
+    <li$if{i+1==len(items)} class="last"$fi>${code}:${item}</li>
+    $rof
+</ul>
+$fi

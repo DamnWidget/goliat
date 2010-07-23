@@ -55,9 +55,8 @@ Goliat.MessageBox = function() {
         noText          : 'No',      
         
         show: function(options) {                        
-            Ext.apply(opts, options);                        
-                    
-            if(Ext.isWebKit) Ext.apply(opts, { width: 400 });
+            Ext.apply(opts, options);          
+            Ext.apply(opts, { autoWidth: true });
                     
             dialog = new Ext.Window(opts);            
             dialog.show();  

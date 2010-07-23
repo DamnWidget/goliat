@@ -1,0 +1,29 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+  <title>${quote(title)}</title>
+</head>
+<body>
+$evoque{header_mq.html}
+
+$begin{greeting}<p>Hello, ${quote(you)}!</p>$end{greeting}
+
+$evoque{#greeting, you=user}
+$evoque{#greeting, you="me"}
+$evoque{#greeting, you="world"}
+
+<h2>Loop</h2>
+$if{items}
+    <ul>
+    $for{idx, item in enumerate(items)}
+        <li${idx+1==len(items) and " class='last'" or ""}>${quote(item)}</li>
+    $rof
+    </ul>
+$fi
+
+$evoque{footer.html}
+$test{ title='Just a test', user='joe', items=['a', '<b/>', 'c'] }
+</body>
+</html>

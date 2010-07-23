@@ -33,7 +33,7 @@ Goliat.data.JsonRequest = function(options, callback) {
     Ext.Ajax.request({
         method      : method,
         url         : options.url,
-        params      : options.data,
+        params      : options.data || {},
         scope       : options.scope,
         callback    : function(options, success, result) {
             Ext.getBody().unmask();

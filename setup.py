@@ -66,7 +66,7 @@ def main(args):
                     currdir=os.getcwd()
                     os.chdir('twisted-storm')
                     from subprocess import Popen, PIPE
-                    p=Popen('python setup.py {0}'.format(args[0]).split(' '), stdout=PIPE, stderr=PIPE)
+                    p=Popen('python2.6 setup.py {0}'.format(args[0]).split(' '), stdout=PIPE, stderr=PIPE)
                     print '\n{0}ing Storm with twisted-integration\n'.format(args[0].capitalize())
                     ret=p.communicate()
                     if len(ret[1]):
@@ -92,17 +92,31 @@ def main(args):
             prompt='Goliat uses evoque as template engine.\n\n'+\
             'Would you like to install evoque now?'
             if userquery(prompt)=="Yes":
-                from setuptools.command.easy_install import main
-		main(['evoque'])
-		print '\nContinue.\n'
+
+                currdir=os.getcwd()
+                os.chdir('twisted-storm')
+                from subprocess import Popen, PIPE
+                p=Popen('python2.6 setup.py {0}'.format(args[0]).split(' '), stdout=PIPE, stderr=PIPE)
+                print '\n{0}ing Goliat Evoque\n'.format(args[0].capitalize())
+                ret=p.communicate()
+                if len(ret[1]):
+                    print ret[1]
+                    print '\nQuitting.'
+                    sys.exit(1)
+                print ret[0]
+                print '\nContinue.\n'
+                os.chdir(currdir)
+                #from setuptools.command.easy_install import main
+                #main(['evoque'])
+                #print '\nContinue.\n'
         try:
             import qpy
         except ImportError:
             prompt='Goliat uses qpy with evoque.\n\n'+\
             'Would you like to install qpy now?'
             if userquery(prompt)=="Yes":
-		from setuptools.command.easy_install import main
-		main(['qpy'])
+                from setuptools.command.easy_install import main
+                main(['qpy'])
                 print '\nContinue.\n'
 
     def get_package_data():

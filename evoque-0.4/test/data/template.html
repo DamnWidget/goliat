@@ -1,0 +1,54 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Content-Style-Type" content="text/css; charset=UTF-8" />
+<meta http-equiv="imagetoolbar" content="no" />
+<style type="text/css">\
+h1 {
+  color: #977;
+  font-weight: bold; \
+}\
+</style>
+<title>${title}</title>
+</head>
+<body>
+
+$begin{label}
+<h1>${title}</h1><p>some ${param} text</p>\
+$end{label}
+
+$begin{literals}<p>a $$ dollar, a literal $${expr}, \
+a % percent... { } ! \ etc.</p>$end{literals}
+
+$begin{unescaped}<p>an unescaped $ literal</p>$end{unescaped}
+
+$for{ j, thing in enumerate(things) }
+<p class="for${j%2}">${j%2} alternating thing ${thing}</p>
+$else
+<p class="forzero">otherwise... $if{flag} FLAG $else DRAPEAU $fi !!
+</p>
+$rof
+
+$if{something or other}
+<p class="ifyes">conditional ${someexpr} stuff yes </p>
+$elif{ likes_blue }
+<p class="blue">blue!</p> 
+$else
+<p class="ifno">conditional $$ stuff % no ${yo}</p>
+$fi
+
+more text #[ some #[ nested ]# comment ]# output 
+output #[ other comment ]# more text
+
+$test{ title="A Title", param="a <param/> for quoting",     
+    things=["Apples", 789, "Blue"], something=False, other=False,
+    someexpr='abc', likes_blue=False, flag="Banana", yo="Johnny" }
+$test{ things=[] }
+$test{ something=True }
+$test{ something=False, other=True }
+$test{ other=False, likes_blue=True }
+
+</body>
+</html>

@@ -34,7 +34,7 @@ from storm.base import Storm
 from storm.locals import *
 from storm import Undef
 
-from goliat.database.Store import Store
+from goliat.database.store import Store
 from goliat.database.reference import Reference, ReferenceSet
 from goliat.database import Database
 from goliat.database.model import Model

@@ -1,0 +1,18 @@
+Metadata-Version: 1.0
+Name: evoque
+Version: 0.4
+Summary: Evoque - managed eval-based freeform templating
+Home-page: http://evoque.gizmojo.org/
+Author: Mario Ruggier
+Author-email: mario@ruggier.org
+License: Academic Free License version 3.0
+Download-URL: http://gizmojo.org/dist/evoque-0.4.tar.gz
+Description: Evoque is a lightweight full-featured generic text templating engine for python with sandbox-ability, versatility and simplicity as key feature priorities. Plus: no source file format constraints; internal processing is exclusively in unicode; dynamic template inheritance; very simple way for templates to address, call and transfer evaluation context; template managed in collections, each with own settings; small footprint, with less than 1K SLOC; extremely fast.
+Keywords: text html xml template templating eval restricted sandbox
+Platform: Python >= 2.4
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2.4
+Classifier: Programming Language :: Python :: 2.5
+Classifier: Programming Language :: Python :: 2.6
+Classifier: Programming Language :: Python :: 3.0
+Classifier: Programming Language :: Python :: 3

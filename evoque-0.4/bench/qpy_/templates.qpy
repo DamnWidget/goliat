@@ -1,0 +1,58 @@
+'''
+Evoque - managed eval-based freeform templating 
+Copyright (C) 2007 Mario Ruggier <mario@ruggier.org>
+Licensed under the Academic Free License version 3.0
+URL: http://evoque.gizmojo.org/
+'''
+__url__ = "$URL: svn://gizmojo.org/pub/evoque/trunk/bench/qpy_/templates.qpy $"
+__revision__ = "$Id: templates.qpy 1099 2008-10-19 09:26:31Z mario $"
+
+
+def greeting:xml(name):
+    '<p>Hello, '
+    name
+    '!</p>'
+  
+def header:xml(title):
+    '<div id="header"><h1>'
+    title
+    '</h1></div>'
+
+def footer:xml():
+    '<div id="footer">'
+    '</div>'
+
+def page:xml(title, user, items):
+    '''<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <title>'''
+    title
+    '</title></head><body>\n'
+    header(title)
+    '<div>'
+    greeting(user)
+    '</div>\n'
+    '<div>'
+    greeting("me")
+    '</div>\n'
+    '<div>'
+    greeting("world")
+    '</div>\n'
+    '<h2>Loop</h2>'
+    if items:
+        '<ul>\n'
+        num_items = len(items)
+        class_attr = ""
+        for i, item in enumerate(items):
+            if i+1 == num_items: 
+                class_attr = ' class="last"'
+            '<li'
+            class_attr
+            '>'
+            item
+            '</li>\n'
+        '</ul>\n'
+    footer()
+    '</body></html>'

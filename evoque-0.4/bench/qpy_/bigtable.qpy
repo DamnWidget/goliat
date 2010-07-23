@@ -1,0 +1,10 @@
+def bigtable:xml(table_data):
+    "<table>\n"
+    for row in table_data:
+        "<tr>"
+        for col in row: 
+            "<td>"
+            col
+            "</td>\n"
+        "</tr>\n"
+    "\n</table>"

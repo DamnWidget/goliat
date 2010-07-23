@@ -1,0 +1,118 @@
+Evoque - managed eval-based freeform templating 
+Copyright (C) 2007 Mario Ruggier <mario at ruggier.org>
+Licensed under the Academic Free License version 3.0
+URL: http://evoque.gizmojo.org/
+------------------------------------------------------------------------------
+$URL: svn://gizmojo.org/pub/evoque/trunk/CHANGES.txt $
+$Id: CHANGES.txt 1154 2009-01-20 11:51:44Z mario $
+------------------------------------------------------------------------------
+$begin{changelog}
+
+
+### 0.4 (2009-01-21):
+
+- Evoque (package/unittests) now runs on all of python 2.4, 2.5, 2.6 and 3.0,
+  simultaneously from the same identical code base.
+- The decodeh module (encoding guessing algorithm, now even more important in
+  py3 when opening text files) becomes py3-aware by:  
+    - making read_from_file() always opens a file in binary mode  
+    - handling bytes as the non-unicode str case in py3
+- Tighter lockdown of the in-process sandbox (thanks to Daniel Diniz for 
+  feedback and additional testing) by:  
+    - fail for all expressions that include lookups for attributes starting 
+      with any of: "__", "func_", "f_", "im_", "tb_", "gi_", "throw"
+    - added "object" to the disallowed list of builtins
+- Changed behaviour of the Domain init parameter slurpy_directives=True, that 
+  now behaves in the following way: for each directive, strip all 
+  leading/trailing whitespace on the same line plus (on left) the initial 
+  newline -- if and only if the end of the line being slurped is made up of 
+  only whitespace.
+- Added whitespace test case.
+- Updated to qpy 1.7.
+- In the unit tests, replaced hash(s) as a shorthand way to compare strings
+  with explicit strings. 
+- Corrected problem with yield and try/finally that was breaking 
+  Template.test() under python 2.4.
+- In restricted mode, when initializing the globals namespace under 
+  python 2.4, the issubclass check is done against Exception as opposed 
+  to BaseException (that is not available in 2.4).
+
+
+### 0.3 (2008-09-06):
+
+- All overlay keyword parameters may now be evaluated at runtime (in the same 
+  way as for the evoque directive); in addition to the first "name" parameter, 
+  the other parameters of the overlay directive [src, collection, space] may 
+  now also be set to a variable for evaluation at runtime. 
+- Runtime evaluation of the overlay directive now explicitly raises a 
+  SyntaxError if a keyword parameter other than [name, src, collection, space]
+  is specified. 
+- Added labels, eval_overlay attributes to Template; removed overlay dict 
+  as attribute, replaced with template.get_space_overlay() that dynamically 
+  returns a (space:bool, overlay:dict) tuple on each call, where the returned
+  overlay dict contains only parameters needed for calling get_template().
+- Renamed Template methods reload() and reload_from_string() to 
+  decode() and decode_from_string().
+- Added possibility to specify a "local" src to $$evoque{} when addressing a
+  template that is (a) named (b) file-based (c) nested and (d) within the 
+  same collection; such src values must start with "#" and the calling 
+  template's file is used to normalize the src 
+  (see Evaluator.evoque()).
+- Refined the check to determine whether a KeyError during evaluation is 
+  really coming from the evaluator's lookup or from further down. 
+- Changed Template.test() method to be a generator of template evaluations,
+  thus resulting in that any successful evaluations prior to a first failure 
+  are returned.
+
+
+### 0.2 (2008-08-04):
+
+- The name first parameter of the evoque and overlay directives i.e. 
+  $$evoque{*name*} and $$overlay{*name*} may now be specified in one of the 
+  following ways:
+    - *an unquoted str arg* : interpreted literally
+    - *a quoted str arg* : interpreted literally
+    - *name=an unquoted str* : str is interpreted as variable name, and 
+        evaluated at runtime within the template's context
+    - *name=a quoted str* : interpreted literally
+- Template.unload() now recurses and unloads also any local sub-templates.
+- Adopted default logging to be standard python logger for "evoque".
+- Changed to True as default value of the "output" parameter of the 
+  builtin callable $${inspect(output=True)}.
+- Rendering of templates with raw=True now correctly processes any specified
+  post-evaluation filters.
+  
+
+### 0.1.2 (2008-07-27):
+
+- Added ext/pylons for integrating Evoque with Pylons, both as documentation 
+  (on web site) and as sample code (in distribution).
+- Corrected problem with auto-refreshing of a template with a modified value
+  for "data" in an embedded $$prefer{data=dict()} directive.
+- Removed unused methods on Template: 
+  set_locals(), set_on_locals(), set_namespace_on_locals()
+- Improved benchmark suite, in particular added benchmarks for mako in 
+  automatic quoting mode.
+- decodeh.py: added catch of ValueError from locale.getdefaultlocale(), to be
+  able to ignore exceptions of the form "ValueError: unknown locale: XXX" when
+  the LANG or any LC_* env variables are set to an unknown locale. 
+- decodeh.py: added global IGNORE_ENCS list, and added the non-existent "cp0" 
+  encoding that is sometimes returned by Windows, thus avoiding a 
+  "LookupError: unknown encoding: cp0" further downstream.
+
+
+### 0.1.1 (2008-03-23):
+
+- Fixed bug with top-level middle text (in between directive blocks) not 
+  being parsed, see: test_mid_text().
+- Some minor changes to parsing code, for better robustness and clarity.
+- Added ext/django recipe, for using evoque with django.
+- Added ext/qp/echo sample qp application.
+- Added ext/werkzeug sample WSGI application.
+
+
+### 0.1 (2008-03-07):
+
+- First public release. 
+
+$end{changelog}

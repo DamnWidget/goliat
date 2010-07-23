@@ -32,8 +32,7 @@ Ext.ns('Goliat');
 Goliat.SidePanel = Ext.extend(Ext.Panel, {
     messages        : {        
         menuAlreadyExists       : 'The component menu {0} with type {1} already exists at side panel. Skipping...'
-    },
-    style           : "padding: 8px;",
+    },    
     autoScroll      : true,
     layout          : "accordion",
     layoutConfig    : {

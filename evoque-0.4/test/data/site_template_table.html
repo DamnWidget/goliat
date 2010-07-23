@@ -1,0 +1,13 @@
+$begin{header}site-table: <h1>${title}</h1>$end{header}
+$begin{content}site-table: ${message}$end{content}
+$begin{footer}site-table: ${footer}$end{footer}
+<html>
+<head><title>site-table: ${title}</title></head>
+<body>
+    <table class="layout">
+        <tr><th>$evoque{#header}</th></tr>
+        <tr><td>$evoque{#content}</td></tr>
+        <tr><td>$evoque{#footer}</td></tr>
+    </table>
+</body>
+</html>

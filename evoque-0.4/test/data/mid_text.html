@@ -1,0 +1,19 @@
+$prefer{% 
+    data=dict(
+        sequence=("name", "spec", "default", "sample", "description")
+    ) 
+%}
+#[ 
+    Ensure that any "middle" text (between directives) is also parsed:
+    - the "${len(s)}"
+    - the "%" in width="100%"
+]#
+<div width="100%">
+$for{s in sequence}
+<p>${s}</p>
+$rof
+</div><p class="middle">${len(sequence)}</p><div width="100%">
+$for{s in sequence}
+<p>${s}</p>
+$rof
+</div>

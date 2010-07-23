@@ -1,0 +1,15 @@
+$overlay{overlay_mid.html, space="negative"}
+<html>
+<head><title>template = ${title}</title></head>
+<body>      <span> -ve space (overlay_chain_neg.html) </span>
+  $begin{content} overlay_chain_neg ${parametrized} content $end{content}
+  $begin{footer}<span>overlay_chain_neg footer</span>$end{footer}
+  <div class="header">$evoque{#header}</div>
+  <div class="content">$evoque{#content}</div>
+  <div class="refootered">
+    <div class="own">$evoque{#footer}</div>
+    <div class="overlaid">$evoque{##footer}</div>
+    <div class="named">$evoque{base.html#footer}</div>
+  </div>
+</body>
+</html>
