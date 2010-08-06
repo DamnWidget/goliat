@@ -38,9 +38,9 @@ from twisted.python import components
 from twisted.cred.checkers import ICredentialsChecker
 from twisted.web.resource import IResource
 from twisted.internet import defer
-from storm.store import Store
 
 from goliat.database import Database
+from goliat.session.userstore import UserStore
 
 class ISessionCookie(ICredentials):
     def check_session(self):
@@ -68,7 +68,6 @@ class DBCredentialsChecker(object):
 
     def __init__(self):
         self.credentialInterfaces=(IUsernamePassword, IUsernameHashedPassword)
-        self.store=Store(Database().get_database())
 
     def requestAvatarId(self, credentials):
         """
@@ -83,9 +82,10 @@ class DBCredentialsChecker(object):
             raise error.UnhandledCredentials()
         from goliat.session.user import UserData
         # Ask the database for the username and password        
-        result=self.store.find(
+        result=UserStore().get_store().find(
             UserData, UserData.username==unicode(credentials.username)).one()
-        # Authenticate the user
+        UserStore().get_store().commit()
+        # Authenticate the user        
         return self._auth(result, credentials)
 
     def _auth(self, result, credentials):

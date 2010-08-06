@@ -55,7 +55,7 @@ class Schema(object):
         """Return the schema tables"""
         try :
             tables=self._schema['database']['tables']
-        except KeyError:
+        except KeyError, TypeError:
             raise SchemaException('Unable to get tables on this database '\
                 'schema, revise your yaml schema definition.')
         return tables
@@ -64,7 +64,7 @@ class Schema(object):
         """Return the schema properties"""
         try:
             properties=self._schema['database']['_properties']
-        except KeyError:
+        except KeyError, TypeError:
             raise SchemaException('Unable to get database _properties, revise'\
                 ' your yaml schema definition.')
         return properties
@@ -73,7 +73,7 @@ class Schema(object):
         """Return data from column on table"""
         try:
             properties=self._schema['database']['tables'][table][column]
-        except KeyError:
+        except KeyError, TypeError:
             raise SchemaException('Unable to resolve column {0} properties on'\
                 ' {1} table, revise your yaml schema definition.'\
                 .format(column, table))

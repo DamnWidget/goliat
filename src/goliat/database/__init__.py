@@ -162,16 +162,10 @@ class Database(Borg):
         try:
             self._conn.execute(drop)
         except ProgrammingError, e:
-            if 'does not exist' in e[0]:
-                print 'Drop fail: ', e[0]
-            else:
-                raise ProgrammingError(e[0])
+            print 'Drop fail: ', e[0]
             self._conn.commit()
         except OperationalError, e:
-            if 'no such table' in e[0]:
-                print 'Drop fail: ', e[0]
-            else:
-                raise OperationalError(e[0])
+            print 'Drop fail: ', e[0]
             self._conn.commit()
 
         self._conn.execute(create)
@@ -181,10 +175,7 @@ class Database(Borg):
         try:
             self._conn.execute(script.split('\n')[0])
         except ProgrammingError, e:
-            if 'does not exist' in e[0]:
-                print 'Drop fail: ', e[0]
-            else:
-                raise ProgrammingError(e[0])
+            print 'Drop fail: ', e[0]
             self._conn.commit()
         self._conn.commit()
 

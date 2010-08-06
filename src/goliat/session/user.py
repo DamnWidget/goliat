@@ -34,7 +34,6 @@ import yaml
 from zope.interface import Interface, Attribute, implements
 from twisted.python.components import registerAdapter
 from storm.properties import Int, Unicode, Bool, DateTime
-from storm.store import Store
 
 from goliat.session import GoliatSession
 from goliat.utils.borg import Borg
@@ -42,6 +41,8 @@ from goliat.database import Database
 from goliat.auth.acl import Acl
 from goliat.template import TemplateManager
 from goliat.utils.config import ConfigManager
+from goliat.session.userstore import UserStore
+
 
 class UserProfileException(Exception):
     pass
@@ -138,19 +139,23 @@ class UserDataProxy(object):
 
     def __init__(self, username='', password=''):
         self.data_object=UserData(username, password)
-        self.store=Store(Database().get_database())
+        self.store=UserStore().get_store()
 
     def load(self, userid):
         """
         Load an user object from database.
         """
-        self.data_object=self.store.get(UserData, int(userid))
+        self.data_object=UserStore().get_store().get(UserData, int(userid))
+        UserStore().get_store().rollback()
+        #self.data_object=self.store.get(UserData, int(userid))
+        #self.store.rollback()
 
     def save(self):
         """
         Save the actual user object to the database.
         """
-        self.store.commit()
+        UserStore().get_store().commit()
+        #self.store.commit()
 
     def __getattr__(self, name):
         return getattr(self.data_object, name)
@@ -175,7 +180,7 @@ class UserProfileProxy(object):
                 err_msg='{0} does not implement IUserProfile Interface'.format(
                     self.user_profile_class)
                 raise UserProfileException(err_msg)
-            self.store=Store(Database().get_database())
+            self.store=UserStore().get_store()
         except ImportError:
             self.user_profile=None
             self.store=None
@@ -184,15 +189,18 @@ class UserProfileProxy(object):
         """Loads the user profile."""
         if self.user_profile:
             #find_str='.user_id == {0}'.format(userid)            
-            prf=self.store.find(
+            prf=UserStore().get_store().find(
                 self._raw_module,
                 self._raw_module.user_id==userid).one()
+            UserStore().get_store().rollback();
+            #self.store.rollback()
             self.user_profile=prf
 
     def save(self):
         """Saves the user profile."""
         if self.user_profile:
-            self.store.commit()
+            UserStore().get_store().commit()
+            #self.store.commit()
 
     def __getattr__(self, name):
         if self.user_profile:
