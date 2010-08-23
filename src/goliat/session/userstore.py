@@ -31,11 +31,14 @@ Created on 06/08/2010 23:47:20
 '''
 
 from goliat.utils import borg
-from goliat.database import Database
+from goliat.database import Database, DatabaseException
 from storm.store import Store
 
 class UserStore(borg.Borg):
-    _store=Store(Database().get_database())
+    try:
+        _store=Store(Database().get_database())
+    except DatabaseException:
+        _store=None
 
     def get_store(self):
         return self._store

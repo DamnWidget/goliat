@@ -128,7 +128,7 @@ class Database(Borg):
         try:
             self._db=create_database(self._schema.get_properties()['uri'])
             self._initialized=True
-        except KeyError:
+        except:
             self._initialized=False
             raise DatabaseException("Database schema is not defined")
 

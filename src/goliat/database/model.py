@@ -134,7 +134,30 @@ class Model(Borg):
         else:
             return cb_sendback(model.store.add(obj))
 
-    def update(self, obj, model, controller):
+    def update(self, model, data):
+        """Perform update CRUD action."""
+
+        def cb_sendback(result):
+            return {'success' : True}
+
+        def cb_update(result):
+            for k, v in data.iteritems():
+                if k is not 'id':
+                    result.setattr(k, v)
+            return model.store.commit().addCallback(cb_sendback)
+
+        if _cfg.get_config('Goliat')['Project']['tos']:
+            return model.store.get(model, data['id'].addCallback(cb_update))
+        else:
+            newobj=model.store.get(model, data['id'])
+            for k, v in data.iteritems():
+                if k is not 'id':
+                    newobj.setattr(k, v)
+            model.store.commit()
+            return defer.succeed({'success' : True})
+
+
+    def update2(self, obj, model, controller):
         """Perform update CRUD action."""
         def cb_sendback(row):
             data=self._parse_result_with_schema(row,
