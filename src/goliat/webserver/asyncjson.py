@@ -67,3 +67,12 @@ class AsyncJSON(object):
     def _unregister(self, passthrough):
         self._consumer.unregisterProducer()
         return passthrough
+
+    def pauseProducing(self):
+        self.pause()
+
+    def resumeProducing(self):
+        self.resume()
+
+    def stopProducing(self):
+        self.stop()
