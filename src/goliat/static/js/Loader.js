@@ -53,6 +53,7 @@ Goliat.Loader = Ext.extend(Ext.util.Observable, {
         'session.Session'   : '/goliat/js/session/Session',
         'ux.Wizard'         : '/goliat/js/ux/Wizard',
         'ux.RowExpander'    : '/goliat/js/ux/RowExpander',
+        'ux.SuperBoxSelect' : '/goliat/js/ux/SuperBoxSelect',
         'util.Logger'       : '/goliat/js/utils/Logger',
         'util.Format'       : '/goliat/js/utils/Format',
         'util.DomHelper'    : '/goliat/js/utils/DomHelper',
@@ -85,7 +86,7 @@ Goliat.Loader = Ext.extend(Ext.util.Observable, {
         'DisplayPanel'      : '/goliat/js/display/DisplayPanel',
         'DisplayField'      : '/goliat/js/display/DisplayField',
         'TextArea'          : '/goliat/js/display/TextArea',
-        'data.JsonRequest'  : '/goliat/js/data/JsonRequest'        
+        'data.JsonRequest'  : '/goliat/js/data/JsonRequest'     
     },
     
     loadComponents: function() {
