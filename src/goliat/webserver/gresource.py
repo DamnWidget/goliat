@@ -34,6 +34,7 @@ import json
 
 from goliat.template import TemplateManager
 from goliat.webserver.asyncjson import AsyncJSON
+from goliat.environment import get_environment, set_environment
 
 class GResource(resource.Resource):
     """
@@ -54,6 +55,13 @@ class GResource(resource.Resource):
         The Goliat Resource render method.
         """
         kwargs={}
+        # Environment
+        if 'env' in request.args:
+            set_environment(request.args.get('env')[0])
+            del request.args['env']
+        else:
+            set_environment('production')
+
         for k, v in request.args.iteritems():
             kwargs[k]=v
         if len(request.prepath)>1:
