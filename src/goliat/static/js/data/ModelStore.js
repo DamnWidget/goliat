@@ -84,19 +84,13 @@ Ext.extend(Goliat.ModelStore, Ext.util.Observable, {
         no                  : 'No'
     },
     
-    writer  : new Ext.data.JsonWriter({
-        encode          : true,
-        writeAllFields  : false
-    }),
-    
     load: function() {
         if(!this.url) {
             return { 'success' : false, 'error' : 'No url setted.' }
         }
         Ext.Ajax.request({
             method  : 'GET',
-            url     : this.url,
-            params  : { 'act' : 'getSchemaModel' },
+            url     : this.url+'/get_schema_model',            
             scope   : this,
             callback: function(options, success, request) {
                 try {
@@ -118,28 +112,60 @@ Ext.extend(Goliat.ModelStore, Ext.util.Observable, {
                         this.lookup[this.modelSchema[c].name] = this.modelSchema[c];
                     }
                                                         
-                    if(!this.store) {                     
-                        this.store  = new Ext.data.JsonStore({                          
-                            id      : this.url.replace(/\//g, ''),
-                            proxy   : new Ext.data.HttpProxy({
-                                        api : {
-                                            read    : { url: this.url+'?act=view', method: 'GET' },
-                                            create  : { url: this.url+'?act=create', method: 'POST' },
-                                            update  : { url: this.url+'?act=update', method: 'POST' },
-                                            destroy : { url: this.url+'?act=delete', method: 'POST' }
-                                        }
-                            }),
-                            writer  : this.writer,
-                            fields  : this.getFields(),
-                            sortInfo: { field: 'id', direction: 'ASC' },
-                            autoSave: true
-                        });
+                    if(!this.store) {                        
+                        this.store = this.buildStore();
                         this.store.load();                        
-                    }                    
-                    this.fireEvent('onload', this);                    
+                    }                
                 }
             }
         });            
+    },
+    
+    buildStore : function() {
+        var proxy = new Ext.data.HttpProxy({
+            api : {
+                read   : this.url + '/view',
+                create : this.url + '/create',
+                update : this.url + '/update',
+                destroy: this.url + '/destroy'                                
+            }
+        });
+        
+        var reader = new Ext.data.JsonReader({
+            idProperty          : 'id',
+            messageProperty     : 'message',
+            successProperty     : 'success'
+        }, this.getFields());
+        
+        var writer = new Ext.data.JsonWriter({
+            encode          : true,
+            writeAllFields  : false
+        });
+        
+        var store = new Ext.data.Store({
+            id        : this.url.replace(/\//g, ''),
+            proxy     : proxy,                 
+            writer    : writer,
+            reader    : reader,
+            sortInfo  : { field: 'id', direction: 'ASC' },                            
+            autoSave  : true,
+            listeners : {
+                scope   : this,
+                load    : function() {
+                    this.fireEvent('onload', this);
+                }
+            } 
+        });
+        
+        return store;
+    },
+    
+    remove : function(record) {        
+        this.store.remove(record);
+    },
+    
+    save : function() {
+        this.store.save();
     },
     
     reload: function() {
@@ -197,14 +223,14 @@ Ext.extend(Goliat.ModelStore, Ext.util.Observable, {
         this.modelSchema.splice(newIndex, 0, f);
     },
     
-    getFields: function() {
+    getFields: function() {        
         fields = [];        
         for(c in this.modelSchema) {
             if(c == "remove")
                 continue;            
-            fields.push(this.modelSchema[c].name);
+            fields.push({ name : this.modelSchema[c].name });
         }        
-        
+                
         return fields;
     },
     
@@ -289,18 +315,18 @@ Ext.extend(Goliat.ModelStore, Ext.util.Observable, {
                 (this.modelSchema[obj].size) ? column_data.width = this.modelSchema[obj].size : 80;
                 column_data.sortable = true; 
                 column_data.id = this.modelSchema[obj].name;
-                column_data.sqlType = this.parseType(this.modelSchema[obj]);
+                column_data.sqlType = this.parseType(this.modelSchema[obj]);                                
                 switch(this.parseType(this.modelSchema[obj])) {
                     case 'string':                        
-                        column_data.xtype = 'gridcolumn';
+                        column_data.xtype = 'gridcolumn';                                                
                         break;
                     case 'number':
                         column_data.xtype = 'numbercolumn';
-                        column_data.format = '0';
+                        column_data.format = '0';                        
                         break;
                     case 'real':
                         column_data.xtype = 'numbercolumn';
-                        column_data.format = '0.00';
+                        column_data.format = '0.00';                        
                         break;
                     case 'boolean':
                         if(this.boolImage) { column_data.xtype = 'booleanimagecolumn'; } 
@@ -326,7 +352,7 @@ Ext.extend(Goliat.ModelStore, Ext.util.Observable, {
                 columns_model.push(column_data);
             }
         }
-        
+                
         return columns_model;    
     },
     

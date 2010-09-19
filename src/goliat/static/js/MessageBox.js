@@ -73,7 +73,7 @@ Goliat.MessageBox = function() {
             return this;
         },
         
-        confirm: function(msg, scope, callback) {
+        confirm: function(msg, scope, callback, default_btn) {            
             this.show({
                 html    : msg,
                 iconCls : "icon_confirm",
@@ -99,7 +99,7 @@ Goliat.MessageBox = function() {
                             if (callback) callback.call(scope || window, "no");
                         }
                     })
-                ]      
+                ]                            
             });
             return this;
         },

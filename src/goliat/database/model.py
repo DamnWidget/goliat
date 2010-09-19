@@ -118,21 +118,18 @@ class Model(Borg):
         else:
             return cb_sendback(model.store.get(model, id))
 
-    def create(self, obj, model, controller):
+    def create(self, obj, model):
         """Perform create CRUD action."""
-        def cb_sendback(ign):
-            model.store.commit()
-            controller._sendback({
-                'success' : True
-            })
 
-        def cb_create(row):
-            return model.store.flush().addCallback(cb_sendback, row)
+        def cb_sendback(result):
+            return {'success' : True, 'obj' : obj }
 
         if _cfg.get_config('Goliat')['Project']['tos']:
-            return model.store.add(obj).addCallback(cb_sendback)
+            return model.store.add(obj).addCallback(lambda ign: model.store.commit()).addCallback(cb_sendback)
         else:
-            return cb_sendback(model.store.add(obj))
+            result=model.store.add(obj)
+            model.store.commit()
+            return defer.succeed(obj)
 
     def update(self, model, data):
         """Perform update CRUD action."""
@@ -142,12 +139,12 @@ class Model(Borg):
 
         def cb_update(result):
             for k, v in data.iteritems():
-                if k is not 'id':
-                    result.setattr(k, v)
+                if k!='id':
+                    result.__setattr__(k, v)
             return model.store.commit().addCallback(cb_sendback)
 
         if _cfg.get_config('Goliat')['Project']['tos']:
-            return model.store.get(model, data['id'].addCallback(cb_update))
+            return model.store.get(model, data['id']).addCallback(cb_update)
         else:
             newobj=model.store.get(model, data['id'])
             for k, v in data.iteritems():
@@ -156,39 +153,37 @@ class Model(Borg):
             model.store.commit()
             return defer.succeed({'success' : True})
 
+    def destroy(self, id, model):
+        """Perform destroy CRUD action"""
 
-    def update2(self, obj, model, controller):
-        """Perform update CRUD action."""
-        def cb_sendback(row):
-            data=self._parse_result_with_schema(row,
-                self.get_model_info(model)[0])
-            controller._sendback({
-                'success' : True,
-                'data' : data
-            })
+        def cb_sendback(ign):
+            model.store.commit()
+            return {
+                'success' : True
+            }
 
-        def cb_get(ign, id):
-            return model.store.get(model, id).addCallback(cb_sendback)
-
-        def cb_update(newobj):
-            for k, v in obj.iteritems():
-                if k=='id':
-                    continue
-                newobj.__setattr__(k, v)
-            return model.store.commit().addCallback(cb_get, newobj.id)
+        def cb_remove(row):
+            if not row:
+                return {
+                    'success' : False,
+                    'message' : 'ID {0} doesn\'t exists on {1} table'.format(
+                        id, model.__storm_table__)
+                }
+            return model.store.remove(row).addCallback(cb_sendback)
 
         if _cfg.get_config('Goliat')['Project']['tos']:
-            return model.store.get(model, obj['id']).addCallback(cb_update)
+            return model.store.get(model, id).addCallback(cb_remove)
         else:
-            newobj=model.store.get(model, obj['id'])
-            for k, v in obj.iteritems():
-                if k=='id':
-                    continue
-                newobj.__setattr__(k, v)
-            model.store.commit()
-            return cb_sendback(newobj)
+            row=model.store.get(model, id)
+            if not row:
+                return {
+                    'success' : False,
+                    'message' : 'ID {0} doesn\'t exists on {1} table'.format(
+                        id, model.__storm_table__)
+                }
+            return cb_sendback(model.store.remove(row))
 
-    def destroy(self, id, model, controller):
+    def destroy2(self, id, model, controller):
         """Perform destroy CRUD action."""
         def cb_sendback(ign):
             controller._sendback({

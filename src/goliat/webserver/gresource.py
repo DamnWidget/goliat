@@ -69,7 +69,7 @@ class GResource(resource.Resource):
         action_name=kwargs.get('action', None)
         if not action_name:
             return resource.Resource.render(self, request)
-        action=getattr(self, action_name, None)
+        action=getattr(self, action_name[0], None)
         if not action:
             return resource.Resource.render(self, request)
         return action(request, **kwargs)

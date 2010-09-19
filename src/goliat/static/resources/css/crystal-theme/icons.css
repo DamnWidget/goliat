@@ -35,6 +35,7 @@
 .icon_confirm { background-image: url(../../media/crystal-theme/16x16/actions/help.png) !important; }
 .icon_error { background-image: url(../../media/crystal-theme/16x16/actions/agt_action_fail.png) !important; }
 .icon_edit_add { background-image: url(../../media/crystal-theme/16x16/actions/edit_add.png) !important; }
+.icon_edit_remove { background-image: url(../../media/crystal-theme/16x16/actions/edit_remove.png) !important; }
 .icon_edit_edit { background-image: url(../../media/crystal-theme/16x16/actions/edit.png) !important; }
 .icon_grid { background-image: url(../../media/crystal-theme/16x16/actions/journal.png) !important; }
 .icon_config { background-image: url(../../media/crystal-theme/16x16/actions/configure.png) !important; }
@@ -61,6 +62,7 @@
 .icon_confirm_32 { background-image: url(../../media/crystal-theme/32x32/actions/help.png) !important; }
 .icon_error_32 { background-image: url(../../media/crystal-theme/32x32/actions/agt_action_fail.png) !important; }
 .icon_edit_add_32 { background-image: url(../../media/crystal-theme/32x32/actions/edit_add.png) !important; }
+.icon_edit_remove_32 { background-image: url(../../media/crystal-theme/32x32/actions/edit_remove.png) !important; }
 .icon_edit_edit_32 { background-image: url(../../media/crystal-theme/32x32/actions/edit.png) !important; }
 .icon_grid_32 { background-image: url(../../media/crystal-theme/32x32/actions/journal.png) !important; }
 .icon_config_32 { background-image: url(../../media/crystal-theme/32x32/actions/configure.png) !important; }

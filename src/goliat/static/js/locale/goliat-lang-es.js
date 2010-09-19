@@ -80,3 +80,13 @@ if(Ext.ux.Wiz) {
 if(Ext.ux.Wiz.Header) {
     Ext.ux.Wiz.Header.prototype.stepText = "Paso {0} de {1}: {2}";
 }
+
+if(Goliat.form.RelationField) {
+    Goliat.form.RelationField.prototype.loadingText = 'Cargando...';
+    Goliat.form.RelationField.prototype.messages.title = 'Seleccione un {0}';
+    Goliat.form.RelationField.prototype.messages.cancel = 'Cancelar';
+    Goliat.form.RelationField.prototype.messages.select = 'Seleccionar';
+    Goliat.form.RelationField.prototype.messages.add = 'Añadir';
+    Goliat.form.RelationField.prototype.messages.remove = 'Eliminar';
+    Goliat.form.RelationField.prototype.messages.removeConfirm = '¿Está seguro de que desea eliminar el registro seleccionado?';
+}
