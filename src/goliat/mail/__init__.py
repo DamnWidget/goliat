@@ -56,7 +56,7 @@ class Email(object):
         self._to=toaddrs
         self._message=MIMEMultipart('alternative')
         self._message['From']=fromaddr
-        self._message['To']=', '.join(toaddrs)
+        self._message['To']=', '.join(toaddrs) if list is type(toaddrs) else toaddrs
         self._message['Subject']=subject
         textPart=None
         htmlPart=None
