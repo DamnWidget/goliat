@@ -47,6 +47,7 @@ class Email(object):
     Class used to send emails without authentication
     """
 
+    _sender_domain_name=None
     _smtphost='localhost'
     _port=25
 
@@ -91,10 +92,13 @@ class Email(object):
         except ValueError:
             self._smtphost=host
 
+    def set_sender_domain_name(self, name):
+        self._sender_domain_name=name
+
     def send(self):
         messageData=self._message.as_string()
         sending=sendmail(self._smtphost, self._from, self._to, messageData,
-            self._port)
+            self._sender_domain_name, self._port)
         return sending
 
 class AuthEmail(Email):
