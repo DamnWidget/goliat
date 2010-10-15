@@ -42,7 +42,7 @@ import sys
 import mimetypes
 import os
 
-class Email(Object):
+class Email(object):
     """
     Class used to send emails without authentication
     """
