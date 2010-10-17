@@ -183,31 +183,6 @@ class Model(Borg):
                 }
             return cb_sendback(model.store.remove(row))
 
-    def destroy2(self, id, model, controller):
-        """Perform destroy CRUD action."""
-        def cb_sendback(ign):
-            controller._sendback({
-                'success' : True,
-                'data' : {}
-            })
-
-        def cb_remove(row):
-            if row==None:
-                self._errback('ID {0} doesn\'t exists on {1} table'.format(
-                    id, model.__storm_table__), controller)
-                return
-            return model.store.remove(row).addCallback(cb_sendback)
-
-        if _cfg.get_config('Goliat')['Project']['tos']:
-            return model.store.get(model, id).addCallback(cb_remove)
-        else:
-            row=model.store.get(model, id)
-            if row==None:
-                self._errback('ID {0} doesn\'t exists on {1} table'.format(
-                        id, model.__storm_table__), controller)
-                return
-            return cb_sendback(model.store.remove(row))
-
     def search(self, model, controller, *args, **kwargs):
         """Perform a database search using store find."""
         def cb_sendback(results):
