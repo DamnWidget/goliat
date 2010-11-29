@@ -38,6 +38,7 @@ from email.MIMEBase import MIMEBase
 from email.MIMEText import MIMEText
 from email.MIMEMultipart import MIMEMultipart
 from email import Encoders
+import StringIO
 import sys
 import mimetypes
 import os
@@ -89,6 +90,7 @@ class Email(object):
     def set_host(self, host):
         try:
             self._smtphost, self._port=host.split(':')
+            self._port=int(self._port)
         except ValueError:
             self._smtphost=host
 
@@ -115,14 +117,10 @@ class AuthEmail(Email):
     def send(self):
         ctx=ClientContextFactory()
         ctx.method=SSLv3_METHOD
-
         result=Deferred()
-
-        sender=ESMTPSenderFactory(
-            user, passwd, fromaddr, to, self._message, result,
-            contextFacory=ctx)
-
-        from twisted.internet import epollreactor
-        epollreactor.connectTCP(self._smtphost, self._port, sender)
-
+        message=StringIO.StringIO(self._message.as_string())        
+        sender=ESMTPSenderFactory(self._username, self._password, self._from, self._to, message, result, contextFactory=ctx)
+        from twisted.internet import reactor                
+        reactor.connectTCP(self._smtphost, self._port, sender)            
         return result
+        
