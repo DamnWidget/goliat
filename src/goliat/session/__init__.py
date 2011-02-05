@@ -213,6 +213,17 @@ class SessionManager(object):
                     user=UserManager().get(avatarId, session)
                     user.set_last_login()
                     user.save()
+                else:
+                    # TODO: Prepare orbited to send notification
+                    # Remove the previous logged session                    
+                    user=UserManager().get(avatarId)
+                    if user:
+                        user.get_session().expire();
+
+                    # Generate a new session
+                    user=UserManager().get(avatarId, session)
+                    user.set_last_login()
+                    user.save()
 
         return ResourceWrapper(avatar)
 

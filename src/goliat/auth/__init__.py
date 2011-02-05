@@ -112,8 +112,9 @@ class DBCredentialsChecker(object):
                 if not UserManager().exists(id):
                     return defer.succeed(id)
                 else:
-                    return defer.fail(
-                        error.LoginFailed('Already Logged'))
+                    return defer.succeed(id)
+                    #return defer.fail(
+                    #    error.LoginFailed('Already Logged'))
             else:
                 return defer.fail(
                     error.UnauthorizedLogin('Username or Password mismatch'))

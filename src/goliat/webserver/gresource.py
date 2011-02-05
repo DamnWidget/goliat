@@ -80,8 +80,8 @@ class GResource(resource.Resource):
         """
         request.write(json.dumps({
             'success' : False,
-            'error' : error['message'],
-            'error_no' : error['number']
+            'message' : error['message'],
+            'error'   : error['number']
         }))
         request.finish()
 
