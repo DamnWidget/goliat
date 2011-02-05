@@ -40,7 +40,11 @@ from goliat.database import Database
 from goliat.database.model import Model
 from twisted.internet import defer
 $for{i, (module, object) in enumerate(relations)}
+$if{object == 'GoliatUserBase'}
+from goliat.session.user import UserData as GoliatUser
+$else 
 from ${module} import ${object}
+$fi
 $rof
 
 class ${model_name}Base(Storm):
@@ -81,7 +85,7 @@ class ${model_name}Base(Storm):
         if not result:            
             return defer.succeed({'success' : False, 'message' : msg})            
         obj = ${model_name}Base()            
-        return Model().create(Model().generate_object(obj, object), ${model_name}Base)
+        return Model().create(Model().generate_object(obj, object), ${model_name}Base, data)
     
     @staticmethod
     def update(data):
@@ -111,21 +115,16 @@ class ${model_name}Base(Storm):
             if ref:
                 model = '{0}Base'.format(ref.capitalize())
                 model = eval(model)
-                return Model().get(int(id[0]), model)            
+                return Model().get(int(id), model)            
             else:            
-                return Model().get(int(id[0]), ${model_name}Base)
+                return Model().get(int(id), ${model_name}Base)
 
     @staticmethod
-    def search(controller):
+    def search(data):
         """Perform a very basic search."""
-        data = controller._request.args.get('data')
-        if data == None:
-            controller._sendback({'success' : False, 'error' : 'No data received from UI.'})            
-        else:
-            args = json.loads(data[0])
-            c = ''
-            for rec in args:
-                for k, v in rec.iteritems():
-                    c += '{0} == {1},'.format("EmployeeBase."+k, v)
-            return Model().search(${model_name}Base, controller, eval(c))
+        
+        objects = tuple([eval(p) for p in eval(data['objects'])])
+        where = eval(data['conditions'])
+        
+        return Model().search(objects, where)
     

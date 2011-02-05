@@ -37,7 +37,7 @@ Goliat.base.FormPanel = Ext.extend(Ext.form.FormPanel, {
         
         Goliat.base.FormPanel.superclass.constructor.call(this, config);
         
-        if (this.record) {            
+        if (this.record) {                        
             this.on({
                 scope  : this,
                 render : {
@@ -85,12 +85,12 @@ Goliat.base.FormPanel = Ext.extend(Ext.form.FormPanel, {
     
     get: function(o) {
         if(!o.url) {
-            return { 'success' : false, 'error' : 'No url setted.' }
+            return { 'success' : false, 'message' : 'No url setted.' }
         }        
         Ext.Ajax.request({
             method  : 'GET',
             url     : o.url,
-            params  : { act : 'get', id : o.id },
+            params  : { id : o.id },
             scope   : this,
             callback: function(options, success, request) {
                 try {
@@ -109,7 +109,7 @@ Goliat.base.FormPanel = Ext.extend(Ext.form.FormPanel, {
         });        
     },
     
-    loadFormAfterRender: function() {        
+    loadFormAfterRender: function() {                
         this.get({
             url     : this.url,
             id      : this.record.get('id'),

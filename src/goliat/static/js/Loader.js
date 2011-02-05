@@ -62,6 +62,7 @@ Goliat.Loader = Ext.extend(Ext.util.Observable, {
         'base.FormPanel'    : '/goliat/js/base/FormPanel',
         'base.GridPanel'    : '/goliat/js/base/GridPanel',
         'form.RelationField': '/goliat/js/form/RelationField',
+        'form/AjaxField'    : '/goliat/js/form/AjaxField',
         'LogPanel'          : '/goliat/js/LogPanel',
         'MessageBox'        : '/goliat/js/MessageBox',
         'SidePanel'         : '/goliat/js/SidePanel',

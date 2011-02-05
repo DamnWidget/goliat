@@ -23,22 +23,28 @@ Ext.ns('Goliat.grid');
 
 Goliat.grid.BooleanImageColumn = Ext.extend(Ext.grid.Column, {
     constructor: function(cfg) {
-        Goliat.grid.BooleanImageColumn.superclass.constructor.call(this, cfg);
-        this.renderer = Ext.util.Format.boolImage();
+        Goliat.grid.BooleanImageColumn.superclass.constructor.call(this, cfg);        
+        this.renderer = function(v) {
+            return Ext.util.Format.boolImage(v); 
+        }
     }
 });
 
 Goliat.grid.BooleanCheckColumn = Ext.extend(Ext.grid.Column, {
-    constructor: function(cfg) {
-        Goliat.grid.BooleanImageColumn.superclass.constructor.call(this, cfg);
-        this.renderer = Ext.util.Format.boolCheck();
+    constructor: function(cfg) {        
+        Goliat.grid.BooleanCheckColumn.superclass.constructor.call(this, cfg);               
+        this.renderer = function(v) {            
+            return Ext.util.Format.boolCheck(v);
+        }
     }
 });
 
 Goliat.grid.ArrayColumn = Ext.extend(Ext.grid.Column, {
     constructor: function(cfg) {
         Goliat.grid.ArrayColumn.superclass.constructor.call(this, cfg);
-        this.renderer = Ext.util.Format.ellipsis(this.width, true);
+        this.renderer = function(v) {
+            return Ext.util.Format.ellipsis(this.width, true);
+        }
     }
 });
 

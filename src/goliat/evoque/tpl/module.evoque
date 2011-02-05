@@ -50,13 +50,75 @@ class ${module_name}(gresource.GResource):
     
     def render_GET(self, request):
         """Process GET Request."""
-        self._request = request
-        ${module_render_get_code}        
-    
+        
+        return json.dumps({'success' : False, 'message' : 'Not implemented yet.'})
+     
     def render_POST(self, request):
         """Process POST Request."""
-        self._request = request
-        ${module_render_post_code}
+        
+        return json.dumps({'success' : False, 'message' : 'Not implemented yet.'})
+    
+    $if{use_model}
+    def view(self, request, **kwargs):
+        """Performs read CRUD action."""
+        
+        def cb_sendback(result):
+            self.sendback(request, result)
+
+        ${model_name}.view().addCallback(cb_sendback)
+
+        return server.NOT_DONE_YET
+        
+    def create(self, request, **kwargs):
+        """Performs create CRUD action."""
+        
+        def cb_sendback(result):
+            self.sendback(request, result)
+        
+        ${model_name}.create(eval(kwargs.get('data')[0])).addCallback(cb_sendback)
+        
+        return server.NOT_DONE_YET
+    
+    def update(self, request, **kwargs):
+        """Performs update CRUD action."""
+        
+        def cb_sendback(result):
+            self.sendback(request, result)
+        
+        ${model_name}.update(eval(kwargs.get('data')[0])).addCallback(cb_sendback)
+        
+        return server.NOT_DONE_YET
+        
+    def destroy(self, request, **kwargs):
+        """Performs destroy CRUD action."""
+        
+        def cb_sendback(result):
+            self.sendback(request, result)
+        
+        ${model_name}.destroy(kwargs.get('data')).addCallback(cb_sendback)
+        
+        return server.NOT_DONE_YET
+    
+    def get(self, request, **kwargs):
+        """Performs an extra read CRUD action."""
+        
+        def cb_sendback(result):
+            self.sendback(request, result)
+        
+        ${model_name}.get(int(kwargs.get('id')[0]), kwargs.get('ref', None)).addCallback(cb_sendback)
+        
+        return server.NOT_DONE_YET       
+    
+    def search(self, request, **kwargs):
+        """Performs a search."""
+        
+        def cb_sendback(result):
+            self.sendback(request, result)
+        
+        ${model_name}.search(kwargs.get('object')[0], kwargs.get('condition')[0]).addCallback(cb_sendback)        
+        
+        return server.NOT_DONE_YET 
+    $fi
     
     def get_register_path(self):
         """Returns the module resource registration path."""

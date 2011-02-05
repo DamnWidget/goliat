@@ -23,7 +23,7 @@ Ext.ns('Goliat.form');
 
 /**
  * @class Goliat.form.RelationField
- * @extends Ext.form.TrifferField
+ * @extends Ext.form.TriggerField
  * Provides a database relation field grid selector with several options as add or remove records.
  * @constructor
  * <p>A relation field selector grid with support for autocomplete, add or remove records and many other features.</p>
@@ -55,8 +55,6 @@ Goliat.form.RelationField = Ext.extend(Ext.form.TriggerField, {
      * @cfg {String} url
      * The url where the date will be loaded from. Usually a Goliat resource controller.
      */
-    url                 : '',
-    
     /**
      * @cfg {String} triggerClass
      * An additional CSS class used to style the trigger button.  The trigger will always get the
@@ -170,19 +168,32 @@ Goliat.form.RelationField = Ext.extend(Ext.form.TriggerField, {
             'beforequery'
         );
                 
-        if(this.url == '')
-            return;
-        
-        this.modelStore = new Goliat.ModelStore({
-            autoLoad    : true,
-            url         : this.url,
-            listeners   : {
-                scope       : this,
-                onload      : function() {
-                    this.value = this.emptyText;
+        if (this.url && !this.ajax) {            
+            this.modelStore = new Goliat.ModelStore({
+                autoLoad: true,
+                url: this.url,
+                boolImage: true,
+                listeners: {
+                    scope: this,
+                    onload: function() {
+                        this.value = this.emptyText;
+                    }
                 }
-            }                            
-        });
+            });
+        }
+        
+        if(this.relationManager) {
+            this.relationManager = new this.relationManager({
+                rs          : this.getStore(),
+                listeners   : {
+                    scope       : this,
+                    save        : function(data, store) {                        
+                        var rec = new this.grid.store.recordType(data);
+                        this.grid.store.insert(0, rec);                        
+                    }
+                }
+            });
+        }
         
         this.selectedIndex = -1;
     },
@@ -405,8 +416,8 @@ Goliat.form.RelationField = Ext.extend(Ext.form.TriggerField, {
     },
     
     // private
-    findRecord : function(prop, value){
-        var record;
+    findRecord : function(prop, value){        
+        var record;        
         if(this.getStore().getCount() > 0){
             this.getStore().each(function(r){
                 if(r.data[prop] == value){
@@ -429,7 +440,7 @@ Goliat.form.RelationField = Ext.extend(Ext.form.TriggerField, {
             return;
         
         this.grid = new Ext.grid.GridPanel({
-            store       : this.modelStore.store,
+            store       : this.getStore(),
             colModel    : new Ext.grid.ColumnModel({
                 defaults: {
                     width   : 120,
@@ -482,6 +493,7 @@ Goliat.form.RelationField = Ext.extend(Ext.form.TriggerField, {
                 }                
             ]              
         });
+        
         this.sw.on('close', function() {
             if (this.selectedIndex < 0) {
                 this.focus(true);
@@ -506,9 +518,7 @@ Goliat.form.RelationField = Ext.extend(Ext.form.TriggerField, {
     },
     
     addButton_onClick: function() {
-        if(this.relationManager) {
-            new this.relationManager().show();            
-        }  
+        this.relationManager.show();
     },
     
     removeButton_onClick: function() {

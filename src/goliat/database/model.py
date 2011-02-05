@@ -60,13 +60,13 @@ class Model(Borg):
             for row in results:
                 ret.append(self._parse_result_with_schema(row,
                     self.get_model_info(model)[0]))
-            return ret
+            return {'success' : True, 'data' : ret}
 
         if _cfg.get_config('Goliat')['Project']['tos']:
             return model.store.find(model).addCallback(cb_find)
         else:
             result=cb_order(model.store.find(model))
-            return defer.succeed(result)
+            return defer.succeed({'success' : True, 'data' : result})
 
     def get(self, id, model):
         """Perform read CRUD action."""
@@ -83,7 +83,12 @@ class Model(Borg):
             return {'success' : True, 'data' : data}
 
         if id=='url':
-            return {'success' : True, 'data' : { 'url' : model.get_register_url() }}
+            return {
+                'success' : True,
+                'data' : {
+                    'url' : model.get_register_url()
+                }
+            }
 
         if _cfg.get_config('Goliat')['Project']['tos']:
             return model.store.get(model, id).addCallback(cb_order)
@@ -91,45 +96,24 @@ class Model(Borg):
             result=cb_order(model.store.get(model, id))
             return defer.succeed(result)
 
-    def get2(self, id, model, controller):
-        """Perform read CRUD action."""
-        def cb_sendback(result):
-            if result==None:
-                self._errback('ID {0} doesn\'t exists on {1} table'.format(
-                    id, model.__storm_table__), controller)
-                return
-            data=self._parse_result_with_schema(result,
-                    self.get_model_info(model)[0])
-            controller._sendback({
-                'success' : True,
-                'data' : data
-            })
-
-        if id=='url':
-            controller._sendback({
-                'success' : True,
-                'data' : { 'url' : model.get_register_url() }
-            })
-
-            return
-
-        if _cfg.get_config('Goliat')['Project']['tos']:
-            return model.store.get(model, id).addCallback(cb_sendback)
-        else:
-            return cb_sendback(model.store.get(model, id))
-
-    def create(self, obj, model):
+    def create(self, obj, model, data):
         """Perform create CRUD action."""
 
         def cb_sendback(result):
-            return {'success' : True, 'obj' : obj }
+            data['id']=obj.id
+            return {
+                'success' : True,
+                'message' : 'Created record',
+                'data' : data
+            }
 
         if _cfg.get_config('Goliat')['Project']['tos']:
-            return model.store.add(obj).addCallback(lambda ign: model.store.commit()).addCallback(cb_sendback)
+            return model.store.add(obj).addCallback(
+                lambda ign: model.store.commit()).addCallback(cb_sendback)
         else:
             result=model.store.add(obj)
             model.store.commit()
-            return defer.succeed(obj)
+            return defer.succeed({'success' : True})
 
     def update(self, model, data):
         """Perform update CRUD action."""
@@ -183,33 +167,43 @@ class Model(Borg):
                 }
             return cb_sendback(model.store.remove(row))
 
-    def search(self, model, controller, *args, **kwargs):
+    def search(self, model, *args, **kwargs):
         """Perform a database search using store find."""
-        def cb_sendback(results):
-            ret=list()
+
+        def cb_order(results):
+            if not results:
+                return {
+                    'success' : False,
+                    'message' : 'There is no row that match with the criteria.'
+                }
+
+            ret=[]
             for row in results:
                 ret.append(self._parse_result_with_schema(row,
                     self.get_model_info(model)[0]))
-            controller._sendback(ret)
+
+            return {'success' : True, 'data' : ret}
 
         def cb_find(results):
-            return results.all().addCallback(cb_sendback)
+            return results.all().addCallback(cb_order)
 
         if _cfg.get_config('Goliat')['Project']['tos']:
-            return model.store.find(model, *args, **kwargs).addCallback(
-                    cb_find).addErrback(self._errback, controller)
+            return model.store.find(model, *args, **kwargs).addCallback(cb_find)
         else:
             try:
-                result=model.store.find(model, *args, **kwargs)
-                return cb_sendback(result)
+                result=cb_order(model.store.find(model, *args, **kwargs))
+                return defer.succeed(result)
             except ProgrammingError, e:
                 model.store.commit()
-                return self._errback('{0}'.format(e[0]), controller)
+                return {
+                    'success' : False,
+                    'message' : '{0}'.format(e[0])
+                }
 
     def generate_object(self, ins, obj):
         """Generated an ins object with obj config."""
         for key, value in obj.iteritems():
-            ins.__setattr__(key, value)
+            ins.__setattr__(key, self._parse_type(key, value, ins))
 
         return ins
 
@@ -243,3 +237,21 @@ class Model(Borg):
             ret[field['name']]=row.__getattribute__(field['name'])
 
         return ret
+
+    def _parse_type(self, key, value, ins):
+        """Parses a value's type and returns it."""
+
+        for k in self.get_model_info(ins.__class__)[0]:
+            if k['name']==key:
+                tp=k['config']['type']
+                if tp=='bool' or tp=='boolean':
+                    value=True if value=='true' else False
+                elif tp=='integer' or tp=='smallint' or tp=='longint' \
+                or tp=='serial' or tp=='bigserial' or tp=='real':
+                    value=int(value)
+                elif tp=='float' or tp=='double' or tp=='decimal':
+                    value=float(value)
+                else:
+                    value=unicode(value.decode('utf8'))
+
+        return value

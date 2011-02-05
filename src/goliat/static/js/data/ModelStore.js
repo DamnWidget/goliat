@@ -134,7 +134,8 @@ Ext.extend(Goliat.ModelStore, Ext.util.Observable, {
         var reader = new Ext.data.JsonReader({
             idProperty          : 'id',
             messageProperty     : 'message',
-            successProperty     : 'success'
+            successProperty     : 'success',
+            root                : 'data'
         }, this.getFields());
         
         var writer = new Ext.data.JsonWriter({
