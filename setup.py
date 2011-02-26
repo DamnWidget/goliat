@@ -66,7 +66,7 @@ def main(args):
                     currdir=os.getcwd()
                     os.chdir('twisted-storm')
                     from subprocess import Popen, PIPE
-                    p=Popen('python2.6 setup.py {0}'.format(args[0]).split(' '), stdout=PIPE, stderr=PIPE)
+                    p=Popen('{1} setup.py {0}'.format(args[0], sys.executable).split(' '), stdout=PIPE, stderr=PIPE)
                     print '\n{0}ing Storm with twisted-integration\n'.format(args[0].capitalize())
                     ret=p.communicate()
                     if len(ret[1]):
@@ -96,7 +96,7 @@ def main(args):
                 currdir=os.getcwd()
                 os.chdir('evoque-0.4')
                 from subprocess import Popen, PIPE
-                p=Popen('python2.6 setup.py {0}'.format(args[0]).split(' '), stdout=PIPE, stderr=PIPE)
+                p=Popen('{1} setup.py {0}'.format(args[0], sys.executable).split(' '), stdout=PIPE, stderr=PIPE)
                 print '\n{0}ing Goliat Evoque\n'.format(args[0].capitalize())
                 ret=p.communicate()
                 if len(ret[1]):
@@ -155,8 +155,8 @@ def main(args):
         },
         url='http://goliat.open-phoenix.com',
         license='GPLv2 License',
-        install_requires=['twisted >= 10.0.0', 'evoque >= 0.4', 'qpy', 'storm >= 0.15', 'pyyaml >= 3.08'],
-        requires=['twisted(>=10.0.0)', 'evoque(>=0.4)', 'qpy', 'storm(>=0.15)', 'pyyaml(>=3.08)'],
+        install_requires=['twisted >= 10.1.0', 'evoque >= 0.4', 'qpy', 'storm >= 0.15', 'pyyaml >= 3.08'],
+        requires=['twisted(>=10.1.0)', 'evoque(>=0.4)', 'qpy', 'storm(>=0.15)', 'pyyaml(>=3.08)'],
         scripts=['src/goliat-mgr'],
         zip_safe=False,
         classifiers=[

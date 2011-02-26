@@ -190,7 +190,7 @@ Ext.extend(Goliat.StompClient, Ext.util.Observable, {
             // Subscribe to channel
             this.stomp.subscribe(this.options.channel)            
             this.stomp.ready = true;
-            this.fireEvent('onstompconnectedfram', this)
+            this.fireEvent('onstompconnectedframe', this)
         };        
         this.stomp.onmessageframe = function(frame) {   // Executed when a message frame is received            
             this.fireEvent('onstompmessageframe', this, frame);

@@ -1,15 +1,22 @@
 Requirements
   Python >= 2.5 
 
-  Twisted >= 10.0.0
+  Twisted >= 10.1.0
 
   Orbited >= 0.7
   
   Storm >= 0.16.0.0 or Twisted-Storm >= 0.16.0.0 (Recommended)
   
   Evoque >= 0.4 and Qpy >= 1.8
+  
+  pyyaml >= 3.08
 
 Installation 
+
+  * Gentoo
+    Add DamnWidget overlay (https://github.com/DamnWidget/damnwidget-overlay) to your layman repos
+    and then do as root:
+    $ emerge -av goliat
 
   * Any
     As with other Python packages, the standard way of installing from source
