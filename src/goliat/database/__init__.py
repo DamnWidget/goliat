@@ -263,14 +263,15 @@ class Generator(object):
         query+="(\n"
         x=0
         if not relation:
-            for column in Database().get_schema().reorder_table_fields(
-                Database().get_schema().find_table(table)):
+            rcolumns=Database().get_schema().reorder_table_fields(
+                Database().get_schema().find_table(table))
+            for column in rcolumns:
                 x+=1
                 query+="    {0}{1}{2} " \
                 .format(self.get_sql_quotes(), column[0], self.get_sql_quotes())
                 query+=self._parse_column(column[1])
                 if self._sqlType=='sqlite':
-                    query+=',\n' if x<len(columns) else '\n'
+                    query+=',\n' if x<len(rcolumns) else '\n'
                 else:
                     query+=',\n'
         else:

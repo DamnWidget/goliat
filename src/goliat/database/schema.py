@@ -27,7 +27,7 @@ Created on 13/04/2010 15:54:26
 @author: Oscar Campos
 @contact: oscar.campos@open-phoenix.com
 @summary:
-@version: 0.1
+@version: 0.2
 '''
 import os
 import yaml

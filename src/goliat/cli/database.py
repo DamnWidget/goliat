@@ -27,7 +27,7 @@ Created on 14/04/2010 01:30:19
 @author: Oscar Campos
 @contact: oscar.campos@open-phoenix.com
 @summary:
-@version: 0.1
+@version: 0.2
 '''
 import sys
 
@@ -35,7 +35,7 @@ from goliat.cli import Command, build_reverse_map, userquery
 from goliat.cli.utils.output import *
 from goliat.database import Database, Generator
 
-_version=('Database', '0.1.0')
+_version=('Database', '0.2.0')
 
 class CmdCreate(Command):
     """Create a new Goliat project database"""
