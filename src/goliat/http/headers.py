@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##
 # Goliat: The Twisted and ExtJS Web Framework
-# Copyright (C) 2010 Open Phoenix IT
+# Copyright (C) 2010 - 2011  Open Phoenix IT
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -27,7 +27,7 @@ Created on 02/04/2010 17:16:05
 @author: Oscar Campos
 @contact: oscar.campos@open-phoenix.com
 @summary: Dummy class needed to maintain other code places clean
-@version: 0.1
+@version: 0.2
 '''
 from goliat._version import version
 import platform

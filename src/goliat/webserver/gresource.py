@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##
 # Goliat: The Twisted and ExtJS Web Framework
-# Copyright (C) 2010 Open Phoenix IT
+# Copyright (C) 2010 - 2011 Open Phoenix IT
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -22,12 +22,12 @@
 Created on 05/07/2010 16:23:42
 
 @license: GPLv2
-@copyright: © 2010 Open Phoenix IT SCA
+@copyright: © 2010 - 2011 Open Phoenix IT SCA
 @organization: Open Phoenix IT S.Coop.And
 @author: Oscar Campos
 @contact: oscar.campos@open-phoenix.com
 @summary:
-@version: 0.1
+@version: 0.2
 '''
 from twisted.web import resource
 import json

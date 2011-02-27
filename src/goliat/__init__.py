@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##
 # Goliat: The Twisted and ExtJS Web Framework
-# Copyright (C) 2010 Open Phoenix IT
+# Copyright (C) 2010 - 2011 Open Phoenix IT
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -22,7 +22,7 @@
 Created on 02/04/2010 13:15:10
 
 @license: GPLv2
-@copyright: © 2010 Open Phoenix IT SCA
+@copyright: © 2010 - 2011 Open Phoenix IT SCA
 @organization: Open Phoenix IT S.Coop.And
 @author: damnwidget
 @contact: oscar.campos@open-phoenix.com
@@ -34,15 +34,15 @@ Twisted for Internet Framework
 Storm as ORM
 ExtJS as GUI System
 Goliat as been developed by Open Phoenix IT S.Coop.And. http://www.open-phoenix.com 
-@version: 0.1
+@version: 0.2
 '''
 
 # Ensure the user is running the version of python we require.
 import sys
-if not hasattr(sys, "version_info") or sys.version_info < (2,5):
+if not hasattr(sys, "version_info") or sys.version_info<(2, 5):
     raise RuntimeError("Goliat requires Python 2.5 or later.")
 del sys
 
 # setup version
 from _version import version
-__version__ = version.short()
+__version__=version.short()

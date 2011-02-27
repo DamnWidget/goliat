@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##
 # Goliat: The Twisted and ExtJS Web Framework
-# Copyright (C) 2010 Open Phoenix IT
+# Copyright (C) 2010 - 2011 Open Phoenix IT
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -22,17 +22,18 @@
 Created on 02/04/2010 13:28:44
 
 @license: GPLv2
-@copyright: © 2010 Open Phoenix IT SCA
+@copyright: © 2010 - 2011 Open Phoenix IT SCA
 @organization: Open Phoenix IT S.Coop.And
 @author: Oscar Campos
 @contact: oscar.campos@open-phoenix.com
 @summary: Web Server resources loader module
-@version: 0.1
+@version: 0.2
 '''
 import os
 import re
-from twisted.python.filepath import FilePath
+from twisted.python import filepath
 from twisted.web import static
+from twsited.internet import inotify
 
 from goliat.module import Module
 import goliat
@@ -54,6 +55,9 @@ class ResourcesLoader(object):
         self._options=options
         self._load_scripts()
         self._load_styles()
+        self._notifier=inotify.INotify()
+        self._notifier.startReading()
+        self._notifier.watch(filepath.FilePath("application/controller"), callbacks=[self._notify])
 
     def setup(self, module_manager):
         """Setup the loader and load the Goliat Application files"""
@@ -87,7 +91,7 @@ class ResourcesLoader(object):
 
         # User paths related
         for key, value in self._options['respath'].iteritems():
-            if FilePath(value).exists():
+            if filepath.FilePath(value).exists():
                 self._root.putChild(key, static.File(value))
 
         # ===========================
@@ -220,3 +224,8 @@ class ResourcesLoader(object):
             return files
         except OSError:
             return list()
+
+    def _notify(self, filepath, mask):
+        """Notifies the changes on application/controller filesystem"""
+        print "event %s on %s"%(
+            ', '.join(inotify.humanReadableMask(mask)), filepath)

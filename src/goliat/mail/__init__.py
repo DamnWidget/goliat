@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##
 # Goliat: The Twisted and ExtJS Web Framework
-# Copyright (C) 2010 Open Phoenix IT
+# Copyright (C) 2010 - 2011 Open Phoenix IT
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -22,12 +22,12 @@
 Created on 14/10/2010 15:31:24
 
 @license: GPLv2
-@copyright: © 2010 Open Phoenix IT SCA
+@copyright: © 2010 - 2011 Open Phoenix IT SCA
 @organization: Open Phoenix IT S.Coop.And
 @author: Oscar Campos
 @contact: oscar.campos@open-phoenix.com
 @summary: Email sending with or without authentication
-@version: 0.1
+@version: 0.2
 '''
 
 from OpenSSL.SSL import SSLv3_METHOD
@@ -118,9 +118,9 @@ class AuthEmail(Email):
         ctx=ClientContextFactory()
         ctx.method=SSLv3_METHOD
         result=Deferred()
-        message=StringIO.StringIO(self._message.as_string())        
+        message=StringIO.StringIO(self._message.as_string())
         sender=ESMTPSenderFactory(self._username, self._password, self._from, self._to, message, result, contextFactory=ctx)
-        from twisted.internet import reactor                
-        reactor.connectTCP(self._smtphost, self._port, sender)            
+        from twisted.internet import reactor
+        reactor.connectTCP(self._smtphost, self._port, sender)
         return result
-        
+

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##
 # Goliat: The Twisted and ExtJS Web Framework
-# Copyright (C) 2010 Open Phoenix IT
+# Copyright (C) 2010 - 2011 Open Phoenix IT
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -22,10 +22,10 @@
 Created on 17/05/2010 22:07:01
 
 @license: GPLv2
-@copyright: © 2010 Open Phoenix IT SCA
+@copyright: © 2010 - 2011 Open Phoenix IT SCA
 @organization: Open Phoenix IT S.Coop.And
 @author: Oscar Campos
 @contact: oscar.campos@open-phoenix.com
 @summary: XML-RPC Client
-@version: 0.1
+@version: 0.2
 '''

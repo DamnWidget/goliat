@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##
 # Goliat: The Twisted and ExtJS Web Framework
-# Copyright (C) 2010 Open Phoenix IT
+# Copyright (C) 2010 - 2011 Open Phoenix IT
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -22,13 +22,13 @@
 Created on 02/04/2010 13:22:14
 
 @license: GPLv2
-@copyright: © 2010 Open Phoenix IT SCA
+@copyright: © 2010 - 2011 Open Phoenix IT SCA
 @organization: Open Phoenix IT S.Coop.And
 @author: Oscar Campos
 @contact: oscar.campos@open-phoenix.com
 @summary: Framework version information
-@version: 0.1
+@version: 0.2
 '''
 # Update this on each release
 from twisted.python import versions
-version = versions.Version('Goliat', 0, 1, 0)
+version=versions.Version('Goliat', 0, 2, 0)
