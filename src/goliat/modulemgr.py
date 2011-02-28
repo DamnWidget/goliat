@@ -49,6 +49,15 @@ class ModuleManager(object):
             now.strftime("%Y-%m-%d %H:%M:%S+0")+str(now.microsecond)[:3],
             module.get_module())
 
+    def reload(self, mname):
+        """Reaload a previously loaded module."""
+        mod=self.lookup(mname)
+        if not mod:
+            return;
+        mod.reload()
+        now=datetime.now()
+        print 'Module {1} reloaded because it was modified'.format(mod.get_module())
+
     def lenght(self):
         """Returns the module pool lenght."""
         return len(self._modules)
@@ -56,4 +65,12 @@ class ModuleManager(object):
     def get_modules(self):
         """Return the pool."""
         return self._modules
+
+    def lookup(self, mname):
+        """Return a module from the pool."""
+
+        for module in self._modules:
+            if module.get_name()==mname:
+                return module
+        return None
 

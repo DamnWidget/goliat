@@ -64,6 +64,19 @@ class Module(object):
         self._object=getattr(_temp_module, _obj_list[0])()
         self._url_path=self._object.get_register_path()
         self._loaded=True
+        self._module=_temp_module
+
+    def reload(self):
+        if not self._loaded:
+            self.load()
+            return
+
+        reload(self._module)
+        del self._object
+        self._object=getattr(self._module, self._name)()
+        self._url_path=self._object.get_register_path()
+
+
 
     def is_loaded(self):
         return self._loaded

@@ -18,6 +18,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 ##
 # $id goliat/webserver/resourcesloader.py created on 02/04/2010 13:28:44 by damnwidget
+from twisted.internet.inotify import humanReadableMask
+from hgext.convert.cvsps import len
 '''
 Created on 02/04/2010 13:28:44
 
@@ -31,18 +33,19 @@ Created on 02/04/2010 13:28:44
 '''
 import os
 import re
+from datetime import datetime
 from twisted.python import filepath
 from twisted.web import static
-from twsited.internet import inotify
-
 from goliat.module import Module
+from twisted.internet import inotify
+
 import goliat
 
 
 class ResourcesLoader(object):
     """ResourcesLoader Object."""
     _root=None
-    _modules=None
+    _modules=list()
     _modules_loaded=False
     _scripts=[]
     _styles=[]
@@ -57,10 +60,15 @@ class ResourcesLoader(object):
         self._load_styles()
         self._notifier=inotify.INotify()
         self._notifier.startReading()
-        self._notifier.watch(filepath.FilePath("application/controller"), callbacks=[self._notify])
+        self._notifier.watch(
+            filepath.FilePath("application/controller"),
+            callbacks=[self._notify]
+        )
+        self._module_manager=None
 
     def setup(self, module_manager):
         """Setup the loader and load the Goliat Application files"""
+        self._module_manager=module_manager
         # ===========================
         # Resources
         # ===========================
@@ -188,6 +196,9 @@ class ResourcesLoader(object):
         # Append Resources to the root object        
         for module in module_manager.get_modules():
             self._root.putChild(module.get_url_path(), module.get_module())
+            self._modules.append(module.get_name())
+
+        self._modules_loaded=True
 
         # ===========================
         # Locales
@@ -225,7 +236,21 @@ class ResourcesLoader(object):
         except OSError:
             return list()
 
-    def _notify(self, filepath, mask):
+    def _notify(self, wd, filepath, mask):
         """Notifies the changes on application/controller filesystem"""
-        print "event %s on %s"%(
-            ', '.join(inotify.humanReadableMask(mask)), filepath)
+        if mask is 2:
+            if filepath.basename().replace('.py', '') in self._modules:
+                self._module_manager.reload(filepath.basename().replace('.py', ''))
+
+        if mask is 256:
+            if filepath.exists():
+                filename=filepath.basename()
+                if len(filename.split('.')) is 2:
+                    if filename.split('.')[1]=='py':
+                        module=Module(filename)
+                        self._module_manager.register(module)
+                        self._root.putChild(module.get_url_path(), module.get_module())
+                        self._modules.append(module.get_name())
+
+        #print "event %s (%s) on %s"%(
+        #    ', '.join(inotify.humanReadableMask(mask)), mask, filepath)
