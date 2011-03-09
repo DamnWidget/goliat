@@ -2,8 +2,10 @@ Goliat - The Twisted and ExtJS Web Framework
 ============================================
 
 Copyright (C) 2010  Open Phoenix IT
+
 Licensed under the terms of the GPL Public License
-URL: http://goliat.open-phoenix.com/
+
+    URL: http://goliat.open-phoenix.com/
 
 Documentation
 -------------
