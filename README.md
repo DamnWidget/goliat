@@ -16,19 +16,23 @@ HOWTO Download
 --------------
 
 You can follow the instructions here:
-http://goliat.open-phoenix.com/wiki/Downloads
+
+    http://goliat.open-phoenix.com/wiki/Downloads
 
 INSTALLATION
 ------------
 
 You can follow the instructions here
-http://goliat.open-phoenix.com/wiki/GoliatInstallationGuide
+
+    http://goliat.open-phoenix.com/wiki/GoliatInstallationGuide
 
 Where can i send reports?
 -------------------------
 
 You can register at goliat mailing list at Launchpad:
-goliat@lists.launchpad.net
+
+    goliat@lists.launchpad.net
 
 You can also send a ticket at the Goliat trac project page:
-http://goliat.open-phoenix.com/newticket
+
+    http://goliat.open-phoenix.com/newticket
