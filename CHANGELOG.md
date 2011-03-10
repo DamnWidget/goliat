@@ -1,5 +1,7 @@
-This file isn't a real changelog, we use our code commits for details on technical changes.
+Goliat ChangeLog
+================
 
+This file isn't a real changelog, we use our code commits for details on technical changes.
 This changelog file is a list of huge changes or bugfixes.
 
 Version: 0.2.0 (In development):

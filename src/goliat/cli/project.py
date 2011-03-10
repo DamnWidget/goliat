@@ -317,7 +317,6 @@ class CmdConfigure(Command):
     def __init__(self):
         self._default_opts={
             'orbited'         : False,
-            'tos'             : True,
             'debug'           : False,
             'doctype'         : 'xhtml-transitional',
             'meta_keys'       : '',
@@ -398,10 +397,6 @@ class CmdConfigure(Command):
         " (Current: {0})".format(
             'Yes' if self._default_opts['orbited'] else 'No')
         current['orbited']=True if userquery(label)=="Yes" else False
-        # Twisted on Storm
-        label="Would you like to use Twisted on Storm ORM? (Current: {0})" \
-            .format('Yes' if self._default_opts['tos'] else 'No')
-        current['tos']=True if userquery(label)=="Yes" else False
         # JavaScript Debug or Minified files
         label="Would you like to use ExtJS and GoliatJS Debug files? " \
         "(Current: {0})".format('Yes' if self._default_opts['debug'] else 'No')
@@ -587,8 +582,6 @@ class CmdConfigure(Command):
             cfg['Project']['ext_theme']
         print '  '+brown('Project Goliat theme'.ljust(26))+\
             cfg['Project']['goliat_theme']
-        print '  '+brown('Storm use Twisted'.ljust(26))+\
-            (green('Yes') if cfg['Project']['tos'] else red('No'))
         print '  '+brown('Use Orbited COMET'.ljust(26))+\
             (green('Yes') if cfg['Project']['orbited'] else red('No'))
         print '  '+brown('Debug scripts used'.ljust(26))+\

@@ -52,35 +52,18 @@ class Model(Borg):
     def view(self, model):
         """Perform read CRUD action."""
 
-        def cb_find(results):
-            return results.all().addCallback(cb_order)
+        result=[]
+        for row in model.store.find(model):
+            result.append(self.__parse_result_with_schema(row,
+                self.get_model_info(model)[0]))
 
-        def cb_order(results):
-            ret=[]
-            for row in results:
-                ret.append(self._parse_result_with_schema(row,
-                    self.get_model_info(model)[0]))
-            return {'success' : True, 'data' : ret}
-
-        if _cfg.get_config('Goliat')['Project']['tos']:
-            return model.store.find(model).addCallback(cb_find)
-        else:
-            result=cb_order(model.store.find(model))
-            return defer.succeed({'success' : True, 'data' : result})
+        return defer.succeed({
+            'success' : True,
+            'data' : result
+        })
 
     def get(self, id, model):
         """Perform read CRUD action."""
-
-        def cb_order(result):
-            if not result:
-                return {
-                    'success' : False,
-                    'message' : 'ID {0} doesn\'t exists on {1} table'.format(
-                    id, model.__storm_table__)
-                }
-            data=self._parse_result_with_schema(result,
-                self.get_model_info(model)[0])
-            return {'success' : True, 'data' : data}
 
         if id=='url':
             return {
@@ -90,87 +73,59 @@ class Model(Borg):
                 }
             }
 
-        if _cfg.get_config('Goliat')['Project']['tos']:
-            return model.store.get(model, id).addCallback(cb_order)
-        else:
-            result=cb_order(model.store.get(model, id))
-            return defer.succeed(result)
+        data=model.store.get(model, id)
+        if not data:
+            return defer.succeed({
+                'success' : False,
+                'message' : 'ID {0} doesn\'t exists on {1} table'.format(
+                id, model.__storm_table__)
+            })
+        result=self._parse_result_with_schema(data,
+            self.get_model_info(model)[0])
+
+        return defer.succeed(result)
 
     def create(self, obj, model, data):
         """Perform create CRUD action."""
 
-        def cb_sendback(result):
-            data['id']=obj.id
-            return {
-                'success' : True,
-                'message' : 'Created record',
-                'data' : data
-            }
-
-        if _cfg.get_config('Goliat')['Project']['tos']:
-            return model.store.add(obj).addCallback(
-                lambda ign: model.store.commit()).addCallback(cb_sendback)
-        else:
-            result=model.store.add(obj)
-            model.store.commit()
-            return defer.succeed({'success' : True})
+        result=model.store.add(obj)
+        model.store.commit()
+        data['id']=obj.id
+        return defer.succeed({
+            'success' : True,
+            'message' : 'Record Created',
+            'data'    : data
+        })
 
     def update(self, model, data):
         """Perform update CRUD action."""
 
-        def cb_sendback(result):
-            return {'success' : True}
-
-        def cb_update(result):
-            for k, v in data.iteritems():
-                if k!='id':
-                    result.__setattr__(k, v)
-            return model.store.commit().addCallback(cb_sendback)
-
-        if _cfg.get_config('Goliat')['Project']['tos']:
-            return model.store.get(model, data['id']).addCallback(cb_update)
-        else:
-            newobj=model.store.get(model, data['id'])
-            for k, v in data.iteritems():
-                if k is not 'id':
-                    newobj.setattr(k, v)
-            model.store.commit()
-            return defer.succeed({'success' : True})
+        newobj=model.store.get(model, data['id'])
+        for k, v in data.iteritems():
+            if k is not 'id':
+                newobj.setattr(k, v)
+        model.store.commit()
+        return defer.succeed({'success' : True})
 
     def destroy(self, id, model):
         """Perform destroy CRUD action"""
 
-        def cb_sendback(ign):
-            model.store.commit()
+        row=model.store.get(model, id)
+        if not row:
             return {
-                'success' : True
+                'success' : False,
+                'message' : 'ID {0} doesn\'t exists on {1} table'.format(
+                    id, model.__storm_table__)
             }
-
-        def cb_remove(row):
-            if not row:
-                return {
-                    'success' : False,
-                    'message' : 'ID {0} doesn\'t exists on {1} table'.format(
-                        id, model.__storm_table__)
-                }
-            return model.store.remove(row).addCallback(cb_sendback)
-
-        if _cfg.get_config('Goliat')['Project']['tos']:
-            return model.store.get(model, id).addCallback(cb_remove)
-        else:
-            row=model.store.get(model, id)
-            if not row:
-                return {
-                    'success' : False,
-                    'message' : 'ID {0} doesn\'t exists on {1} table'.format(
-                        id, model.__storm_table__)
-                }
-            return cb_sendback(model.store.remove(row))
+        model.store.commit()
+        return {
+            'success' : True
+        }
 
     def search(self, model, *args, **kwargs):
         """Perform a database search using store find."""
 
-        def cb_order(results):
+        def order(results):
             if not results:
                 return {
                     'success' : False,
@@ -184,21 +139,15 @@ class Model(Borg):
 
             return {'success' : True, 'data' : ret}
 
-        def cb_find(results):
-            return results.all().addCallback(cb_order)
-
-        if _cfg.get_config('Goliat')['Project']['tos']:
-            return model.store.find(model, *args, **kwargs).addCallback(cb_find)
-        else:
-            try:
-                result=cb_order(model.store.find(model, *args, **kwargs))
-                return defer.succeed(result)
-            except ProgrammingError, e:
-                model.store.commit()
-                return {
-                    'success' : False,
-                    'message' : '{0}'.format(e[0])
-                }
+        try:
+            result=order(model.store.find(model, *args, **kwargs))
+            return defer.succeed(result)
+        except ProgrammingError, e:
+            model.store.commit()
+            return {
+                'success' : False,
+                'message' : '{0}'.format(e[0])
+            }
 
     def generate_object(self, ins, obj):
         """Generated an ins object with obj config."""
