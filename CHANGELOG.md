@@ -12,6 +12,7 @@ Version: 0.2.0 (In development):
     * Added inotify support to the resources loader, now you can modify or add
       a new controller in runtime and goliat will reload it without restart the
       entire application.
+    * Added HTML5 Doctype support.
 
 Version: 0.1.1 (Thu Apr 22 13:45:49 2010):
 ------------------------------------------

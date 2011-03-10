@@ -28,7 +28,7 @@ You can follow the instructions here
 
     http://goliat.open-phoenix.com/wiki/GoliatInstallationGuide
 
-Where can i send reports?
+Where can I send reports?
 -------------------------
 
 You can register at goliat mailing list at Launchpad:

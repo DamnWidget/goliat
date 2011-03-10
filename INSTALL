@@ -5,7 +5,7 @@ Requirements
 
   Orbited >= 0.7
   
-  Storm >= 0.16.0.0 or Twisted-Storm >= 0.16.0.0 (Recommended)
+  Storm >= 0.16.0.0 
   
   Evoque >= 0.4 and Qpy >= 1.8
   

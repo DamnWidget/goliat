@@ -25,12 +25,6 @@ if not hasattr(sys, "version_info") or sys.version_info<(2, 6):
 
 sys.path.insert(0, './src')
 
-try:
-    import goliat.cli.utils.linux as linux
-except:
-    pass
-from goliat.cli import userquery
-
 static_types=[
     '*.js',
     '*.html',
@@ -45,80 +39,6 @@ static_types=[
 ]
 
 def main(args):
-    def check_storm_twisted():
-        try:
-            import storm.twisted
-        except ImportError:
-            prompt='Storm Twisted branch is required to use the deferred stores from Storm ORM\n'+\
-            'Goliat can work with the regular Storm libraries but using the Twisted branch (at this\n'+\
-            'moment waiting for merge to the official branch) should offer a high performance.\n'+\
-            'NOTE: You need the Bazaar bzrlibs installed in your system to get the branch.\n\n'+\
-            'Would you like to install the twisted branch from storm bazaar repository? (recommended)'
-            if userquery(prompt)=="Yes":
-                try:
-                    from bzrlib import bzrdir, errors
-                    accelerator_tree, source=bzrdir.BzrDir.open_tree_or_branch('http://bazaar.launchpad.net/~therve/storm/twisted-integration')
-                    try:
-                        print 'The installation script is donwloading the Bazaar repository...'
-                        source.create_checkout('./twisted-storm', None, True, accelerator_tree)
-                    except errors.FileExists:
-                        pass
-                    currdir=os.getcwd()
-                    os.chdir('twisted-storm')
-                    from subprocess import Popen, PIPE
-                    p=Popen('{1} setup.py {0}'.format(args[0], sys.executable).split(' '), stdout=PIPE, stderr=PIPE)
-                    print '\n{0}ing Storm with twisted-integration\n'.format(args[0].capitalize())
-                    ret=p.communicate()
-                    if len(ret[1]):
-                        print ret[1]
-                        print '\nQuitting.'
-                        sys.exit(1)
-                    print ret[0]
-                    print '\nContinue.\n'
-                    os.chdir(currdir)
-                except ImportError:
-                    prompt='You answered \'Yes\' previosly but the bzrlib is not present in your system.\n'+\
-                    'This script needs Bazaar Bzrlib to get the twisted-storm branch from the launchpad brazaar'+\
-                    'repository.\n\n'+\
-                    'Would you like return to the system and install he Brzlibs with your package manager?'
-                    if userquery(prompt)=="Yes":
-                        sys.exit(1)
-                    print 'The twisted support will not be available in your Goliat Resource objects...\n\n'
-
-    def check_evoque_qpy():
-        try:
-            import evoque
-        except ImportError:
-            prompt='Goliat uses evoque as template engine.\n\n'+\
-            'Would you like to install evoque now?'
-            if userquery(prompt)=="Yes":
-
-                currdir=os.getcwd()
-                os.chdir('evoque-0.4')
-                from subprocess import Popen, PIPE
-                p=Popen('{1} setup.py {0}'.format(args[0], sys.executable).split(' '), stdout=PIPE, stderr=PIPE)
-                print '\n{0}ing Goliat Evoque\n'.format(args[0].capitalize())
-                ret=p.communicate()
-                if len(ret[1]):
-                    print ret[1]
-                    print '\nQuitting.'
-                    sys.exit(1)
-                print ret[0]
-                print '\nContinue.\n'
-                os.chdir(currdir)
-                #from setuptools.command.easy_install import main
-                #main(['evoque'])
-                #print '\nContinue.\n'
-        try:
-            import qpy
-        except ImportError:
-            prompt='Goliat uses qpy with evoque.\n\n'+\
-            'Would you like to install qpy now?'
-            if userquery(prompt)=="Yes":
-                from setuptools.command.easy_install import main
-                main(['qpy'])
-                print '\nContinue.\n'
-
     def get_package_data():
         ret=[]
         for t in reduce(list.__add__, [
@@ -134,11 +54,6 @@ def main(args):
         ]):
             ret.append(t)
         return ret
-
-
-
-    check_storm_twisted()
-    check_evoque_qpy()
 
     setuptools.setup(
         name="Goliat",
