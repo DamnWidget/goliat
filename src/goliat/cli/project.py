@@ -133,6 +133,7 @@ class CmdCreate(Command):
         if 'verbose' in opts:
             pr.verbose()
         pr.set_name(opts['app_name'])
+        pr.set_project_name(opts['app_name'].lower().replace(' ', '_'))
         pr.set_desc(opts['app_desc'])
         pr.set_port(opts['app_port'])
         pr.set_app_file(opts['app_file'])
@@ -203,12 +204,19 @@ class CmdCreate(Command):
             if pr._verbose: print bold('Writing {0} project file.'.format(
                     pr.get_name().lower().replace(' ', '_')+'.cfg'))
             self._create_config_file(pr)
+            self._create_server_file(pr)
 
             print bold('Project Generated!')
             self._configure(pr)
         except OSError, e:
             print red(str(e))
             sys.exit(-1)
+
+    def _create_server_file(self, pr):
+        """Create the project server file."""
+        fp=open('server', 'w')
+        fp.write(pr.get_template('server'))
+        fp.close()
 
     def _create_config_file(self, pr):
         """Create the project config file."""
@@ -711,6 +719,11 @@ class Project(object):
 
     def get_name(self):
         return self._options['app_name']
+
+    def set_project_name(self, name):
+        if self._verbose:
+            print 'Setting callable project name to {0}'.format(name)
+        self._options['app_project_name']=name
 
     def set_port(self, port):
         if self._verbose:

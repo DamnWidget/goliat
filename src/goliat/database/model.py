@@ -54,7 +54,7 @@ class Model(Borg):
 
         result=[]
         for row in model.store.find(model):
-            result.append(self.__parse_result_with_schema(row,
+            result.append(self._parse_result_with_schema(row,
                 self.get_model_info(model)[0]))
 
         return defer.succeed({
@@ -201,6 +201,10 @@ class Model(Borg):
                 elif tp=='float' or tp=='double' or tp=='decimal':
                     value=float(value)
                 else:
-                    value=unicode(value.decode('utf8'))
+                    #value=unicode(value.decode('utf8'))
+                    if type(value) is not unicode:
+                        value=unicode(value.decode('utf8'))
+                    else:
+                        value=value
 
         return value

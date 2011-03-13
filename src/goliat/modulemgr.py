@@ -56,7 +56,7 @@ class ModuleManager(object):
             return;
         mod.reload()
         now=datetime.now()
-        print 'Module {1} reloaded because it was modified'.format(mod.get_module())
+        print 'Module {0} reloaded because it was modified'.format(mod.get_module())
 
     def lenght(self):
         """Returns the module pool lenght."""
