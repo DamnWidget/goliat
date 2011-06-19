@@ -13,6 +13,7 @@ Version: 0.2.0 (In development):
       a new controller in runtime and goliat will reload it without restart the
       entire application.
     * Added HTML5 Doctype support.
+    * Added OrderedDict() support for python 2.4, 2.5, 2.6 and 2.7
 
 Version: 0.1.1 (Thu Apr 22 13:45:49 2010):
 ------------------------------------------

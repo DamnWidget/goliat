@@ -103,7 +103,7 @@ class Model(Borg):
         newobj=model.store.get(model, data['id'])
         for k, v in data.iteritems():
             if k is not 'id':
-                newobj.setattr(k, v)
+                setattr(newobj, k, v)
         model.store.commit()
         return defer.succeed({'success' : True})
 
