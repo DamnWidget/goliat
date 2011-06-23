@@ -1,3 +1,4 @@
+# -*- test-case-name: goliat.utils.test -*-
 # -*- coding: utf-8 -*-
 ##
 # Goliat: The Twisted and ExtJS Web Framework
