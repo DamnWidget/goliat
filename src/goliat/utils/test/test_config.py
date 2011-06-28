@@ -18,7 +18,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 ##
 # $id goliat/utils/test/config.py created on 22/06/2011 22:24:40 by damnwidget $
-from _xmlplus.xpath.XPathParser import SELF
 
 '''
 Created on 22/06/2011 22:24:40
@@ -78,6 +77,7 @@ class ConfigTest(unittest.TestCase):
         
     def test_load_config_file(self):
         self.assertTrue(self.cfg.load_config('Goliat', 'test.cfg', True))
+        self.assertFalse(self.cfg.load_config('Tailog', 'notexists.cfg', True))
     
     def test_reload(self):        
         self.cfg.load_config('Goliat', 'test.cfg', True)

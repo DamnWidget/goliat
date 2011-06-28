@@ -75,7 +75,7 @@ def userquery(prompt):
     colours=(colours*len(responses))[:len(responses)]
     print('\n'+bold(prompt), end=' ')
     try:
-        while True:
+        while True:            
             response=raw_input("["+"/".join([colours[i](responses[i]) \
                 for i in range(len(responses))])+"] ")
             if response:
@@ -84,7 +84,7 @@ def userquery(prompt):
                     # first value in responses.
                     if response.upper()==key[:len(response)].upper():
                         return key
-            print("Sorry, response '%s' not understood.".format(response),
+            print("Sorry, response '{0}' not understood.".format(response),
                   end=' ')
     except (EOFError, KeyboardInterrupt):
         print('Interrupted.')
