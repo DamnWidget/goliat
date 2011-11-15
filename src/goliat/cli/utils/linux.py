@@ -40,13 +40,17 @@ debian_based=[ 'ubuntu', 'max', 'guadalinex', 'linex', 'knoppix' ]
 redhat_based=[ 'fedora', 'centos' ]
 suse_based=[ 'openSuSE' ]
 gentoo_based=[ 'sabanyon' ]
+mac_os=[ '10.6.8' ]
 
 supported_distros=[ 'gentoo', 'debian', 'redhat', 'fedora' ]
 
-try:
-    distro=platform.linux_distribution()[0].split(' ')[0].lower()
-except:
-    distro=platform.dist()[0].split(' ')[0].lower()
+if platform.system() == "Linux":	
+	try:		
+		distro=platform.linux_distribution()[0].split(' ')[0].lower()		
+	except:		
+		distro=platform.dist()[0].split(' ')[0].lower()
+elif platform.system() == "Darwin":	
+		distro=platform.mac_ver()[0]
 
 real_distro=distro
 
@@ -55,6 +59,7 @@ if real_distro in debian_based: distro='debian'
 if real_distro in redhat_based: distro='redhat'
 if real_distro in suse_based: distro='suse'
 if real_distro in gentoo_based: distro='gentoo'
+if real_distro in mac_os: distro="osx"
 
 
 distro_utils={
@@ -86,6 +91,10 @@ distro_utils={
             'del' : Template('innserv -r /etc/init.d/${app_name}')
         }
     },
+	'osx' : {
+		# TODO: End this shit about Mac OS X 
+		'init_script' : 'rc.scripts/generic.evoque',
+	},
     'generic' : {
         'init_script' : 'rc.scripts/generic.evoque'
     }
