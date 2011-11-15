@@ -172,5 +172,11 @@ def rc_update(app_name, add='add'):
             distro_utils[distro]['init_update'][add].substitute(
                                                 app_name=app_name), distro))
 
+def server_file(application_name):
+	"""Generates the Goliat server file template"""
+	mgr=TemplateManager()
+	t=mgr.get_sys_domain().get_template('tpl/server.evoque')
+	return t.evoque(app_name=application_name)
+
 def is_supported(distro):
     return distro in supported_distros

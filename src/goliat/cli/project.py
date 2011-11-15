@@ -215,6 +215,7 @@ class CmdCreate(Command):
     def _create_server_file(self, pr):
         """Create the project server file."""
         fp=open('server', 'w')
+        print pr.get_template('server')
         fp.write(pr.get_template('server'))
         fp.close()
 
@@ -687,7 +688,8 @@ class Project(object):
         'mainJs'    : None,
         'service'   : None,
         'project'   : None,
-        'schema'    : None
+        'schema'    : None,
+		'server'	: None
     }
 
     _install_paths=dict()
@@ -812,6 +814,11 @@ class Project(object):
         if self._verbose:
             print bold('Template for schema file generated:')
 
+		# Template for server file		
+        self._templates['server']=linux.server_file(self._options['app_name'])
+        if self._verbose:
+            print bold('Template for server file generated:')
+
 
     def build_install_paths(self):
         """Setup the new project application install paths"""
@@ -841,7 +848,8 @@ _docTypes={
     'html-frameset'      : 'HTML 4.01 Frameset',
     'xhtml-strict'       : 'XHTML 1.0 Strict',
     'xhtml-transitional' : 'XHTML 1.0 Transitional',
-    'xhtml-frameset'     : 'XHTML 1.0 Frameset'
+    'xhtml-frameset'     : 'XHTML 1.0 Frameset',
+    'html5'              : 'HTML 5'
 }
 
 _layouts={
